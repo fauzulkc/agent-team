@@ -1,9 +1,12 @@
 # Walkthrough: seating a team on Tally
 
-**Tally** is an invented invoicing app for freelancers: a React web app, a Node API, Postgres, card
-payments, sign-ups and a blog. This is the prompt-by-prompt story of seating a team on it, shipping
-one feature, and resizing the team a month later. What you type is in **bold quotes**; what the team
-says back is condensed. A seated example of the same app is in [tally/](tally/).
+**Tally** is an invented invoicing app for freelancers: a React web app with a pricing page and
+product analytics, a Node API on Express, Postgres, card payments, sign-ups, an email service and a
+blog. This is the prompt-by-prompt story of seating a team on it, shipping one feature, and resizing
+the team a month later. What you type is in **bold quotes**; what the team says back is condensed.
+Every count and every proposal below was measured by running the scripts on a project built to this
+description (`python3 tools/measure_tally.py`). The files a seated project carries are in
+[tally/](tally/), with a smaller team of eight seats the owner named.
 
 ---
 
@@ -20,19 +23,19 @@ Open Claude Code in the Tally repo:
 > **"set up the team"**
 
 `team-setup` reads the README, the CI workflow and the last thirty commits, then scans the repo. The
-scan finds, each with its evidence: React in the dependencies, a payment library, a sign-in library,
-an email service, product analytics, a pricing page, a `blog/` folder, a Dockerfile and a hosting
-config, a test suite run by CI, and email columns in the database schema. It sizes Tally as
-**medium** (661 source files, four contributors) and saves the scan as the baseline for later.
-Then it asks once:
+scan finds, each with its evidence: React in the dependencies, an API framework (Express), a payment
+library, a sign-in library, an email service, product analytics, a pricing page, a `blog/` folder, a
+Dockerfile and a hosting config, a test suite run by CI, and email columns in the database schema.
+It sizes Tally as **medium** (661 source files, four contributors) and saves the scan as the
+baseline for later. Then it asks once:
 
 > *Decision needed: which team for Tally?*
 
 | Option | Seats | What it is |
 |---|---|---|
 | **Recommended** | 19 | every role the evidence calls for, each in its own seat: Tally is past the size where one session should hold several roles |
-| Lean | 10 | the fewest sessions: Sales, SEO and Social share one **Growth** seat; Product with Design; Engineering with Platform; Testing with the Bar Raiser as **Quality**; Payments with Compliance as **Legal & Compliance**; no User or Research seat |
-| Full | 21 | the recommended team plus Competition & Market and Funding |
+| Lean | 10 | the fewest sessions, sixteen roles in ten: Sales, SEO and Social share one **Growth** seat; Product with Design; Engineering with Platform; Testing with the Bar Raiser as **Quality**; Payments with Compliance as **Legal & Compliance**; no User, Research or Scope Trimmer seat |
+| Full | 22 | the recommended team plus Competition & Market, Funding, and a Docs writer for the API |
 
 > *The recommended seats, and why each:*
 
@@ -60,34 +63,38 @@ Then it asks once:
 
 > *A merged seat is one session holding several roles, every rule of each kept; it splits back when
 > its work grows. Any option can be edited: add, drop, merge or split a seat.*
-> *Also: what only you do (default: publishing, sending, spending, signing), and who pushes
-> (default: you).*
+> *Also: what only you do (default: publishing, sending, spending, signing). And when finished work
+> is ready, should the team upload it to the shared code on its own once checks pass, or ask you
+> each time? (Recommended: ask me each time.) Seats are opened in new sessions once setup is done.*
 
 > **"recommended, and emailing customers is mine too"**
 
 It writes the plan, then scaffolds `docs/TEAM.md`, `docs/DECISIONS.md` with your answer word for
-word, nineteen seat briefs, the nineteen rulebooks copied from the catalogue, twenty-five workers
-(one per seat plus the six shared tiers) and the scratch area. It fills each brief from what it
-measured (test commands, paths, the dev server's health URL). No seat here is new to the catalogue,
-so no rulebook needs writing. It ends with:
+word as **DEC-2** (DEC-1, the team method, comes with the register), nineteen seat briefs, the
+nineteen rulebooks copied from the catalogue, twenty-five workers (one per seat plus the six shared
+tiers) and the scratch area. Your answer left the upload question alone, so the team asks you before
+each upload. It fills each brief from what it measured (test commands, paths, the dev server's
+health URL). No seat here is new to the catalogue, so no rulebook needs writing; all of it happened
+in this one session. It ends with:
 
-> *Open the CEO first: `/seat-ceo catch up and work your inbox`. Then the Chief of Staff, who you'll
-> talk to day to day. Say "re-evaluate the team" whenever a milestone closes.*
+> *Open the CEO and the Chief of Staff now, each in a new session. Talk to the Chief of Staff day to
+> day. Open other seats when their work comes up; the ones you don't open are covered by their
+> teams. Say "re-evaluate the team" whenever a milestone closes.*
 
 **Asked you: once.**
 
-## 3. Open the seats you need today
+## 3. Open the CEO and the Chief of Staff
 
-Each in its own session, named after the seat:
+Each in its own new session, named after the seat:
 
 ```
 /seat-ceo catch up and work your inbox
 /seat-chief-of-staff catch up and work your inbox
-/seat-engineering catch up and work your inbox
-/seat-frontend catch up and work your inbox
 ```
 
-The other fifteen stay closed for now. Their teams cover them.
+When the work below starts, Engineering and Frontend are worth opening too
+(`/seat-engineering catch up and work your inbox`, the same for `/seat-frontend`): four open is a
+typical day. The other fifteen stay closed. Their teams cover them.
 
 ## 4. Ask for a feature, in one sentence
 
@@ -98,7 +105,8 @@ To the Chief of Staff:
 What happens without you:
 
 1. The Chief of Staff takes it to the CEO with the evidence (nine support emails).
-2. The CEO judges it a reversible call inside your scope, records **DEC-2**, and tells the seats.
+2. The CEO judges it a reversible call inside your scope, records **DEC-3** (DEC-2 is the team
+   itself), and tells the seats.
 3. Product is closed, so the CEO calls the Product team (`product-worker`). It writes the scope
    note *"monthly and weekly only, no proration"*, and leaves a line in Product's inbox.
 4. Engineering writes a contract for its own team: schema and scheduler, the tests to paste, the
@@ -119,7 +127,7 @@ What happens without you:
 
 > **"turn it on"**
 
-Your words are recorded verbatim as **DEC-3**
+Your words are recorded verbatim as **DEC-4**
 ([tally/docs/DECISIONS.md](tally/docs/DECISIONS.md)), and every seat they touch is told.
 
 **Asked you: once, because turning a feature on for customers is outward.**
@@ -162,10 +170,11 @@ work for the three quiet seats, and their commits are prefixed, so the counts ar
 > *1. Merge Sales, SEO and Social into one Growth seat. All three were quiet for 30 days (one
 > commit each from Sales and SEO, nothing from Social, no worker runs). The blog still needs
 > Social's work, so it is merged rather than retired.*
-> *2. Add a Mobile engineer: a mobile app appeared since setup.*
+> *2. Add a Mobile engineer: a mobile app appeared since setup (it uses Expo).*
 > *For you: close the Sales, SEO and Social sessions if they are open; open Growth and Mobile
-> engineer when you need them.*
-> *Apply all (recommended), apply some, or change nothing?*
+> engineer when their work comes up. You still talk to the Chief of Staff.*
+> *Apply all (recommended), apply some, or change nothing? Anything you turn down is remembered and
+> not asked again unless the repo changes in a way that calls for it.*
 
 > **"apply all"**
 
@@ -175,8 +184,13 @@ What happens without you:
    Social's (every rule of each kept) and a brief that carries all three briefs; **📱 Mobile engineer**
    is copied from the catalogue.
 2. Sales, SEO and Social are retired: their briefs stay, under a "Retired" line, and their workers
-   are removed. Their unread inbox lines move to Growth.
-3. Your words go into `docs/DECISIONS.md` verbatim, as a team change.
+   are removed. Their rulebooks were unedited catalogue copies, so they are removed too (Growth's
+   holds every rule of each); an edited one would have been archived to `docs/team/retired/`.
+   Their unread inbox lines move to Growth.
+3. Your words go into `docs/DECISIONS.md` verbatim as **DEC-5**: *seated 📱 Mobile engineer; merged
+   💼 Sales & Marketing, 📣 SEO & Publicity, 💬 Social Media Manager into 📈 Growth*. Had you answered
+   *"just the mobile engineer"*, the merge would be listed there as declined and kept in
+   `docs/team/declined.json`, and the next re-evaluation would not raise it again on the same evidence.
 4. The scan baseline resets to today, so the mobile app is not raised again.
 5. The generator's check runs green; Growth, Mobile, Engineering and the Chief of Staff each get an
    inbox line saying what moved and where the brief is.
@@ -189,7 +203,9 @@ line in the same question, not a question of its own.
 
 ## 8. Keep it current
 
-> **"add Motion to the team"**: when a launch video is planned. You named it, so there is no question.
+> **"add Motion to the team"**: when a launch video is planned. You named it, so there is no question;
+> your words are recorded as the decision. Had you said *"add Sales to the team"* after the merge, the
+> Growth seat would be split back into Sales, SEO and Social, and you would be told.
 
 > **"sync the team's rulebooks"**: after a plugin update, this refreshes every rulebook the project
 > hasn't edited, recomposes Growth from its members' new rulebooks, and names any it kept.
@@ -203,7 +219,7 @@ run `python3 scripts/gen-team-agents.py`, open a new session, and ask one worker
 
 | Asked | Not asked |
 |---|---|
-| which team (recommended), what only you do, who pushes (setup) | the nineteen seats, one by one |
+| which team (recommended), what only you do, whether finished work is uploaded on its own (setup) | the nineteen seats, one by one |
 | turn recurring invoices on for everyone | scope of recurring invoices |
 | the reminder email's words | the design of the badge |
 | the re-evaluation's two changes, together | how to build it, which workers, which models |

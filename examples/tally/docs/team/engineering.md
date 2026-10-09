@@ -1,7 +1,8 @@
 # ⚙️ Engineering: the project brief for Tally
 
-**This seat's rulebook is the skill `seat-engineering`** (how the role thinks and works). **This file
-is what the role needs to know about Tally.** A decision in [DECISIONS.md](../DECISIONS.md) outranks both.
+**This seat's rulebook is `.claude/skills/seat-engineering/SKILL.md` in this project** (how the role
+thinks and works). **This file is what the role needs to know about Tally.** A decision in
+[DECISIONS.md](../DECISIONS.md) outranks both.
 
 ## Owns here
 - **Register:** engineering goals in `docs/GOALS.md` under `E-n`; what lands in code.
@@ -16,8 +17,8 @@ is what the role needs to know about Tally.** A decision in [DECISIONS.md](../DE
 CEO
 
 ## Decisions that bind this seat
-- DEC-2: recurring invoices are monthly and weekly only, no proration.
-- DEC-3: the recurring-invoices switch is on for everyone; never remove the switch without a decision.
+- DEC-3: recurring invoices are monthly and weekly only, no proration.
+- DEC-4: the recurring-invoices switch is on for everyone; never remove the switch without a decision.
 
 ## Project facts this seat relies on
 - Test: `npm test` (server, uncached: `npm test -- --no-cache`), `npm run test:web` (Frontend's leg).

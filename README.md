@@ -53,34 +53,44 @@ claude plugin install agent-team@agent-team
 ```
 
 From a local clone: `claude plugin marketplace add ./agent-team`, then the install line above.
-Without the plugin system: `./install.sh` links `team-setup` into your global skills.
+Without the plugin system: `./install.sh` links both skills, `team-setup` and `team-reevaluate`, into
+your global skills.
 
 ## Use
 
 1. **Seat the team.** Open Claude Code in your project and say **"set up the team"**. It reads and
    scans the project, sizes it, and asks you once: which of three teams (lean, recommended, full,
-   each seat with its reason), plus what only you do and who pushes. You can edit the pick: add, drop,
-   merge or split a seat. Then it writes the team in (rulebooks, roster, decisions register, one brief
-   per seat, workers, scratch space), and writes the rulebook of any new seat for its role before
-   that seat works.
-2. **Open the seats you need**, each in its own session named after it:
-   `/seat-ceo catch up and work your inbox` (the CEO first, then the Chief of Staff).
-3. **Talk to the Chief of Staff** like a person: *"Freelancers keep asking for recurring invoices.
-   Let's do it."* It comes back with only what needs you, in one shape: decision needed, summary,
-   progress by objective, detail if you ask.
+   each seat with its reason), what only you do, and whether the team uploads finished work to your
+   shared code on its own once checks pass or asks you each time. You can edit the pick: add, drop,
+   merge or split a seat. Then it writes the team in (rulebooks, roster, decisions register with
+   your answer word for word, one brief per seat, workers, scratch space), and writes the rulebook
+   of any new seat for its role before that seat works. All of it happens in that one session.
+2. **Open the CEO and the Chief of Staff now**, each in a new session named after it:
+   `/seat-ceo catch up and work your inbox`, then `/seat-chief-of-staff catch up and work your inbox`
+   (the CEO alone when the team has no Chief of Staff). Open other seats when their work comes up;
+   the seats you don't open are covered by their teams. Three to six open at once is typical.
+3. **Talk to the Chief of Staff** (or the CEO, when the team has no Chief of Staff) like a person:
+   *"Freelancers keep asking for recurring invoices. Let's do it."* It comes back with only what
+   needs you, in one shape: decision needed, summary, progress by objective, detail if you ask.
 4. **Re-evaluate it** as the work changes: say **"re-evaluate the team"** (after a milestone is a good
    moment). It reports each seat's activity over the last 30 days and what changed in the repo, then
-   asks once: apply all, some, or none of its proposals. **Add a seat by name** any time: *"add Sales
-   to the team"*. **Refresh the rulebooks** after a plugin update: *"sync the team's rulebooks"*.
+   asks once: apply all, some, or none of its proposals. What you decline is remembered and not put
+   to you again unless the repo changes in a way that calls for it. **Change the team by name** any
+   time: *"add Motion to the team"*, *"retire Design"*; you named it, so your words are the decision
+   and there is no question unless the measurement cuts against them. A role a merged seat already
+   holds (*"add Sales"* while 📈 Growth holds it) comes back by splitting that seat into its roles,
+   and you are told. **Refresh the rulebooks** after a plugin update: *"sync the team's rulebooks"*;
+   rulebooks the project wrote or edited are kept as they are.
 
 A full prompt-by-prompt story on an example project is in [examples/walkthrough.md](examples/walkthrough.md);
-a seated example of the same project is in [examples/tally/](examples/tally/).
+the files a seated project carries are in [examples/tally/](examples/tally/) (a smaller team of eight
+seats the owner named, on the same app).
 
 ## What you'll be asked, and what you won't
 
 | You're asked | You're not asked |
 |---|---|
-| which team, at setup: lean, recommended or full, with any edits | how to build what's already in scope |
+| which team, at setup: lean, recommended or full, with any edits; and whether finished work is uploaded on its own or you're asked each time | how to build what's already in scope |
 | a re-evaluation's proposals, once, when you ask for one | each seat one by one, or how a merged or new seat's rulebook is written |
 | anything public: posts, emails to customers, invites, press | which worker or model does a task |
 | any spend, and prices | routing between seats, covering an absent seat |
@@ -89,7 +99,8 @@ a seated example of the same project is in [examples/tally/](examples/tally/).
 | a real fork that cuts against a preference you stated | ordering work inside the current milestone |
 | new goals or milestones | recording decisions you already made |
 
-Questions are batched through one seat, asked once, and your answers are recorded word for word.
+Questions are batched through one seat, asked once, and your answers are recorded word for word;
+a team change you decline is not proposed again unless the repo changes in a way that calls for it.
 Full rules: [docs/owner-touchpoints.md](docs/owner-touchpoints.md).
 
 ## The model tiers
@@ -115,8 +126,8 @@ half-done: edits climb Quick, Execution, Build; reading and judging climb Scout,
   recommended team scales with it: every allowed merge when tiny, the commercial seats merged when
   small, every role separate when medium, and a frontend seat per UI app when large. Measured on
   invented test projects: a small library gets 5 to 7 seats; a web product that takes sign-ups and
-  payments gets 10 to 12 lean, 13 to 19 recommended, 21 or more full. The method has run with 21
-  seats on one production project.
+  payments gets 10 lean, and 12 recommended when tiny, 16 when small, 19 when medium; 21 full, or
+  22 when it serves an API. The method has run with 21 seats on one production project.
 - **Open at once:** each open seat is a Claude session, so your plan's limits set the ceiling; closed
   seats are covered by their teams, so 3 to 6 open seats is a typical day.
 - **Workers:** each seat runs waves of background workers, kept under about ten at a time.
@@ -138,9 +149,11 @@ Details: [docs/how-it-works.md](docs/how-it-works.md#capacity-what-to-expect).
 
 ## Develop
 
-`python3 check.py` proves every seat rulebook has its mark, the seven sections, no model names and
-no project-specific facts. `python3 -m unittest discover -s tests` runs the scan, planner, scaffold
-and re-evaluation against invented fixture projects. `claude plugin validate .` checks the plugin.
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+`python3 check.py` proves every seat rulebook has its mark, the seven sections, sourced shifts, no
+model names and no project-specific facts, and that the generated docs ([seats](docs/seats.md), the
+[example](examples/tally/)) match what their generators in `tools/` write today.
+`python3 -m unittest discover -s tests` runs the scan, planner, scaffold and re-evaluation against
+invented fixture projects, and `python3 tools/measure_tally.py --check` re-measures the walkthrough's
+numbers. `claude plugin validate .` checks the plugin. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 MIT licensed.

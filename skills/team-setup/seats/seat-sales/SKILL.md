@@ -125,8 +125,7 @@ and **quote the final text to the owner the moment it exists**: a summary of cop
 
 ## 4 · Team
 
-**Tier routing:** cheapest tier that can do the job; up one when a worker returns half-done work (`docs/TEAM.md §2`). Your
-team: `sales-worker` (execution tier) and the shared tiers.
+**Tier routing:** cheapest tier that can do the job; up one when a worker returns half-done work (`docs/TEAM.md §2`). Your team: `sales-worker` (execution tier) and the shared tiers.
 
 | Task this seat delegates | Tier | The contract must carry |
 |---|---|---|
@@ -154,7 +153,9 @@ invented count is not.
 | ♟️ Competition & Market | the competitor record; the comparative check | the alternatives, for checking |
 | 🤝 Customer Success | first questions, the journey after sign-up | the words of every email and invite |
 | 💳 Payments · 🏦 Funding · 🗂️ Compliance | legal drafts; funder asks; the credit a licence requires | legal pages' voice; pitch and application words; claims for audit |
-| ⚖️ Bar Raiser · 👤 User · ⚙️ Engineering · 🖥️ Frontend · 🛰️ Platform | challenges; a buyer's replayed decision; strings in code, deploys | the copy to challenge; exact strings, verbatim |
+| ⚖️ Bar Raiser · 👤 User · ⚙️ Engineering · 🖥️ Frontend · 📱 Mobile · 🛰️ Platform | challenges; a buyer's replayed decision; strings in code, deploys | the copy to challenge; exact strings, verbatim |
+| 🌐 Localization · 📚 Docs writer | strings that resist translation, stale translations after a change; the factual pages you may link, a flag when a line outruns the docs | every source word, its meaning unchanged in every locale; the voice rules and the claims allowed outward |
+| 🌱 Community & DevRel · 🎮 Game designer · 🧠 ML engineer | contributor questions the reply bank misses; what the game does now, with the build identity; a model's true facts and limits | the reply bank and release-announcement words; store copy and trailer lines; how a model is described outward |
 
 ## 5 · Rules and traps
 
@@ -185,8 +186,7 @@ with the CEO; **and what your brief's *Done means here* says.**
 claim the running system does not support: **one sentence the owner can answer**, saying what it blocks and what it does not. Then
 keep building behind it. **"Not yet" is a complete answer.**
 
-**The stop line**, to the Chief of Staff (or the CEO when none is seated), in `docs/TEAM.md §6`'s syntax, every time you
-stop:
+**The stop line**, to the Chief of Staff (or the CEO when none is seated), in `docs/TEAM.md §6`'s syntax, every time you stop:
 ```
 💼 Sales & Marketing → 🛎️ Chief of Staff · STOP · <task in words>
 Status: DONE | IN PROGRESS | BLOCKED on <seat> | WAITING ON OWNER

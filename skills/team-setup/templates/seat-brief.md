@@ -1,9 +1,9 @@
 # {{MARK}} {{SEAT}}: the project brief for {{PROJECT}}
 
-**This seat's rulebook is the global skill `{{SKILL}}`** (how the role thinks and works). **This file
-is what the role needs to know about {{PROJECT}}**: what it owns here, the decisions that bind it,
-and the traps it has paid for. The seat reads it right after `docs/TEAM.md`, every time it starts.
-A decision in [DECISIONS.md](../DECISIONS.md) outranks both.
+**This seat's rulebook is `.claude/skills/{{SKILL}}/SKILL.md` in this project** (how the role thinks
+and works). **This file is what the role needs to know about {{PROJECT}}**: what it owns here, the
+decisions that bind it, and the traps it has paid for. The seat reads it right after `docs/TEAM.md`,
+every time it starts. A decision in [DECISIONS.md](../DECISIONS.md) outranks both.
 
 ## Owns here
 - **Register:** {{REGISTER}}

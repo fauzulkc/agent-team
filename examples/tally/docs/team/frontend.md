@@ -1,9 +1,9 @@
 # 🖥️ Frontend engineer: the project brief for Tally
 
-**This seat's rulebook is the global skill `seat-frontend`** (how the role thinks and works). **This file
-is what the role needs to know about Tally**: what it owns here, the decisions that bind it,
-and the traps it has paid for. The seat reads it right after `docs/TEAM.md`, every time it starts.
-A decision in [DECISIONS.md](../DECISIONS.md) outranks both.
+**This seat's rulebook is `.claude/skills/seat-frontend/SKILL.md` in this project** (how the role thinks
+and works). **This file is what the role needs to know about Tally**: what it owns here, the
+decisions that bind it, and the traps it has paid for. The seat reads it right after `docs/TEAM.md`,
+every time it starts. A decision in [DECISIONS.md](../DECISIONS.md) outranks both.
 
 ## Owns here
 - **Register:** the UI code paths

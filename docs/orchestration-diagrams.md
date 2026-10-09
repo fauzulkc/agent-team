@@ -57,8 +57,9 @@ flowchart TB
 ## 1 · Seating the team
 
 Setup scans the repo, sizes it, and offers three teams, every seat with the evidence that put it
-there. Tally's repo measures medium (661 code files, four contributors), so the recommended team
-keeps each role in its own seat. A smaller repo gets merged seats instead (scenario 8).
+there. Tally's repo measures medium (661 source files, four contributors), so the recommended team
+keeps each role in its own seat. A smaller repo gets merged seats instead (scenario 8). The whole
+setup runs in this one session; seats are opened in new sessions afterwards.
 
 ```mermaid
 sequenceDiagram
@@ -71,24 +72,26 @@ sequenceDiagram
     Setup->>Repo: read README, CLAUDE.md, git log, test commands, deploy config
     Setup->>Tools: scan the repo
     Tools->>Repo: manifests, file names, CI, contributors, commits
-    Tools-->>Setup: signals, each with its evidence: web UI, payments, sign-in, email,<br/>pricing page, blog, tests, deploy · size: medium<br/>saved as docs/team/scan.json, the baseline for re-evaluating later
+    Tools-->>Setup: signals, each with its evidence: web UI, an API, payments, sign-in, email,<br/>product analytics, personal data, pricing page, blog, tests, deploy · size: medium<br/>saved as docs/team/scan.json, the baseline for re-evaluating later
     Setup->>Tools: plan three options
-    Tools-->>Setup: recommended 19 · lean 10 · full 21, every seat with its why
-    Setup-->>You: "Decision needed: which team for Tally?<br/>Recommended, 19 seats, each with its reason:<br/>Frontend, the code has a web interface ·<br/>Payments, a payment library is in the dependencies ·<br/>Social, there is a blog · …<br/>Lean, 10: related roles share one session<br/>(Sales, SEO and Social as one Growth seat).<br/>Full, 21: adds Competition and Funding.<br/>Settings: only you publish, spend and sign. You push."
-    You->>Setup: "recommended"
+    Tools-->>Setup: recommended 19 · lean 10 · full 22, every seat with its why
+    Setup-->>You: "Decision needed: which team for Tally?<br/>Recommended, 19 seats, each with its reason:<br/>Frontend engineer, it has a web interface ·<br/>Payments, a payment library is in the dependencies ·<br/>Social, it publishes posts (a blog) · …<br/>Lean, 10: related roles share one session<br/>(Sales, SEO and Social as one Growth seat).<br/>Full, 22: adds Competition, Funding and a Docs writer for the API.<br/>Also: what only you do (publishing, sending, spending, signing),<br/>and when finished work is ready, should the team upload it to the shared code<br/>on its own once checks pass, or ask you each time? (Recommended: ask me.)<br/>Seats are opened in new sessions once setup is done."
+    You->>Setup: "recommended, and emailing customers is mine too"
     Setup->>Tools: scaffold that plan, with your answer
     Tools->>Repo: docs/TEAM.md, one brief per seat, .claude/skills, .claude/agents, scratchpad
-    Tools->>Repo: DECISIONS.md: the team, with your word verbatim
+    Tools->>Repo: DECISIONS.md: DEC-2, the team, with your words verbatim
     opt a seat the catalogue does not have (a new role, or a split)
-        Setup->>Repo: write its rulebook for its role
-        Note over Setup,Repo: the agent generator refuses while any rulebook still says AUTHORING NEEDED
+        Setup->>Repo: write its rulebook for its role, in this session
+        Note over Setup,Repo: until it is written the seat has no worker and the generator's check fails
     end
     Setup->>Repo: fill each seat's brief from what it measured (commands, paths, traps)
-    Setup-->>You: "Open the CEO first: /seat-ceo catch up and work your inbox"
+    Setup-->>You: "Open the CEO and the Chief of Staff now, each in a new session:<br/>/seat-ceo catch up and work your inbox<br/>/seat-chief-of-staff catch up and work your inbox<br/>Open other seats when their work comes up. Their teams cover them meanwhile."
 ```
 
-**Asks you:** once: which of the three teams, with the two settings (what only you do, who pushes).
-You may edit the pick (add, drop, merge or split a seat). Everything else is measured from the repo.
+**Asks you:** once: which of the three teams, with the two settings (what only you do, and whether
+finished work is uploaded to the shared code on its own or you're asked each time). You may edit
+the pick (add, drop, merge or split a seat). Everything else is measured from the repo. Your answer
+is the register's **DEC-2** (DEC-1, the team method, comes with it).
 
 ---
 
@@ -111,8 +114,8 @@ sequenceDiagram
 
     You->>CoS: "Freelancers keep asking for recurring invoices. Let's do it."
     CoS->>CEO: ASK · recurring invoices into the active milestone? (evidence: 9 support emails)
-    CEO->>CEO: two-way door, in scope → decides, records DEC-2
-    CEO->>PM: RULED · DEC-2: recurring invoices, this milestone
+    CEO->>CEO: two-way door, in scope → decides, records DEC-3
+    CEO->>PM: RULED · DEC-3: recurring invoices, this milestone
     PM->>ENG: HANDOFF · scope note: monthly and weekly only, no proration (appetite: one milestone)
     ENG->>W: contract: schema + scheduler, tests to paste, paths allowed, "no git"
     W-->>ENG: ≤10 lines: done, tests green (pasted), run log path
@@ -128,10 +131,11 @@ sequenceDiagram
     ENG->>CoS: STOP · recurring invoices · DONE · deployed behind the flag
     CoS-->>You: "Recurring invoices are built and behind a switch. Decision needed: turn it on for everyone?"
     You->>CoS: "turn it on"
+    CoS->>CEO: OWNER ANSWER · "turn it on", verbatim → recorded as DEC-4
 ```
 
 **Asks you:** once, at the end, because turning a feature on for customers is outward. Scope, design,
-build, review and the bug fix happened without you.
+build, review and the bug fix happened without you. (DEC-2 is the team itself, recorded at setup.)
 
 ---
 
@@ -150,7 +154,7 @@ sequenceDiagram
     FE->>FE: list open sessions → Design not open
     FE->>DW: "Under your rulebook and docs/team/design.md: does the overdue badge reuse pattern P-3? If it needs a new ruling, PROPOSE it."
     DW-->>FE: RESULT · P-3 covers it (red is reserved for errors, overdue uses the warning tone)
-    DW->>Inbox: 2026-03-04 · 🖥️ Frontend · overdue badge · RESULT P-3 applies · runs/design/2026-03-04-overdue.md
+    DW->>Inbox: 2026-03-04 · 📐 Design team (called by 🖥️ Frontend) → 📐 Design · RESULT · overdue badge: P-3 applies · runs/design/2026-03-04-overdue-badge.md
     Note over DW,Inbox: anything needing a NEW ruling is written as PROPOSAL, never decided by the team
     DS->>Inbox: first action next session: read, absorb, delete exactly those lines
     DS->>DS: agrees, or records a correction and tells Frontend
@@ -276,8 +280,8 @@ flowchart TB
         sales["💼 Sales"] & seo["📣 SEO"] & social["💬 Social"] --> growth["📈 Growth<br/>every rule of each kept"]
     end
     subgraph split["Split: one Frontend per UI app"]
-        fe["🖥️ Frontend"] --> fe_admin["🖥️ Frontend (admin)<br/>only apps/admin/"]
-        fe --> fe_web["💻 Frontend (web)<br/>only apps/web/"]
+        fe["🖥️ Frontend"] --> fe_admin["💻 Frontend engineer (admin)<br/>only apps/admin/"]
+        fe --> fe_web["🪟 Frontend engineer (web)<br/>only apps/web/"]
     end
     subgraph created["New: a role the catalogue lacks"]
         firmware["signal: firmware/"] --> derived["🔌 Hardware & firmware engineer<br/>derived from the nearest rulebook"]
@@ -291,11 +295,12 @@ flowchart TB
 ```
 
 **The rules:** the CEO and the Bar Raiser are in every option (in lean, the Bar Raiser sits inside
-Quality). The Chief of Staff joins from five seats (seven in lean) and the Scope Trimmer from ten,
-because they earn their seat by the sessions they coordinate.
-Check seats (Bar Raiser, Scope Trimmer, User, Security) never merge into a seat whose work they
-check; Quality is the one check merge. Other new roles come the same way as Hardware & firmware:
-a smart-contract, desktop or browser-extension engineer, each raised by its own signal.
+Quality). The Chief of Staff joins from five other seats (seven in lean) and the Scope Trimmer from
+ten other seats ("other" leaves out those two), because they earn their seat by the sessions they
+coordinate. Check seats (Bar Raiser, Scope Trimmer, User, Security) join only a check merge: Quality
+is the one, and no merge a re-evaluation proposes holds the CEO or the Bar Raiser. A merge claims its
+members, so two merges never share one. Other new roles come the same way as Hardware & firmware: a
+smart-contract, desktop or browser-extension engineer, each raised by its own signal.
 
 ---
 
@@ -323,15 +328,18 @@ sequenceDiagram
     You->>RE: "apply all"
     RE->>Tools: scaffold the proposed plan, with your answer
     Tools->>Repo: seat 📈 Growth and 📱 Mobile engineer<br/>retire Sales, SEO and Social (briefs kept, marked retired)
-    Tools->>Repo: DECISIONS.md: the team change, with your words verbatim
+    Tools->>Repo: DECISIONS.md: DEC-5, the team change, with your words verbatim
     opt a seat the catalogue does not have
         RE->>Repo: write its rulebook for its role before it works
     end
     RE->>Tools: save a fresh scan as the new baseline
     RE->>Inbox: one line each to 📈 Growth, 📱 Mobile, ⚙️ Engineering and 🛎️ Chief of Staff:<br/>what moved, and where its brief is
-    RE-->>You: "Open /seat-growth and /seat-mobile in new sessions.<br/>Close the Sales, SEO and Social sessions."
+    RE-->>You: "Close the Sales, SEO and Social sessions if they are open.<br/>Open /seat-growth and /seat-mobile in new sessions when their work comes up.<br/>You still talk to the Chief of Staff."
 ```
 
-**Asks you:** once, after the report. A retired seat keeps its brief, so its history stays readable,
-and it is not proposed again unless its signal is new since setup. A merged seat whose work grows to
-carry the team is proposed for splitting back into its roles the same way.
+**Asks you:** once, after the report. Your answer is one decision row (DEC-5 here, after the two of
+scenario 2). Had you said *apply some* or *change nothing*, every proposal you turned down would be
+written to `docs/team/declined.json` and not put to you again unless the repo changes in a way that
+calls for it. A retired seat keeps its brief, so its history stays readable, and it is not proposed
+again unless its signal is new since setup. A merged seat whose work grows to carry the team is
+proposed for splitting back into its roles the same way.

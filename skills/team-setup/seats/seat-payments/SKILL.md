@@ -87,6 +87,8 @@ These cut WORK, never TRUTH: no capture, re-grep or compliance rule is skipped t
 | ⚙️ Engineering | building the checkout, webhooks, delivery | what the platform requires of delivery (a software-only platform cannot sell a service) |
 | 🛰️ Platform | deploying the legal pages; measured facts a page must state (where data lives, what runs live) | the facts each page needs measured |
 | 🏦 Funding | incorporation's effect on grant eligibility | what each entity form changes for payments |
+| 🔐 Security | webhook signature and replay checks; key scope on the provider account | which provider flows and webhooks exist |
+| 🌐 Localization | which legal and pricing keys wait on a qualified translation | the approved legal-page text per language, and who may translate it |
 
 ## 5 · Rules and traps
 

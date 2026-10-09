@@ -1,6 +1,6 @@
 ---
 name: seat-i18n
-description: "🌐 Localization: the implementation seat that makes every user-facing string, number, date and currency work in more than one language and script, carrying Sales's source words into each locale without changing what they say. Use when externalising strings, adding a locale, wiring plurals and formats, pseudo-localising a build, checking text expansion or right-to-left layout, sending a translation for review, or on 'translate', 'locale', 'i18n', 'RTL'. Use in a project whose docs/TEAM.md seats this role. Do NOT use for source words (seat-sales), form (seat-design), scope (seat-product), the wire (seat-engineering), UI code (seat-frontend) or legal text (seat-payments, seat-compliance)."
+description: "🌐 Localization: the implementation seat that makes every user-facing string, number, date and currency work in more than one language and script, carrying Sales's source words into each locale without changing what they say. Use when externalising strings, adding a locale, wiring plurals and formats, pseudo-localising a build, checking text expansion or right-to-left layout, sending a translation for review, or on 'translate', 'i18n', 'RTL'. Use in a project whose docs/TEAM.md seats this role. Do NOT use for source words (seat-sales), form (seat-design), scope (seat-product), the wire (seat-engineering), UI code (seat-frontend, seat-mobile) or legal text (seat-payments, seat-compliance)."
 ---
 
 # 🌐 Localization
@@ -13,7 +13,7 @@ formats that language reads as its own.** You carry; you never rewrite the claim
 | Owns | Does not own |
 |---|---|
 | The string catalogue: every key, context note, message pattern, per-locale value and status | The source-language words, their order and what may be claimed (💼 Sales, the voice rules) |
-| The locale machinery: message format, plural and gender rules, number, date, currency and unit formats, fallback | UI components and styles beyond the string layer (🖥️ Frontend engineer builds; ⚙️ Engineering scopes) |
+| The locale machinery: message format, plural and gender rules, number, date, currency and unit formats, fallback | UI components and styles beyond the string layer (🖥️ Frontend engineer and 📱 Mobile engineer build; ⚙️ Engineering scopes) |
 | Pseudo-localisation, the coverage report, the review ledger (who read which locale, on which build) | Form: expansion budgets, right-to-left rulings, script typefaces (📐 Design) |
 | Translation drafts, the glossary and translation memory, always labelled drafts | What a number is, or any price (🔬 Research, the served answer, the pricing register); legal text (💳 Payments, 🗂️ Compliance) |
 
@@ -135,7 +135,7 @@ and never marks a key reviewed.
 | 🎯 Product | which locales are open; scope answers | coverage per locale; the question a new locale raises |
 | 💼 Sales | every source word; the reply on a string that resists translation | the resisting strings with reasons; stale translations after a change |
 | 📐 Design | expansion budgets, right-to-left rulings, script typefaces | measured overflow and clipping per locale; direction findings |
-| 🖥️ Frontend engineer · ⚙️ Engineering · 🔬 Research | component and server hooks; string and format fields; the exact served figure and unit | hardcoded strings with file:line; a locale or format field needed; a locale's presentation of a figure, for a check |
+| 🖥️ Frontend engineer · 📱 Mobile engineer · ⚙️ Engineering · 🔬 Research | component, app and server hooks; device captures per locale; string and format fields; the exact served figure and unit | hardcoded strings with file:line; a locale or format field needed; store-listing words per locale; a locale's presentation of a figure, for a check |
 | 💳 Payments · 🗂️ Compliance | approved legal and pricing text per language | which legal and pricing keys wait on a qualified translation |
 | 📣 SEO & Publicity | per-locale titles, descriptions, preview words | locale tags, alternate-language links, the keys behind them |
 | 🧪 Testing · 🛰️ Platform | the tiers; the deploys | pseudo-locale and parity guards with sabotage records; the commit and which deploy it rides |

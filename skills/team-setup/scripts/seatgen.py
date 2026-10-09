@@ -5,14 +5,18 @@
     seatgen.py derive --team web --seat "Web engineer" --mark 🖥️ --base seat-frontend \\
                       --kind implementation --reports-to Engineering --scope "only apps/web/" --out <dir>
 
-A MERGE is deterministic and complete: every section of every member rulebook is kept under
-"As <member>", with a short header on holding several roles at once. It can be recomposed from
-newer member rulebooks at any time (`scaffold.py --sync` does).
+A MERGE is deterministic and complete: each member's whole preamble (the text between its H1 and
+section 0) is kept under "As <member>" ahead of section 0, and every section of every member
+rulebook is kept under "As <member>", with a short header on holding several roles at once. It can
+be recomposed from newer member rulebooks at any time (`scaffold.py --sync` does).
 
-A DERIVE copies a base rulebook under the new seat's name and mark, adds the seat's scope to §0,
-and puts an AUTHORING NEEDED block at the top: the session that created it rewrites the rulebook
-for the role (references/seat-contract.md), then deletes the block. Until then the generator's
-check and `scaffold.py` report it.
+A DERIVE copies a base rulebook under the new seat's name and mark, rewrites the base seat's own
+paths to the new seat's (`docs/team/<base>.md`, `scratchpad/team/inbox/<base>.md`,
+`scratchpad/team/runs/<base>/`, `<base>-worker`, `seat-<base>`), adds the seat's scope to §0, and
+puts an AUTHORING NEEDED banner at the top telling any reader not to act under it: the session that
+created it rewrites the rulebook for the role (references/seat-contract.md), then deletes the
+banner line. Until then the generator writes no worker for the seat, its --check fails, and
+`scaffold.py` reports it.
 Standard library only.
 """
 from __future__ import annotations
@@ -35,13 +39,16 @@ def parse(skill_text: str) -> dict:
     desc = re.search(r'^description:\s*"(.*)"\s*$', fm.group(1), re.M).group(1) if fm else ""
     h1 = re.search(r"^# (.+)$", body, re.M)
     loyalty = re.search(r"Single loyalty:\s*(.+?)\*\*", body, re.S)
+    first = SECTION_RE.search(body)
+    preamble = body[h1.end():first.start()].strip() if h1 and first and first.start() > h1.end() else ""
     sections: dict[int, tuple[str, str]] = {}
     matches = list(SECTION_RE.finditer(body))
     for i, m in enumerate(matches):
         end = matches[i + 1].start() if i + 1 < len(matches) else len(body)
         sections[int(m.group(1))] = (m.group(2).strip(), body[m.end():end].strip())
     return {"description": desc.replace('\\"', '"'), "h1": h1.group(1) if h1 else "",
-            "loyalty": re.sub(r"\s+", " ", loyalty.group(1).replace("**", "")).strip() if loyalty else "", "sections": sections, "body": body}
+            "loyalty": re.sub(r"\s+", " ", loyalty.group(1).replace("**", "")).strip() if loyalty else "",
+            "preamble": preamble, "sections": sections, "body": body}
 
 
 def first_sentence(desc: str) -> str:
@@ -68,8 +75,9 @@ def compose_merge(team: str, seat: str, mark: str, members: list[str]) -> str:
         desc = desc[:996].rsplit(" ", 1)[0] + "…"
     out = [f'---\nname: seat-{team}\ndescription: "{quote(desc)}"\n---\n',
            f"# {mark} {seat}\n",
-           "**Single loyalty: each role below, held honestly at once.** "
-           + " · ".join(f"*As {r['seat']}:* {p['loyalty']}" for r, p in parsed if p["loyalty"]) + "\n",
+           "**Single loyalty: each role below, held honestly at once.**\n",
+           *(f"*As {r['mark']} {r['seat']}:* " + re.sub(r"^(#+) ", r"\1### ", p["preamble"], flags=re.M) + "\n"
+             for r, p in parsed if p["preamble"]),
            f"<!-- COMPOSED by agent-team seatgen from {', '.join(r['skill'] for r, _ in parsed)}. "
            "Recomposed by `scaffold.py --sync` while unedited; edit freely to make it this project's own. -->\n",
            "**This seat holds several roles in one session**, because the project is small enough that "
@@ -92,20 +100,38 @@ def compose_merge(team: str, seat: str, mark: str, members: list[str]) -> str:
     return "\n".join(out).rstrip() + "\n"
 
 
+def own_paths(body: str, base_team: str, team: str) -> str:
+    """Rewrite a base rulebook's references to its own seat (brief, inbox, run logs, worker, skill name) so
+    they point at the derived seat `team`. References to other seats are left alone."""
+    b = re.escape(base_team)
+    edge = r"(?![\w-])"
+    for pat, new in ((rf"docs/team/{b}\.md", f"docs/team/{team}.md"),
+                     (rf"scratchpad/team/inbox/{b}\.md", f"scratchpad/team/inbox/{team}.md"),
+                     (rf"scratchpad/team/runs/{b}/", f"scratchpad/team/runs/{team}/"),
+                     (rf"(?<![\w-]){b}-worker{edge}", f"{team}-worker"),
+                     (rf"(?<![\w-])seat-{b}{edge}", f"seat-{team}")):
+        body = re.sub(pat, new, body)
+    return body
+
+
 def compose_derive(team: str, seat: str, mark: str, base: str, kind: str, reports_to: str, scope: str,
                    register: str = "", sibling: str = "") -> str:
     text = (SEATS_SRC / base / "SKILL.md").read_text(encoding="utf-8")
     p = parse(text)
     base_mark, _, base_name = p["h1"].partition(" ")
+    base_row = next((r for r in catalogue().values() if r["skill"] == base), None)
+    base_team = base_row["team"] if base_row else base[len("seat-"):] if base.startswith("seat-") else base
+    base_seat = f"{base_row['mark']} {base_row['seat']}" if base_row else p["h1"]
     desc = (f"{mark} {seat}: {scope}. Derived from the {base_name} rulebook. "
             f"Use for this seat's work in a project whose docs/TEAM.md seats this role.")
-    body = p["body"]
+    body = own_paths(p["body"], base_team, team)
     body = body.replace(f"# {p['h1']}", f"# {mark} {seat}", 1)
-    banner = (f"\n> **{AUTHORING_MARK}.** This rulebook was derived from `{base}` for a role the catalogue "
-              f"doesn't hold. Before the seat works: rewrite it for **{seat}** following "
-              f"`references/seat-contract.md` in the team-setup skill (research the role, keep the seven "
-              f"sections, cite sources, tier names only), then delete this block. Kind: {kind}. Reports to: "
-              f"{reports_to}. Scope: {scope}."
+    banner = (f"\n> **{AUTHORING_MARK}. Do not act under this rulebook:** it was copied from {base_seat} "
+              f"(`{base}`) for a new role the catalogue doesn't hold, and still describes that seat. A worker "
+              f"or session that reads this: tell the CEO and stop. The session that seated it rewrites it for "
+              f"**{seat}** following `references/seat-contract.md` in the team-setup skill (research the role, "
+              f"keep the seven sections, cite sources, tier names only), then deletes this line. Kind: {kind}. "
+              f"Reports to: {reports_to}. Scope: {scope}."
               + (f" Register: {register}." if register else "")
               + (f" Sibling seat: {sibling} (split the work by the scope above; hand off with ASK/HANDOFF)." if sibling else "")
               + "\n")

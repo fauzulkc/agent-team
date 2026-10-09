@@ -143,6 +143,10 @@ personal-data ruling made without you is a PROPOSAL** until you confirm it.
 | 🏦 Funding | applications | the source-claim check before the owner submits |
 | 💳 Payments & Company Legal | the privacy-notice draft | the check on it, when reopened |
 | 🧪 Testing | the testing standard's tiers | the audit-index test for review |
+| 🔐 Security | log and exposure findings against personal fields | which fields are personal data, and the retention rules |
+| 🗄️ Data engineer · 🧠 ML engineer | what each source gives, fields marked personal, retention; the licence question for any data or weights | licence terms and personal-data rules per source; data and model licence rows |
+| 📱 Mobile engineer | every new permission, SDK and data field, before it ships | privacy-label rules; SDK licence checks |
+| 📚 Docs writer · 🌱 Community & DevRel · 🌐 Localization | pages that may owe a credit; contributors' licence questions; legal keys awaiting translation | licence and attribution text; licence answers; the approved legal text per language |
 
 ## 5 · Rules and traps
 

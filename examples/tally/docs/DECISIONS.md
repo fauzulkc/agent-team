@@ -15,7 +15,8 @@ may (anything outward, any spend, anything that cannot be undone).
 
 | Decision | Question | Evidence | Decided |
 |---|---|---|---|
-| **DEC-1** | The team method: seats, workers, tiers and the shared rulebook | `docs/TEAM.md` | ✅ 2026-10-09: the team is seated as `docs/TEAM.md`'s roster lists, set up with `team-setup` |
-| **DEC-2** | Recurring invoices: this milestone or after the mobile app? | 9 support emails asking (docs/team/product.md, "Demand"); the mobile app has 2 | ✅ 2026-03-03 (CEO, a two-way door inside the owner's scope): recurring invoices join the active milestone, **monthly and weekly only, no proration** (Product's scope note). Reopen if a paying customer asks for proration. |
-| **DEC-3** | Turn recurring invoices on for every customer? | Built behind a switch; Bar Raiser PASS after the 31st-of-month fix (commit `abc123`) | ✅ 2026-03-05, the owner, verbatim: *"turn it on"* (given to the Chief of Staff; owner-questions #4). Platform flips the switch; Customer Success is not seated, so Product drafts the in-app note and Sales words it. |
+| **DEC-1** | The team method: seats, workers, tiers and the shared rulebook | `docs/TEAM.md` | ✅ 2026-03-02: the team is seated as `docs/TEAM.md`'s roster lists, set up with `team-setup` |
+| **DEC-2** | Which seats for Tally? | named by the owner | ✅ 2026-03-02: seated 🧭 CEO, 🛎️ Chief of Staff, 🎯 Product, ⚙️ Engineering, 🖥️ Frontend engineer, 🧪 Testing, ⚖️ Bar Raiser, 📐 Design. Declined: nothing. Owner's words: "the CEO, a Chief of Staff, Product, Engineering, Frontend, Testing, the Bar Raiser and Design; emailing customers is mine too" |
+| **DEC-3** | Recurring invoices: this milestone or after the mobile app? | 9 support emails asking for it; 2 asking for a mobile app | ✅ 2026-03-03 (CEO, a two-way door inside the owner's scope): recurring invoices join the active milestone, **monthly and weekly only, no proration** (Product's scope note). Reopen if a paying customer asks for proration. |
+| **DEC-4** | Turn recurring invoices on for every customer? | Built behind a switch; Bar Raiser PASS after the 31st-of-month fix (commit `abc123`) | ✅ 2026-03-05, the owner, verbatim: *"turn it on"* (given to the Chief of Staff; owner-questions #4). Engineering flips the switch; neither Customer Success nor Sales is seated, so Product drafts the in-app note and the owner approves its words. |
 

@@ -1,6 +1,6 @@
 ---
 name: team-setup
-description: "🧩 Seat an AI team in any project: scans the repo, offers three team sizes (lean, recommended, full) drawn from a catalogue of 29 roles (CEO, Chief of Staff, Product, Engineering, Frontend, Mobile, Testing, Platform, Research, Bar Raiser, Design, Sales, SEO, Payments, Security, Data, ML, Docs and more), merges roles into one session for a small project, splits or creates seats for a large one, then writes the shared rulebook docs/TEAM.md, a decision register, a brief per seat, each seat's worker team and the model tiers in .claude/agents. Use when the user says \"set up the team\", \"seat the team\", \"team setup\", \"add a seat\", \"add Design to the team\", \"bring the seats to this project\", \"merge seats\" or \"split a seat\" while the team is being chosen, or opens a new project that should run with seats. Do NOT use to act as a seat (open its seat-<role> skill), to change a project's existing decisions, or to resize a team that has already worked (team-reevaluate)."
+description: "🧩 Seat an AI team in any project: scans the repo, offers three team sizes (lean, recommended, full) from a catalogue of 29 roles (CEO, Chief of Staff, Product, Engineering, Frontend, Mobile, Testing, Platform, Research, Bar Raiser, Design, Sales, Security, Data, ML, Docs and more), merges roles into one session for a small project, splits or creates seats for a large one, then writes docs/TEAM.md, a decision register, a brief and a rulebook per seat, and each seat's workers. Use when the user says \"set up the team\", \"seat the team\", \"team setup\" or \"bring the seats to this project\", adds, merges or splits a seat while the team is being chosen, or says \"sync the team's rulebooks\", \"refresh the rulebooks\" or \"update the seats after a plugin update\". Do NOT use to act as a seat (its seat-<role> skill), to change a decision, or to change a seated team: adding, retiring, merging, splitting or resizing is team-reevaluate."
 ---
 
 # 🧩 Team setup
@@ -8,15 +8,18 @@ description: "🧩 Seat an AI team in any project: scans the repo, offers three 
 Seats a team of AI sessions in the current project. **The roles** are the 29 `seat-<role>`
 rulebooks in this skill's `seats/` folder; setup **copies the chosen ones into the project's
 `.claude/skills/`**, composes a merged rulebook where one session holds several roles, and derives a
-new one where no catalogue role fits. Anyone who clones the project has the seats with nothing to
-install. **The project facts** stay local (`docs/TEAM.md`, `docs/DECISIONS.md`, `docs/team/<team>.md`,
-generated `.claude/agents/`). A seat is a session the owner opens with its skill; each seat runs its
-own workers on cheaper tiers and steers them.
+new one where no catalogue role fits, so anyone who clones the project has the seats. **The project
+facts** stay local (`docs/TEAM.md`, `docs/DECISIONS.md`, `docs/team/<team>.md`, `.claude/agents/`). A
+seat is a session the owner opens with its skill; it runs its own workers on cheaper tiers.
 
 This skill's folder is `${CLAUDE_SKILL_DIR}`. `scripts/`: `scan.py`, `plan.py`, `scaffold.py`,
 `seatgen.py` (merged and derived rulebooks), `gen-team-agents.py` (copied into the project) and
 `reevaluate.py` (for `team-reevaluate`). `references/`: `seats.md` (the catalogue), `seat-contract.md`
 (how a rulebook is written), `role-research.md` (the sources behind each seat's thinking).
+
+**Setup runs start to finish in this session.** The workers and tiers it generates load only in a
+later session, so this session writes the new seats' rulebooks and fills the briefs itself (steps 6
+and 7); the owner opens the seats in new sessions afterwards (step 8).
 
 ---
 
@@ -27,9 +30,11 @@ This skill's folder is `${CLAUDE_SKILL_DIR}`. `scripts/`: `scan.py`, `plan.py`, 
 - **How it is built and checked:** the manifests, test commands, CI, linters; whether a suite exists.
 - **Where it runs:** deploy configs and anything that costs money.
 - **Who it is for:** users, buyers, testers, content channels, data sources and their licences.
-- **What exists already.** `docs/TEAM.md` present means this is not a fresh setup: the owner naming a
-  seat is `scaffold.py --root <project> --add <team>`; anything else (too big, too small, merge, split,
-  retire) is `team-reevaluate`. Existing `.claude/skills/` win: never shadow a project's own skill.
+- **What exists already.** `docs/TEAM.md` with a roster means a team is seated and this is no setup:
+  "sync the team's rulebooks" (or refresh, or update after a plugin update) is **Sync** below; any
+  change to the team, named by the owner or not (add, retire, merge, split, resize), is
+  `team-reevaluate`. A `seat-<team>` folder already in `.claude/skills/` is the project's own:
+  scaffold keeps it, records it, and never overwrites or syncs it.
 
 ## 2 · Scan
 
@@ -38,9 +43,8 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/scan.py --root <project> --save
 ```
 
 **`--save` writes `docs/team/scan.json`, the baseline `team-reevaluate` diffs against.** Every signal
-carries its evidence. Read them against step 1: a signal raised by a stray dependency or an example
-folder is noise (say so to the owner); a need step 1 found that no signal raised (a launch the README
-plans, a grant being written) becomes an owner edit in step 3.
+carries its evidence; read them against step 1. A signal raised by a stray dependency or an example
+folder is noise (say so); a need no signal raised (a planned launch, a grant) is an edit in step 3.
 
 ## 3 · Present three options, ask once
 
@@ -48,30 +52,39 @@ plans, a grant being written) becomes an owner edit in step 3.
 python3 ${CLAUDE_SKILL_DIR}/scripts/plan.py --scan <project>/docs/team/scan.json --markdown
 ```
 
-**One question, three options, recommended first** and labelled `(Recommended)`, then lean, then
-full. Each option lists its seats by mark and name, each with its one-line why **in plain words**
-(translate the evidence: "a payment library is in the dependencies", never a signal key). Under the
-options say, once:
+**It prints the options ready for the owner** (the size, then Recommended, Lean and Full: each seat,
+how it is held and why, in plain words). Check it against step 1 (noise, a need no signal raised: say
+which) and present it as printed in one question, Recommended labelled `(Recommended)`. Then, once:
 - **A merged seat is one session holding several roles**, every rule of each kept; it splits back
   when its work grows.
 - **A new seat** (one no catalogue role covers, or a split) **gets its rulebook written for its role
-  before it works**; setup does that in step 6.
+  before it works**; this session writes it.
 - **The owner may edit any option**: add, remove, merge or split a seat.
 
-In the same question, ask the two settings the rulebook needs, each with its default:
-- **What only the owner does** (default: publishing, sending, spending, signing).
-- **Who pushes** (default: the owner pushes; a seat never pushes unless a decision says so).
+In the same question, two settings in plain words, each with its recommendation:
+- **What only you do** (recommended: publishing, sending, spending and signing).
+- **Uploading finished work:** "When finished work is ready, should the team upload it to the shared
+  code repository on its own once the checks pass, or ask you each time? (Recommended: ask me each
+  time.)" The owner may also say they upload it themselves.
 
-Then tell the owner in two lines what they will be asked from now on (anything outward, any spend,
-prices, legal and irreversible acts, real forks, new scope) and what they will not (everything
-reversible inside scope). No codes, no team slugs: `docs/TEAM.md §7`'s shape.
+Then, in plain lines (`docs/TEAM.md §7`'s shape, no codes, no team slugs): **what they will be asked
+from now on** (anything outward, any spend, prices, legal and irreversible acts, real forks, new
+scope) and not (everything reversible in scope); and **what happens next**: this session writes the
+team in and finishes setup, then the owner opens seats in new sessions, the CEO and the Chief of
+Staff (the CEO alone without one) right away and every other seat when its work comes up. A seat not
+open is covered by its team; three to six open at once is typical.
 
 ## 4 · Write the plan
 
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/plan.py --scan <project>/docs/team/scan.json --option <lean|recommended|full> \
-  --out <project>/docs/team/plan.json --project "<name>" --owner-acts "<the owner's acts>" --push-rule "<who pushes>"
+  --out <project>/docs/team/plan.json --project "<name>" --owner-acts "<what only the owner does>" --push-rule "<rule>"
 ```
+
+**`--push-rule` from the uploading answer:**
+- *ask me each time*: `a seat asks the owner before each push and pushes on the owner's yes.`
+- *on its own*: `a seat pushes its landed work once the checks pass and a reviewing seat has passed it, and reports the push after.`
+- *I upload it myself*: `the owner pushes; a seat never pushes unless DECISIONS.md says otherwise.`
 
 **Apply the owner's edits by editing `docs/team/plan.json`'s `seats` list**, one spec per seat:
 
@@ -90,16 +103,16 @@ catalogue members. A split names its sibling**, so each half knows where its sco
 
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold.py --root <project> --plan <project>/docs/team/plan.json \
-  --record "<the owner's answer, verbatim>"
+  --record "<the owner's answer, verbatim>" --question "<the question asked, in one line>"
 ```
 
-It writes `docs/TEAM.md` (the roster), `docs/DECISIONS.md` with the owner's words as a decision row,
-one brief per seat, the tracker and owner-questions with a Chief of Staff, each rulebook in
-`.claude/skills/` with its origin and hash in `docs/team/seat-skills.lock`, `scripts/gen-team-agents.py`,
-the generated `.claude/agents/`, a gitignored `scratchpad/team/` and a pointer in `CLAUDE.md`.
-**It never overwrites an existing file** (it says what it skipped); `--force` only on the owner's word.
-It prints `NEEDS AUTHORING` for every derived seat. **A new session is needed** for the copied
-skills and generated workers to load.
+It writes `docs/TEAM.md` (the roster), `docs/DECISIONS.md` with the owner's question and words as a
+decision row, a brief per seat, the tracker and owner-questions with a Chief of Staff, each rulebook in
+`.claude/skills/` (origin, hash and seated date in `docs/team/seat-skills.lock`), the generator and
+`.claude/agents/`, a gitignored `scratchpad/team/` and a `CLAUDE.md` pointer. **It never overwrites a
+file** (it says what it skipped); `--force` only on the owner's word. **A refusal changes nothing:**
+`nothing was changed:` and one line per cause (a mark two seats share, a role two seats would hold);
+fix the plan and rerun. `NEEDS AUTHORING` names each derived seat: no worker until it is written.
 
 ## 6 · Author every new seat
 
@@ -110,11 +123,14 @@ skills and generated workers to load.
    early-stage company); cite only what you opened. A split shares its base's role: research only
    what differs, and name the sibling in §0.
 3. Rewrite `.claude/skills/seat-<team>/SKILL.md` to the contract's seven sections; delete the
-   `AUTHORING NEEDED` block last.
-4. In the project, run `python3 scripts/gen-team-agents.py --check` until it passes.
+   `AUTHORING NEEDED` banner line last.
+4. In the project, run `python3 scripts/gen-team-agents.py` (it writes the seat's worker now that the
+   rulebook is its own), then `python3 scripts/gen-team-agents.py --check` until it passes.
 
-For several new seats, give each to a research-tier worker with the step-1 measurements as a shared
-file in `scratchpad/team/shared/`, then review every rulebook yourself against the contract.
+**For several new seats, spawn general-purpose subagents from this session**, one seat each, with no
+model override (they run on this session's model), steps 1 to 3 and the paths in the prompt, and the
+step-1 measurements written once to `scratchpad/team/shared/setup-facts.md`. **Never spawn by tier
+name here:** the tiers load only in a new session. Review every rulebook against the contract yourself.
 
 ## 7 · Fill each seat's brief
 
@@ -129,26 +145,24 @@ every section from what step 1 measured, for that seat only:
 - **Traps paid for:** anything the git log or docs show already went wrong in this seat's area.
 - **Done means here:** the concrete done-when (which tests, which review, deployed or not).
 
-For more than six seats, give the briefs to research-tier workers (three seats each, the step-1
-file shared), then review each yourself. Mark anything not measured `UNVERIFIED`; never invent a path.
+For more than six seats, give the briefs to subagents as in step 6 (three seats each), then review
+each yourself. Mark anything not measured `UNVERIFIED`; never invent a path.
 
 ## 8 · Hand over to the owner
 
 Report in `docs/TEAM.md §7`'s shape: the decision needed (if any), a summary, then the seats by
-objective. Include how to open each seat:
-
-| Seat | Open a new session named after it, first message |
-|---|---|
-| 🧭 CEO | `/seat-ceo catch up and work your inbox` |
-| … | `/seat-<team> catch up and work your inbox` |
-
-Then, in plain words:
-- **Open the CEO first**, to record anything pending. Seats spawn their own workers (the owner
-  never does); a seat that is away has its team called by the others.
-- **The owner's touchpoints:** what they will be asked and what they will not, as step 3 told them
-  (the full line is `docs/TEAM.md §7`; the plugin's `docs/owner-touchpoints.md` explains it).
-- **Say "re-evaluate the team" any time**; after each milestone is a good moment. It measures how
-  each seat actually works and proposes changes; nothing changes without the owner's yes.
+objective. Then, in plain words:
+- **Open now**, each in a new session named after it: 🧭 CEO with
+  `/seat-ceo catch up and work your inbox`, then 🛎️ Chief of Staff with
+  `/seat-chief-of-staff catch up and work your inbox` (the CEO alone when no Chief of Staff is
+  seated). Talk to that seat like a person.
+- **Every other seat when its work comes up**, the same way: `/seat-<team> catch up and work your inbox`.
+  Name them in one line. A seat not open is covered by its team, which the other seats call (the
+  owner never spawns workers); three to six open at once is typical.
+- **The owner's touchpoints**, as step 3 told them (`docs/TEAM.md §7`; the plugin's
+  `docs/owner-touchpoints.md`).
+- **Say "re-evaluate the team" any time**; after each milestone is a good moment. Name a change
+  directly too ("add Sales to the team"); after a plugin update, say "sync the team's rulebooks".
 
 Commit the setup with explicit paths (`git add <paths>`, then `git commit -o <paths>`), never `-A`.
 
@@ -156,27 +170,27 @@ Commit the setup with explicit paths (`git add <paths>`, then `git commit -o <pa
 
 ## Maintaining a seated project
 
-- **Re-evaluate the team:** `team-reevaluate` ("re-evaluate the team") measures each seat's commits,
-  worker runs, inbox and blocked lines, re-scans the repo against `docs/team/scan.json`, and proposes
-  adds, retires, merges, unmerges and splits for the owner to approve.
-- **Add a seat the owner names:** `scaffold.py --root <project> --add <team>` (catalogue seats).
-- **Retire a seat:** `scaffold.py --root <project> --retire <team>`. It removes the roster row, the
-  rulebook copy and the worker, and **keeps the brief** with a "Retired" line on top; an authored
-  (derived) rulebook moves to `docs/team/retired/` (copy there by hand any other rulebook the
-  project edited, first). The CEO and the Bar Raiser are never retired.
+- **Change the team: `team-reevaluate`.** "Re-evaluate the team" measures each seat and proposes
+  adds, retires, merges, unmerges and splits for one answer; a change the owner names ("add Sales",
+  "retire Design") is made with the owner's words as the record, asked about only when the measurement
+  cuts against it. Every change is a decision row; **never add or remove a roster row by hand.**
+- **Sync** ("sync the team's rulebooks", after a plugin update):
+  `python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold.py --root <project> --sync`. It refreshes every
+  catalogue copy the project has not edited and recomposes every merged seat from its members' new
+  rulebooks unless edited (`docs/team/seat-skills.lock` holds each copy's origin and hash); derived
+  rulebooks and the project's own are never touched. `updated:` and `missing, re-created:` name what
+  changed; `kept (edited in this project)`, `not tracked`, `not synced` and `still needs authoring`
+  each need a look. **Tell the owner which seats' rulebooks changed**, by mark and name, and that a
+  session of those seats opened before the sync holds the old rulebook: reopen it, or send
+  `/seat-<team> catch up and work your inbox` again. **Sync leaves the generator and the protocol
+  alone:** carry this skill's `scripts/gen-team-agents.py` over the project's, keeping its `TIERS`,
+  then run it and `--check`; diff `docs/TEAM.md` against `templates/TEAM.md` and carry over what
+  applies, the roster untouched. Commit the changed paths.
 - **A new model ships:** edit `TIERS` in `scripts/gen-team-agents.py` and the tier table in
   `docs/TEAM.md` §2, run the generator, and confirm with a one-line spawn that quotes its model id
   **after** the session reloads the agent files (a spawn straight after an edit runs the old one).
-- **The rulebooks improve** (a new version of this skill): `scaffold.py --root <project> --sync`
-  refreshes every catalogue copy the project has not edited **and recomposes every merged seat from
-  its members' new rulebooks**, unless the project edited it (`docs/team/seat-skills.lock` holds each
-  copy's origin and hash). It names what it kept, and any derived seat still waiting for authoring;
-  derived rulebooks are the project's own and never refreshed. A change to the shared protocol does
-  not reach a project's `docs/TEAM.md` by itself: diff it against `templates/TEAM.md` and carry over
-  what applies.
-- **Why the rulebooks are copied, not shared:** a worker's `skills:` preload finds project and user
-  skills by name, but not a skill that lives only inside a plugin (measured 2026-10-09: both the plain
-  and the `plugin:` name preloaded nothing).
+- **Why the rulebooks are copied:** a worker's `skills:` preload finds project and user skills by
+  name, never a plugin-only skill (measured 2026-10-09: plain and `plugin:` names preloaded nothing).
 - **Audit how the team works:** read `scratchpad/team/inbox/` and `runs/`, and count which agent
   types the sessions spawned and on which models. Generic agents with a model shorthand are the
   usual leak (they can land on an older model); seats should spawn by tier name.

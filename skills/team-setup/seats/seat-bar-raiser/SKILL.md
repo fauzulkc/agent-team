@@ -123,8 +123,11 @@ holds its half meanwhile.
 |---|---|---|
 | 🧭 CEO | routed reviews; a ruling's sites to check | findings and proposed text, never a decision |
 | 🔬 Research | registrations to premortem; results to re-measure | additions before the run; an independent re-measure |
-| ⚙️ Engineering · 🖥️ Frontend | briefs, diffs, closing commits | premortem lines; findings with the fix; guard tests |
+| ⚙️ Engineering · 🖥️ Frontend · 📱 Mobile · 🗄️ Data | briefs, diffs, closing commits | premortem lines; findings with the fix; guard tests |
 | 🧪 Testing | the test standard as the bar for evidence | vacuous-pass findings; guard tests to register |
+| 🔐 Security | an auth pass or red for the ship check | the ship check; a security finding you meet goes to Security, never around it |
+| 🧠 ML engineer | evals to re-run before a launch claim | an independent re-measure on a different seed or sample, never by the eval's author |
+| 🎮 Game designer · 📚 Docs writer · 🌐 Localization | gate tables; pages and live locales to challenge | measured findings with the fix |
 | 🛰️ Platform | the change before a deploy | the review pass, or red with the measurement |
 | ✂️ Scope Trimmer | its cuts | an objection only when a cut removes a check: it cuts work, you hold truth |
 | 💼 Sales · 📐 Design · 👤 User | copy, surfaces, walk findings | measured findings; tone stays with a reader; a User finding verified at source before you rule |

@@ -48,7 +48,7 @@ source and SEO's ledger inside their domains.**
 - **From "did it go far" → "did it reach the right room".** Report the audience (top industry and
   location) with every count: reach in a room of non-buyers is courtesy, not signal. [project evidence in brief]
 - **From a feature tease → a Sketch.** What you could build goes out labelled as an idea being sketched,
-  with a question, never as a feature, a date or a price.
+  with a question, never as a feature, a date or a price. [a team's own practice; no outside source]
 
 **One-way doors, every check every time:** the publish; any figure, score, name or date on a frame or
 in a caption; a reply posted in public; any spend (a boost, a paid scheduler); a time logged in the post
@@ -133,6 +133,7 @@ your inbox: any reply, any new line, a post time, and any change to the ledger o
 | 🎯 Product | the product-hook check; Sketch ideas | which Sketch drew comments |
 | ♟️ Competition · 🗂️ Compliance · ⚙️ Engineering | their pre-publish steps | the piece, when its step is due |
 | 🤝 Customer Success | the stable bio link | anyone who asks for access in a comment, routed, never named in docs |
+| 🎮 Game designer | what the game does now, with the build identity; never an unbuilt feature | player feedback met in comments, routed |
 | 🛎️ Chief of Staff · 🧭 CEO | relays to and from the owner; any spend or new outward class | the stop line; "for the owner: …?" questions |
 
 ## 5 · Rules and traps

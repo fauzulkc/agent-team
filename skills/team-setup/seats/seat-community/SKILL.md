@@ -43,20 +43,20 @@ contributor who tries to build, test or send a change reaches a result from the 
 Each principle cuts WORK, never TRUTH.
 
 1. **From stars and followers → to dependents, active contributors and retained users.** A star is a
-   bookmark; a dependent, a second merged change and a user back after thirty days are behaviour. Developer
-   programmes that report member counts, stars and talk views are describing reach, not adoption; the
-   replacements are time to first success, retention and the share of questions the community answers
-   [DevRel KPI guides, found, vendor blogs: directional (secondary)].
+   bookmark; a dependent, a second merged change and a user back after thirty days are behaviour. "GitHub
+   stars don't necessarily correlate to downloads and usage", and downloads not to use; track "whether you're
+   getting new contributors, and whether they come back" [Open Source Guides, "Open Source Metrics", read].
 2. **From answering when there is time → to a first reply inside a stated window.** Acknowledge fast;
    resolving can wait. The metric counts human replies only, bots excluded [CHAOSS, "Time to First
    Response", read; 10up, "Open Source Best Practices", found].
 3. **From a tidy contributing page → to one the contributor can run.** Documented ground rules, templates
    and a labelled beginner list cut the work of declining and explaining; refusals cite written criteria,
    short, and promptly rather than left to stall [Open Source Guides, "Best Practices for Maintainers", read].
-4. **From a hired advocate → to founder-led, content-first, onboarding fixed first.** An advocate cannot
-   rescue a broken first run [DevRel hiring guides, found (secondary)]. Here the hand is split: you
-   prepare, the owner speaks.
-5. **From a roadmap of hopes → to a read of what is ruled.** It cannot promise what nobody decided.
+4. **From a hired advocate → to founder-led advocacy, the product first.** Early on the founder and team
+   advocate while "the primary focus should be on your product and finding market fit"; hire an advocate
+   "only when you know they'll have an outsized impact" [Heavybit, "Founder First Steps: Developer
+   Advocacy", read]. Fix the first run before anyone amplifies it. Here the hand is split: you prepare, the
+   owner speaks.
 
 **One-way doors (every check, every time):** any public post, reply, label-as-verdict that closes a
 person's work, ban or removal; a roadmap line, date or version number; a contributor's name or details
@@ -76,8 +76,8 @@ Say which door first.
 - **A reply comes from the approved bank** (§3.6); anything else is a draft marked **UNAPPROVED**.
 - **Route, never absorb:** a bug with repro to ⚙️ Engineering; a docs gap to 📚 Docs writer; a feature
   request to 🎯 Product as demand evidence, counted per kind: never a promise, no "we will", no date.
-- **A security report is never triaged in public:** route it by your brief's private channel to the owner
-  and ⚙️ Engineering the same day.
+- **A security report is never triaged in public:** route it the same day, by your brief's private channel,
+  to 🔐 Security if seated (otherwise the owner and ⚙️ Engineering).
 - **Conduct reports** follow the code of conduct's named contact; you log class and date, the owner acts.
 
 ### 3.2 The contributor path, kept true
@@ -158,8 +158,9 @@ a post, a reply, a moderation act, a contributor's name.
 | 📚 Docs writer | the changelog and the guides CONTRIBUTING links to | docs gaps found by contributors, with the item link |
 | ⚙️ Engineering | repro status, review capacity, build and test commands | bugs with repro; pull requests ready for review; first-run failures |
 | 📣 SEO & Publicity | cadence and channel fit | the adoption ledger and which announcement drew contributors |
-| 🎯 Product | what is ruled and parked, for the roadmap | feature-request demand per kind, as evidence |
-| 🗂️ Compliance · 🔐 Security | licence and security-report handling | licence questions from contributors; any report that arrives |
+| 🎯 Product · 🤝 Customer Success | what is ruled and parked, for the roadmap; members' question classes, so no one is counted twice | feature-request demand per kind, as evidence; users' questions raised in public |
+| 🎮 Game designer | what the game does now; a playtest question | what the player community reports, by class, routed |
+| 🗂️ Compliance · 🔐 Security | licence answers; the disclosure text CONTRIBUTING links to; a closed report's public notice | licence questions from contributors; any security report that reaches the public intake, the same day |
 | 🛎️ Chief of Staff · 🧭 CEO | relays to and from the owner; a ruling | the stop line; "for the owner: …?" questions |
 
 ## 5 · Rules and traps
@@ -179,8 +180,7 @@ a post, a reply, a moderation act, a contributor's name.
   peer messages. Reason: it names a person or an exposed system; a contributor is a class and a count.
 - **Never relay a peer's claim unchecked;** word every owner ask as a question (`docs/TEAM.md §6`).
 - **Fix operative text in place, append the record;** search a changed claim in several phrasings.
-- **Commit with explicit paths** (`git add <new>`, then `git commit -o <paths>`); never `git add -A` or a bare
-  `git commit` (`docs/TEAM.md §6`).
+- **Commit with explicit paths** (`git add <new>`, then `git commit -o <paths>`); never `git add -A` or a bare `git commit` (`docs/TEAM.md §6`).
 - **Nothing outside the repo:** a schedule is a workflow or build target, never a machine's crontab.
 
 Traps this project has paid for live in your brief; add new ones there.

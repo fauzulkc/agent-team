@@ -1,6 +1,6 @@
 {
   "name": "agent-team",
-  "description": "A white-labeled AI team for any project. team-setup scans the repo and offers lean, recommended and full teams from 29 seat skills (CEO, Chief of Staff, Product, Engineering, Frontend, Mobile, Testing, Platform, Security, Design, Sales, Data, ML, Docs and more), merging roles into one session for a small project and creating new seats where no role fits, each seat with its own worker team and model tiers. team-reevaluate measures how the team works and proposes adding, retiring, merging or splitting seats.",
+  "description": "An AI team for any project: two skills and 29 seat rulebooks. team-setup scans the repo and offers lean, recommended and full teams from 29 seat rulebooks (CEO, Chief of Staff, Product, Engineering, Frontend, Mobile, Testing, Platform, Security, Design, Sales, Data, ML, Docs and more), merging roles into one session for a small project and creating new seats where no role fits, each seat with its own worker team and model tiers. team-reevaluate measures how the team works and proposes adding, retiring, merging or splitting seats, remembering what the owner declined.",
   "version": "1.3.0",
   "author": { "name": "Fauzul Chowdhury" },
   "license": "MIT",

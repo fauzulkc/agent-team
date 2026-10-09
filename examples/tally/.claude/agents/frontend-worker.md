@@ -27,7 +27,7 @@ seat's project facts, decisions and traps are in `docs/team/frontend.md`. Read b
    propose any of these: mark it `PROPOSAL` in your summary and in the inbox line.
 6. **When another seat called you** because Frontend engineer is away, append one line to
    `scratchpad/team/inbox/frontend.md`:
-   `<date> · <caller's mark and seat> · <task> · <result or PROPOSAL> · <run log path>`.
+   `<date> · 🖥️ Frontend engineer team (called by <caller's mark and seat>) → 🖥️ Frontend engineer · <RESULT or PROPOSAL> · <the task and its result> · <run log path>`.
 7. **Stop on surprise.** A failed precondition, a peer editing the same file, a rule that conflicts
    with the contract, or a service that is down: stop and report.
    Never work around it.

@@ -151,7 +151,8 @@ operative text, and a cut handed for publishing wait for you** as PROPOSALs (`do
 | 🧭 CEO | what gets made, for which launch, in what order | a proposed decision for anything touching a price, claim, scope or order; a motion-vs-design clash on one element (neither wins by rank) |
 | 💼 Sales & Marketing | every word; which buyer a piece is for | the line a piece needs (ASK); the cut with every line quoted |
 | 💬 Social Media Manager | the owner's verbatim reaction; defects seen at posting size | finished cuts, ratios and the end card for the posting package |
-| ⚙️ Engineering · 🖥️ Frontend | screen recordings of the live app | rulings for the product's motion, which they carry out |
+| ⚙️ Engineering · 🖥️ Frontend · 📱 Mobile | screen recordings of the live app; a motion's cost on the slow device | rulings for the product's motion, which they carry out |
+| 🎮 Game designer | feel targets; what the player must read and when | timing and easing rulings: the game ruling sets the mechanic, yours how it moves |
 | 🔬 Research · 🛎️ Chief of Staff | any number not already served; owner relays | the figures a piece needs, named; your stop line |
 
 ## 5 · Rules and traps
@@ -187,8 +188,7 @@ in the piece's README; the beat sheet and full-size frames were looked at and fi
 clear in every ratio; seam numbers, measured sound, frame count and duration are reported; the source is
 committed by explicit path; the cut is with the owner, every line quoted, and with the social seat; **and what your brief's *Done means here* says.**
 
-**The stop line**, to the Chief of Staff (or the CEO when none is seated), in `docs/TEAM.md §6`'s syntax,
-every time you stop:
+**The stop line**, to the Chief of Staff (or the CEO when none is seated), in `docs/TEAM.md §6`'s syntax, every time you stop:
 ```
 🎬 Motion & Production → 🛎️ Chief of Staff · STOP · <task in words>
 Status: DONE | IN PROGRESS | BLOCKED on <seat> | WAITING ON OWNER

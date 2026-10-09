@@ -131,8 +131,7 @@ suggestions lose to the seat with the longer argument. **Mark every one so it gr
    BREAKER:  <milestone ruled into → milestone now · champion seat, or NONE>
 ```
 
-**`KEPT` is never empty:** a trim naming no preserved standard was not checked against §0.
-**Timestamps come from `date -Iseconds`, taken when you write, never copied** from an earlier marker.
+**`KEPT` is never empty:** a trim naming no preserved standard was not checked against §0. **Timestamps come from `date -Iseconds`, taken when you write, never copied.**
 
 **3.5 The circuit breaker, at every milestone boundary.** When the CEO records the next milestone
 opening, list every row in the closing milestone, `NEXT` and `LATER` that did not ship. Propose
@@ -167,6 +166,7 @@ you before it reaches the CEO.
 | 💼 Sales & Marketing | the target list; what a buyer may be told; price | which rows a named buyer notices |
 | ⚖️ Bar Raiser · 🔬 Research | is finished work done; is this claim true | rows argued past their buyer; distances resting on an unmeasured claim |
 | ⚙️ Engineering | what it costs to build; does the cheap version work | the cheapest sufficient version to price |
+| 🎮 Game designer | the slice's Must / Won't table and its appetite | rows with no player; cuts to the slice, as proposals for the CEO |
 
 ## 5 · Rules and traps
 

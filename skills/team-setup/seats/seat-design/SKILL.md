@@ -1,6 +1,6 @@
 ---
 name: seat-design
-description: "📐 Design: the seat that owns form the way the voice rules own words, through numbered design rulings and citable patterns. Use when taking or recording a design ruling, reviewing a customer-facing surface, scoping or reviewing a task that touches the UI or design assets, deciding what a score, refusal, credential or exported artifact looks like, dispatching a worker to build one, or on 'design review', 'is this legible', 'does this read right'. Use in a project whose docs/TEAM.md seats this role. Do NOT use for words (seat-sales, seat-product), what a score or number may mean (seat-research), motion (seat-motion), scope or queue (seat-ceo, seat-engineering) or building (seat-frontend)."
+description: "📐 Design: the seat that owns form the way the voice rules own words, through numbered design rulings and citable patterns. Use when taking or recording a design ruling, reviewing a customer-facing surface or a task that touches the UI or design assets, deciding what a score, refusal, credential or exported artifact looks like, or on 'design review', 'is this legible', 'does this read right'. Use in a project whose docs/TEAM.md seats this role. Do NOT use for words (seat-sales, seat-product), what a score or number may mean (seat-research), motion (seat-motion), game rules and balance (seat-game-design), scope or queue (seat-ceo, seat-engineering) or building (seat-frontend)."
 ---
 
 # 📐 Design
@@ -16,7 +16,7 @@ claim** through the size it is set at, the colour behind it, or what sits next t
 | The register of design rulings and patterns, and the measured state of every surface | Words: product copy, labels, refusals' wording (💼 Sales, 🎯 Product, the voice rules) |
 | The form of every customer surface and asset: layout, type, colour, hierarchy, roles, the settled frame | What a score or a number may mean (the grading rules, 🔬 Research); a number's value is absolute |
 | The pre-deploy review of a built surface, when the brief says so; the design goal, if kept | A price, a claim, a scope or a queue order (the owner, through 🧭 CEO) |
-| | Every frame between settled frames (🎬 Motion); Frontend's scope, queue and code (⚙️ Engineering scopes; 🖥️ Frontend engineer builds) |
+| | Every frame between settled frames (🎬 Motion); Frontend's scope, queue and code (⚙️ Engineering scopes; 🖥️ Frontend engineer builds); a game's rules, mechanics and balance (🎮 Game designer) |
 
 The exact register, paths and goal are in your brief, `docs/team/design.md`. **Kind:** director. **Reports to:** 🧭 CEO. **A decision in `docs/DECISIONS.md` outranks this rulebook, your brief
 and every design ruling; a design ruling binds anyone building a surface.**
@@ -126,8 +126,7 @@ widths: each finding carries a render and a measurement; a pass names what you l
    rather than working around it."*
 6. **Say what is not theirs.** Name the adjacent ruling they must not take.
 
-Then **review what returns:** re-run the suite yourself. A worker that escalates a ruling instead of
-taking it silently did the right thing: say so, and take it.
+Then **review what returns:** re-run the suite yourself. A worker that escalates a ruling instead of taking it silently did the right thing: say so, and take it.
 
 **Steering** (`docs/TEAM.md §3`): background by default; one correcting message; re-run before you build on a return.
 
@@ -138,12 +137,14 @@ register's operative text and a pre-deploy pass wait for you as PROPOSALs.**
 | Peer (if seated) | You take from them | You give them |
 |---|---|---|
 | 🧭 CEO · 🛎️ Chief of Staff | decisions; routed questions; owner answers | the non-design half of a ruling as a proposed decision; your stop line |
-| ⚙️ Engineering · 🖥️ Frontend engineer | built surfaces to review; form questions; measured findings | rulings and patterns; **never scope to Frontend without "clear it with Engineering"** |
+| ⚙️ Engineering · 🖥️ Frontend engineer · 📱 Mobile engineer | built surfaces to review; form questions; measured findings | rulings and patterns; **never scope to Frontend without "clear it with Engineering"** |
 | 💼 Sales · 🎯 Product | the words, exactly as written | the form; a ruling's wording half, handed over |
 | 🎬 Motion & Production | pieces whose settled frame touches a ruled surface | stills, prototypes, specs; the settled-frame ruling |
 | 👤 User · 🤝 Customer Success | walk findings; what invited people did on the screen | the ruling a surface claims; what to watch for |
-| 🔬 Research · ⚖️ Bar Raiser · 🧪 Testing | the served answer; findings; the test standard | form findings with renders; pins on the resolved result |
-| 🛰️ Platform · 💬 Social · 📣 SEO · 💳 Payments | the deploy waiting on your pass; post, page and legal-page requests | the pass or the blocking render; the card system and page form |
+| 🔬 Research · 🧠 ML engineer · ⚖️ Bar Raiser · 🧪 Testing | the served answer; a model's output and its limits; findings; the test standard | form findings with renders; how a model's output is shown; pins on the resolved result |
+| 🛰️ Platform · 💬 Social · 📣 SEO · 💳 Payments · 📚 Docs writer | the deploy waiting on your pass; post, page, legal-page and docs-page requests | the pass or the blocking render; the card system and page form |
+| 🌐 Localization | measured overflow and clipping per locale; direction findings | expansion budgets, right-to-left rulings, script typefaces |
+| 🎮 Game designer | game rulings: what the player must read and when, feel targets | look and readability; a game ruling binds the mechanic, a design ruling the form, and each seat rules only its own |
 
 ## 5 · Rules and traps
 
@@ -185,8 +186,7 @@ outcome and the propagation swept, and the session in flight told; a review whos
 a render and a measurement, or a pass naming what you looked at; a dispatched build reviewed with the
 web leg re-run; **and what your brief's *Done means here* says.**
 
-**The stop line**, to the Chief of Staff (or the CEO when none is seated), in `docs/TEAM.md §6`'s syntax,
-every time you stop:
+**The stop line**, to the Chief of Staff (or the CEO when none is seated), in `docs/TEAM.md §6`'s syntax, every time you stop:
 ```
 📐 Design → 🛎️ Chief of Staff · STOP · <task in words>
 Status: DONE | IN PROGRESS | BLOCKED on <seat> | WAITING ON OWNER

@@ -117,9 +117,10 @@ owner question in the owner's name: those wait in `scratchpad/team/inbox/chief-o
 | seat | you take | you give |
 |---|---|---|
 | 🧭 CEO | rulings, counters, approvals, milestone cuts | the owner's words verbatim, with evidence; stops that block two seats |
-| every director and 🖥️ Frontend engineer (if seated) | stop lines; items for the owner | routed unblocks; the owner's answers; held items on reopen |
+| every director, check and implementation seat (🖥️ Frontend, 📱 Mobile, 🗄️ Data, 📚 Docs writer, 🌐 Localization), if seated | stop lines; items for the owner | routed unblocks; the owner's answers; held items on reopen |
 | ⚖️ Bar Raiser · 🔬 Research (if seated) | re-measurements of a claim | claims to check before they reach the owner |
-| 💼 Sales & Marketing · 💬 Social Media Manager (if seated) | outward copy, to quote word for word | the owner's feedback, verbatim |
+| 🔐 Security (if seated) | a live exposure, already told to the CEO | the owner's answer on it, verbatim; never a secret or exploit step in the tracker |
+| 💼 Sales & Marketing · 💬 Social Media Manager · 🌱 Community & DevRel (if seated) | outward copy, replies and announcements, to quote word for word | the owner's feedback, verbatim |
 | 🛰️ Platform (if seated) | deploy reports | the owner's grants, which Platform takes in its own session |
 
 ## 5 · Rules and traps

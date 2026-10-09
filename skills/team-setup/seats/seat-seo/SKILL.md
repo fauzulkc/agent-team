@@ -151,6 +151,9 @@ you** as `PROPOSAL` in your inbox (`docs/TEAM.md §4`): a prediction, a window, 
 | ⚙️ Engineering · 🖥️ Frontend · 🛰️ Platform | the site's HTML, sitemap, edge counting | the crawl requirement, measured |
 | 🤝 Customer Success · 🎯 Product | the person after sign-up; sign-up rows (source plus first question) | the source read |
 | 💳 Payments & Company Legal | the privacy line for any measurement or new sign-up question | what is collected, in aggregate |
+| 🌱 Community & DevRel | the adoption ledger; which announcement drew contributors | cadence and channel fit for release announcements |
+| 🌐 Localization | locale tags, alternate-language links and the keys behind them | per-locale titles, descriptions and preview words, as Sales wrote them |
+| 🎮 Game designer | what the game does now, with the build identity | the angle and window a trailer or post needs |
 | 🧭 CEO · 🛎️ Chief of Staff | the queue; the owner's answers | bets that spend, publish or contact, as questions |
 
 ## 5 · Rules and traps

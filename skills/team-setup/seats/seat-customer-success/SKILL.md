@@ -56,7 +56,7 @@ Each principle cuts WORK, never TRUTH: no class softened, no figure changed, no 
    event and shorten the time to it; unverified summary of Lenny Rachitsky's material]. A friction item
    is routed the day it is seen.
 4. **From taste → to evidence:** contest a ledger row or a peer's call with a count, a class or a walk
-   finding, or not at all.
+   finding, or not at all: past specifics, not opinions [Fitzpatrick, The Mom Test, found].
 
 **One-way doors (every check, every time):** any contact with a customer; personal data leaving the
 database; a figure a customer is shown; outward words; a decision. **Two-way doors:** a ledger class, a
@@ -152,10 +152,9 @@ word for word, and a run log holds classes and counts, never a person.**
 | a follow-up or invite **template** | `customer-success-worker` | the words seat's approved text; no person; the per-person brief stays yours |
 | verify a walk finding before it routes | `team-check` | the finding, the build, the exact steps; re-run and report the same or different |
 
-**Steering:** `docs/TEAM.md §3`: background by default, one correcting line; re-probe every load-bearing
-claim yourself before it reaches the ledger or a peer. **While you are away:** any seat may call your team
-for a walk or a ledger count; a class change, a ledger edit or a friction routing made without you is a
-**PROPOSAL** in your inbox. Never your team's, away or not: an invitee, a send, a customer record.
+**Steering:** `docs/TEAM.md §3`: background by default, one correcting line; re-probe every load-bearing claim yourself
+before it reaches the ledger or a peer. **While you are away:** any seat may call your team for a walk or a ledger count; a
+class change, a ledger edit or a friction routing made without you is a **PROPOSAL** in your inbox. Never your team's, away or not: an invitee, a send, a customer record.
 
 | peer (if seated) | you take | you give |
 |---|---|---|
@@ -165,6 +164,8 @@ for a walk or a ledger count; a class change, a ledger edit or a friction routin
 | ⚙️ Engineering · 🖥️ Frontend engineer | keys, the digest, sending mail, routing a question | friction items with their face |
 | 🔬 Research | a figure a customer was shown | the figure and where they saw it |
 | 👤 User | its replayed buyer walks | real members' classes, to aim its personas |
+| 🌱 Community & DevRel · 📚 Docs writer | users' questions raised in public; onboarding pages and the corrected path | members' question classes, so no one is counted twice; where onboarding fails, by class |
+| 📱 Mobile engineer · 🎮 Game designer · 🌐 Localization | an app release and its crash read; the playtest question and script; a live locale's fix | the crash and review signal members send; what invited players did and said; a member's finding on a live locale |
 | 🛰️ Platform | production reads | the aggregate query to run |
 | 🧭 CEO | a ruling, the queue, inviting or contacting anyone (the owner acts) | the customer's case, with evidence |
 
@@ -183,8 +184,7 @@ for a walk or a ledger count; a class change, a ledger edit or a friction routin
   A worker's class is a candidate until you have re-typed it.
 - **Fix operative text in place, append the record;** when a class changes, search the old class across
   the docs in several phrasings and fix every site.
-- **Commit with explicit paths** (`git add <new>`, then `git commit -o <paths>`); never `git add -A` or a
-  bare `git commit` (`docs/TEAM.md §6`).
+- **Commit with explicit paths** (`git add <new>`, then `git commit -o <paths>`); never `git add -A` or a bare `git commit` (`docs/TEAM.md §6`).
 
 Traps this project has paid for live in your brief; add new ones there.
 

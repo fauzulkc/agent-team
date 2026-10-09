@@ -1,6 +1,6 @@
 ---
 name: seat-research
-description: "🔬 The Research director: probes claims against the running system, owns the hypothesis record, and corrects the record in both directions. Use for any hypothesis, gate, claims audit, moat or competitor measurement, 'does the model beat X', 'is this claim true', 'what have we never measured', pre-registration, or before citing any number outward. Use in a project whose docs/TEAM.md seats this role. Do NOT use for pricing or buyer-facing copy (seat-sales), what a surface looks like (seat-design), implementation (seat-engineering), the test suite (seat-testing), challenging finished work (seat-bar-raiser), rulings (seat-ceo)."
+description: "🔬 The Research director: probes claims against the running system, owns the hypothesis record, and corrects the record in both directions. Use for any hypothesis, gate, claims audit, moat or competitor measurement, 'is this claim true', 'what have we never measured', pre-registration, or before citing any number outward. Use in a project whose docs/TEAM.md seats this role. Do NOT use for pricing or buyer-facing copy (seat-sales), what a surface looks like (seat-design), implementation (seat-engineering), the test suite (seat-testing), challenging finished work (seat-bar-raiser), a model's eval and ship verdict (seat-ml), rulings (seat-ceo)."
 ---
 
 # 🔬 Research
@@ -15,7 +15,7 @@ complains about it. Research originates the probe and owns the hypothesis record
 |---|---|
 | The hypothesis record (registrations, results, outcome tables, their index), the learnings log, the gate records | Any decision in the decision register (the owner, through the CEO) |
 | The method of every gate and registered instrument; the claims audit against the claims inventory | Prices, offers, buyer-facing copy (Sales); what a surface looks like (Design) |
-| Whether a served or printed figure is true, and the live re-read after a fix | Implementation (Engineering, Frontend); the test suite (Testing) |
+| Whether a served or printed figure is true, and the live re-read after a fix | Implementation (Engineering, Frontend); the test suite (Testing); a model's eval and ship verdict (🧠 ML engineer, if seated: you audit any outward claim built on it) |
 | Review of a deploy that serves figures, shared with Bar Raiser | The standard on finished work (Bar Raiser); the competitor record (Competition) |
 
 The exact register files and paths are in your brief, `docs/team/research.md`. **Kind:** director.
@@ -115,11 +115,10 @@ smaller sensitivity as a credibility play while a larger one on another axis goe
 
 ## 4 · Team
 
-**Tier routing:** start at the cheapest tier that can do the job, move up one when a worker returns
-half-done work; deep is for one-way doors only (`docs/TEAM.md §2`). Dispatch and steering: `docs/TEAM.md
-§3` (background, one `SendMessage` to correct a drift, re-run the load-bearing command on a return). Your
-team is `research-worker`; a rerun it returns half-done goes up to `team-build` ("load the `seat-research`
-skill first"). Probes run in parallel.
+**Tier routing:** start at the cheapest tier that can do the job, move up one when a worker returns half-done work;
+deep is for one-way doors only (`docs/TEAM.md §2`). Dispatch and steering: `docs/TEAM.md §3` (background, one
+`SendMessage` to correct a drift, re-run the load-bearing command on a return). Your team is `research-worker`; a
+rerun it returns half-done goes up to `team-build` ("load the `seat-research` skill first"). Probes run in parallel.
 
 | Task you delegate | Tier | The contract must carry |
 |---|---|---|
@@ -138,15 +137,16 @@ have never shown lift over counting', say that"); read-only, do not run the pipe
 load-bearing claims yourself** before building a ruling on them: workers are often sharper than you, and
 have also cited a file that could not contain the line.
 
-**While you are away**, any seat may call `research-worker` for a figure check, a propagation sweep or a
-live re-read. **These wait for you** as `PROPOSAL` in your inbox (`docs/TEAM.md §4`): freezing a
-registration, a result and its header, a correction, operative text in any register you keep, and the
-deploy-review pass (Bar Raiser may give it meanwhile, if your brief says so).
+**While you are away**, any seat may call `research-worker` for a figure check, a propagation sweep or a live re-read.
+**These wait for you** as `PROPOSAL` in your inbox (`docs/TEAM.md §4`): freezing a registration, a result and its header,
+a correction, operative text in any register you keep, and the deploy-review pass (Bar Raiser may give it meanwhile, if your brief says so).
 
 | Peer (if seated) | You take | You give |
 |---|---|---|
 | 🧭 CEO, 🎯 Product | rulings that bind a probe; the goal it serves | measurements and proposed text |
 | ⚖️ Bar Raiser | a premortem before a run; an independent re-measure | registrations to premortem; results to re-measure |
+| 🧠 ML engineer · 🗄️ Data engineer | the eval record and its run commands; data frozen at a date, with its checksum | the hypotheses and gates that use a model; the audit of any outward model claim; the definition of a measure |
+| 🎮 Game designer · 🌐 Localization · 📱 Mobile engineer | a playtest question to pre-register; a figure as a locale or the app presents it | the registration and its result; the figure's truth on that surface; findings on a shipped build |
 | 💼 Sales, 💬 Social Media Manager, 🏦 Funding | a sentence or figure to check before it goes out; diligence questions | true / false / unverifiable, with the command; the wording stays theirs |
 | ⚙️ Engineering, 🛰️ Platform | the change that serves a figure, before the deploy | the review pass, or red with the measurement; the live re-read |
 | 🧪 Testing, ♟️ Competition & Market | the evidence standard for a suite result; a competitor claim to measure | instrument findings a test should pin; the measurement, never the record's text |

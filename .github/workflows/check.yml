@@ -3,16 +3,46 @@ on: [push, pull_request]
 jobs:
   check:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.9 is the scripts' floor (no tomllib, so scan.py's own pyproject reader runs); 3.12 is current.
+        python-version: ["3.9", "3.12"]
+    env:
+      GIT_AUTHOR_NAME: CI
+      GIT_AUTHOR_EMAIL: ci@example.invalid
+      GIT_COMMITTER_NAME: CI
+      GIT_COMMITTER_EMAIL: ci@example.invalid
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with: { python-version: "${{ matrix.python-version }}" }
       - name: Every seat rulebook is in shape and project-neutral
-        run: python3 check.py
+        run: python check.py
       - name: The scaffold seats a fresh project and the generator agrees
         run: |
           d=$(mktemp -d) && git -C "$d" init -q
-          python3 skills/team-setup/scripts/scaffold.py --root "$d" --project Demo --seats engineering,testing,bar-raiser,design
-          python3 "$d/scripts/gen-team-agents.py" --check
+          python skills/team-setup/scripts/scaffold.py --root "$d" --project Demo --seats engineering,testing,bar-raiser,design
+          python "$d/scripts/gen-team-agents.py" --check
+      - name: The skills' commands run in order on a fresh project (setup, re-evaluate, add, retire, sync)
+        run: |
+          s="$GITHUB_WORKSPACE/skills/team-setup/scripts"
+          d=$(mktemp -d) && cd "$d" && git init -q
+          printf '{"name": "demo", "dependencies": {"react": "18.3.1"}}\n' > package.json
+          git add package.json && git commit -qm initial
+          python "$s/scan.py" --root . --save
+          python "$s/plan.py" --scan docs/team/scan.json --markdown
+          python "$s/plan.py" --scan docs/team/scan.json --option lean --out docs/team/plan.json --project Demo \
+            --push-rule "a seat asks the owner before each push and pushes on the owner's yes."
+          python "$s/scaffold.py" --root . --plan docs/team/plan.json --record "yes, the lean team" --question "Which team?"
+          python scripts/gen-team-agents.py --check
+          python "$s/reevaluate.py" --root . --out docs/team/reevaluation.json
+          python "$s/scaffold.py" --root . --add user --record "add a User seat" --question "Add 👤 User?"
+          python "$s/scaffold.py" --root . --retire user --record "retire the User seat" --question "Retire 👤 User?"
+          python scripts/gen-team-agents.py --check
+          python "$s/scaffold.py" --root . --sync
+          test "$(grep -c '^| \*\*DEC-' docs/DECISIONS.md)" -eq 4  # the register's first row, then setup, add, retire
       - name: Scan, plan, scaffold and re-evaluate behave on fixture repos
-        run: python3 -m unittest discover -s tests -v
+        run: python -m unittest discover -s tests -v
+      - name: The walkthrough's figures still match what the scripts give a Tally-shaped project
+        run: python tools/measure_tally.py --check

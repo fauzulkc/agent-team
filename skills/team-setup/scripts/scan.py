@@ -6,6 +6,17 @@
 
 Reads file names, manifests and dependency lists only (no file bodies beyond manifests, nothing
 sent anywhere). Each signal carries the evidence that raised it, so a proposal can say why.
+
+What it leaves out: vendored, build and hidden folders, and the team's own files (docs/TEAM.md,
+docs/DECISIONS.md, docs/team/, scripts/gen-team-agents.py), so seating a team changes no signal.
+Dependencies come from the dependency lists only: package.json's dependency maps, requirements*.txt,
+pyproject.toml's [project] dependencies and optional-dependencies, [dependency-groups] and Poetry's
+dependency tables (read with tomllib on Python 3.11+, a section-aware reader before that), go.mod,
+Cargo.toml, Gemfile, composer.json. `mobile` needs Android or iOS evidence (an android/ or ios/
+folder, AndroidManifest.xml, a Gradle file applying a com.android plugin, pubspec.yaml, an Expo
+app.json, an Xcode project or a Podfile); a plain Gradle build is not a mobile app. `monorepo` means
+package manifests in two or more different folders below the root, or a workspace config.
+`size.ui_apps` lists up to 8 web UI app folders; `size.ui_app_count` is the full count.
 Standard library only; finishes in seconds on large repos (it skips vendored and build folders).
 """
 from __future__ import annotations
@@ -23,6 +34,9 @@ from pathlib import Path
 SKIP_DIRS = {".git", "node_modules", "vendor", "dist", "build", "out", ".next", ".venv", "venv",
              "__pycache__", "target", ".cache", "coverage", ".turbo", ".claude", "scratchpad", "Pods"}
 MAX_FILES = 60000
+# the team's own files: seating or changing a team must not move a signal
+TEAM_FILES = {"docs/TEAM.md", "docs/DECISIONS.md", "scripts/gen-team-agents.py"}
+TEAM_DIRS = {"docs/team"}
 
 # dependency name patterns (lower-case substrings or regexes) → signal
 DEP_SIGNALS = {
@@ -59,7 +73,8 @@ DEP_SIGNALS = {
 }
 # path globs / names → signal
 PATH_SIGNALS = {
-    "mobile": ["ios/", "android/", "pubspec.yaml", "app.json:expo", "*.xcodeproj", "Podfile", "build.gradle"],
+    "mobile": ["ios/", "android/", "pubspec.yaml", "app.json:expo", "*.xcodeproj", "Podfile", "AndroidManifest.xml",
+               "build.gradle:com.android", "build.gradle.kts:com.android"],
     "deploy": ["Dockerfile", "docker-compose.yml", "compose.yml", "fly.toml", "vercel.json", "netlify.toml",
                "render.yaml", "wrangler.toml", "Procfile", "serverless.yml", "*.tf", "k8s/", "helm/",
                "app.yaml", ".platform.app.yaml", "railway.json"],
@@ -92,7 +107,7 @@ PERSONAL_DATA_WORDS = re.compile(r"\b(email|phone|address|date_of_birth|dob|pass
 
 
 def walk(root: Path) -> list[str]:
-    """Repo-relative paths (posix strings), skipping vendored, build and hidden folders."""
+    """Repo-relative paths (posix strings), skipping vendored, build and hidden folders and the team's own files."""
     out: list[str] = []
     keep_hidden = {".github", ".circleci", ".buildkite", ".vitepress"}
     stack = [""]
@@ -107,9 +122,10 @@ def walk(root: Path) -> list[str]:
                 rel = f"{rel_dir}/{e.name}" if rel_dir else e.name
                 try:
                     if e.is_dir(follow_symlinks=False):
-                        if e.name not in SKIP_DIRS and (not e.name.startswith(".") or e.name in keep_hidden):
+                        if e.name not in SKIP_DIRS and (not e.name.startswith(".") or e.name in keep_hidden) \
+                                and rel not in TEAM_DIRS:
                             stack.append(rel)
-                    elif e.is_file(follow_symlinks=False):
+                    elif e.is_file(follow_symlinks=False) and rel not in TEAM_FILES:
                         out.append(rel)
                 except OSError:
                     continue
@@ -117,6 +133,119 @@ def walk(root: Path) -> list[str]:
 
 
 MANIFESTS = {"package.json", "pyproject.toml", "go.mod", "Cargo.toml", "Gemfile", "pubspec.yaml", "composer.json"}
+
+try:
+    import tomllib  # Python 3.11+
+except ImportError:  # older Pythons use the section-aware reader below
+    tomllib = None
+
+REQ_NAME = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9_.\-]*)")
+TOML_TABLE = re.compile(r"^\s*\[\[?\s*([^\[\]]+?)\s*\]\]?\s*(?:#.*)?$")
+TOML_KEY = re.compile(r"""^\s*("[^"]+"|'[^']+'|[A-Za-z0-9_.\-]+)\s*=\s*(.*)$""")
+POETRY_TABLE = re.compile(r"^tool\.poetry\.(dependencies|dev-dependencies|group\.[^.]+\.dependencies)$")
+
+
+def requirement_names(reqs) -> set[str]:
+    """Package names from PEP 508 requirement strings ("SQLAlchemy[asyncio]~=2.0" -> "sqlalchemy")."""
+    out = set()
+    for r in reqs:
+        m = REQ_NAME.match(r) if isinstance(r, str) else None
+        if m:
+            out.add(m.group(1).lower())
+    return out
+
+
+def array_strings(text: str) -> tuple[list[str], bool]:
+    """The top-level strings of the TOML array `text` opens with `[` (strings inside inline tables are
+    skipped, comments run to their line's end), and whether the array closed within `text`."""
+    out: list[str] = []
+    depth = braces = 0
+    i, n = 0, len(text)
+    while i < n:
+        ch = text[i]
+        if ch in "\"'":
+            end = text.find(ch, i + 1)
+            if end < 0:
+                return out, False
+            if depth == 1 and not braces:
+                out.append(text[i + 1:end])
+            i = end
+        elif ch == "#":
+            end = text.find("\n", i)
+            if end < 0:
+                return out, False
+            i = end
+        elif ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                return out, True
+        elif ch == "{":
+            braces += 1
+        elif ch == "}":
+            braces -= 1
+        i += 1
+    return out, False
+
+
+def pyproject_deps_fallback(text: str) -> set[str]:
+    """Section-aware reader for Pythons without tomllib: only the dependency tables count."""
+    reqs: list[str] = []
+    names: set[str] = set()
+    table, pending = "", None  # pending: the text of an array that has not closed yet
+    for line in text.splitlines():
+        if pending is not None:
+            pending += "\n" + line
+            got, done = array_strings(pending)
+            if done:
+                reqs += got
+                pending = None
+            continue
+        m = TOML_TABLE.match(line)
+        if m:
+            table = m.group(1).replace('"', "").replace("'", "")
+            continue
+        k = TOML_KEY.match(line)
+        if not k:
+            continue
+        key, value = k.group(1).strip("\"'"), k.group(2)
+        array_key = ((table == "project" and key == "dependencies")
+                     or table in ("project.optional-dependencies", "dependency-groups"))
+        if array_key and value.lstrip().startswith("["):
+            got, done = array_strings(value)
+            if done:
+                reqs += got
+            else:
+                pending = value
+        elif POETRY_TABLE.match(table) and key.lower() != "python":
+            names.add(key.lower())
+    return requirement_names(reqs) | names
+
+
+def pyproject_deps(text: str) -> set[str]:
+    """Dependency names from pyproject.toml's dependency tables only: [project] dependencies and
+    optional-dependencies, [dependency-groups], and Poetry's dependencies, dev-dependencies and
+    group.*.dependencies (python itself left out). Keywords, tool config and the project name never count."""
+    if tomllib is None:
+        return pyproject_deps_fallback(text)
+    try:
+        data = tomllib.loads(text)
+    except ValueError:  # tomllib.TOMLDecodeError is a ValueError
+        return pyproject_deps_fallback(text)
+    as_dict = lambda v: v if isinstance(v, dict) else {}  # noqa: E731
+    as_list = lambda v: v if isinstance(v, list) else []  # noqa: E731
+    project = as_dict(data.get("project"))
+    reqs = list(as_list(project.get("dependencies")))
+    for v in as_dict(project.get("optional-dependencies")).values():
+        reqs += as_list(v)
+    for v in as_dict(data.get("dependency-groups")).values():
+        reqs += as_list(v)  # an inline {include-group = ...} table is not a string and is skipped
+    poetry = as_dict(as_dict(data.get("tool")).get("poetry"))
+    names = set(as_dict(poetry.get("dependencies"))) | set(as_dict(poetry.get("dev-dependencies")))
+    for g in as_dict(poetry.get("group")).values():
+        names |= set(as_dict(as_dict(g).get("dependencies")))
+    return requirement_names(reqs) | {n.lower() for n in names if n.lower() != "python"}
 
 
 WEB_UI = re.compile(r"^(react-dom|vue|svelte|@sveltejs/kit|next|nuxt|@angular/core|solid-js|astro|preact|@remix-run/react)$")
@@ -150,9 +279,7 @@ def deps_from_manifests(root: Path, rels: list[str]) -> tuple[set[str], list[str
                         deps.add(re.sub(r"\[.*\]", "", m.group(1)).lower())
                 found.append(rel)
             elif name == "pyproject.toml":
-                t = f.read_text(encoding="utf-8", errors="replace")
-                deps |= {m.lower() for m in re.findall(r'^\s*"?([A-Za-z0-9_.\-]+)(?:\[[^\]]*\])?\s*[<>=~!^ ;,"]', t, re.M)}
-                deps |= {m.lower() for m in re.findall(r'"([A-Za-z0-9_.\-]+)(?:\[[^\]]*\])?\s*(?:[<>=~!^][^"]*)?"', t)}
+                deps |= pyproject_deps(f.read_text(encoding="utf-8", errors="replace"))
                 found.append(rel)
             elif name == "go.mod":
                 for m in re.findall(r"^\s*(?:require\s+)?([a-z0-9.\-]+/[^\s]+)\s+v", f.read_text(encoding="utf-8", errors="replace"), re.M):
@@ -279,8 +406,20 @@ def scan(root: Path) -> dict:
     licence = next((r for r, n in rels if n.upper().startswith("LICENSE") or n.upper().startswith("LICENCE")), None)
     if licence and "oss" in signals:
         hit("oss", licence)
-    if any(m.endswith("package.json") for m in manifests[1:]) or (root / "pnpm-workspace.yaml").exists() or (root / "turbo.json").exists():
-        hit("monorepo", "several package manifests" if len(manifests) > 1 else "workspace config")
+    # monorepo: package manifests in two or more different folders below the root (order-independent),
+    # or a workspace config at the root
+    manifest_dirs = sorted({m.rsplit("/", 1)[0] for m in manifests if "/" in m})
+    workspace = next((n for n in ("pnpm-workspace.yaml", "turbo.json", "lerna.json", "nx.json") if (root / n).exists()), None)
+    if not workspace and "package.json" in manifests:
+        try:
+            if json.loads((root / "package.json").read_text(encoding="utf-8", errors="replace")).get("workspaces"):
+                workspace = "package.json workspaces"
+        except (OSError, ValueError, AttributeError):
+            pass
+    if len(manifest_dirs) >= 2:
+        hit("monorepo", f"package manifests in {len(manifest_dirs)} folders: {', '.join(manifest_dirs[:4])}")
+    elif workspace:
+        hit("monorepo", f"workspace config: {workspace}")
 
     authors = {a for a in git(root, "log", "--format=%ae", "-n", "2000").split() if a}
     commits = git(root, "rev-list", "--count", "HEAD").strip()
@@ -289,7 +428,7 @@ def scan(root: Path) -> dict:
         "scanned": datetime.date.today().isoformat(),
         "root": root.name,
         "size": {"files": len(paths), "code_files": len(code_files), "manifests": manifests[:10],
-                 "ui_apps": sorted(UI_APPS)[:8],
+                 "ui_apps": sorted(UI_APPS)[:8], "ui_app_count": len(UI_APPS),
                  "contributors": len(authors), "commits": int(commits) if commits.isdigit() else 0,
                  "first_commit": first or None},
         "signals": dict(sorted(signals.items())),

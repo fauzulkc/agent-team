@@ -11,7 +11,7 @@ director's scope. *Checks* challenge other seats' work and own no product regist
 | Mark | Seat | Skill | Team | Kind | Default register | Reports to | Seat it when |
 |---|---|---|---|---|---|---|---|
 | 🧭 | CEO | `seat-ceo` | `ceo` | owner-side | docs/DECISIONS.md (the decision register, the queue, milestones) | the owner | **always** |
-| 🛎️ | Chief of Staff | `seat-chief-of-staff` | `chief-of-staff` | owner-side | docs/team/tracker.md, docs/team/owner-questions.md | the owner | **always** when three or more seats run |
+| 🛎️ | Chief of Staff | `seat-chief-of-staff` | `chief-of-staff` | owner-side | docs/team/tracker.md, docs/team/owner-questions.md | the owner | **always** when five or more other seats run (seven in the lean option) |
 | 🎯 | Product | `seat-product` | `product` | director | docs/GOALS.md (goals, non-goals, scope) | CEO | there is a product with users |
 | ⚙️ | Engineering | `seat-engineering` | `engineering` | director | engineering goals; what lands in code | CEO | **always** for a code project |
 | 🖥️ | Frontend engineer | `seat-frontend` | `frontend` | implementation | the UI code paths | Engineering | there is a web or app UI |
@@ -19,7 +19,7 @@ director's scope. *Checks* challenge other seats' work and own no product regist
 | 🛰️ | Platform | `seat-platform` | `platform` | director | docs/PLATFORM.md (environments, deploys, cost) | CEO | something is deployed or costs money to run |
 | 🔬 | Research | `seat-research` | `research` | director | docs/HYPOTHESES.md, docs/LEARNINGS.md | CEO | claims rest on data, models or measurement |
 | ⚖️ | Bar Raiser | `seat-bar-raiser` | `bar-raiser` | check | its findings, in docs/briefs/ | CEO | **always** — the independent check |
-| ✂️ | Scope Trimmer | `seat-scope-trimmer` | `scope-trimmer` | check | its trim verdicts, in docs/briefs/ | CEO | the queue outgrows the team |
+| ✂️ | Scope Trimmer | `seat-scope-trimmer` | `scope-trimmer` | check | its trim verdicts, in docs/briefs/ | CEO | ten or more other seats run: the queue outgrows the team |
 | 📐 | Design | `seat-design` | `design` | director | docs/DESIGN.md (design rulings and patterns) | CEO | anything a person looks at |
 | 🎬 | Motion & Production | `seat-motion` | `motion` | director | docs/MOTION.md, the render pipeline | CEO | video, animation or UI motion matters |
 | 💼 | Sales & Marketing | `seat-sales` | `sales` | director | docs/PRICING.md, docs/POSITIONING.md, the outward copy source | CEO | it will be sold, or words go outward |
@@ -37,15 +37,26 @@ director's scope. *Checks* challenge other seats' work and own no product regist
 | 🔐 | Security | `seat-security` | `security` | check | docs/SECURITY.md (threat model, findings) | CEO | there is auth, payments or personal data |
 | 📚 | Docs writer | `seat-docs` | `docs` | implementation | the docs site, guides, API reference, changelog | Product | there is a docs site, a public API or a library |
 | 🌱 | Community & DevRel | `seat-community` | `community` | director | CONTRIBUTING, issues and discussions, release notes | CEO | it is open source with outside contributors |
-| 🎮 | Game designer | `seat-game-design` | `game-design` | director | the game design doc (loop, mechanics, economy, rulings) | CEO | it is a game |
+| 🎮 | Game designer | `seat-game-design` | `game-design` | director | the game design doc (loop, mechanics, economy, game rulings) | CEO | it is a game |
 | 🌐 | Localization | `seat-i18n` | `i18n` | implementation | locale files and the string catalogue | Product | the product ships in more than one language |
 
-**Composed seats.** Setup and re-evaluation can also **merge** seats for a small project (one
-session holds several roles: Growth = Sales + SEO + Social; Product & Design; Money = Funding +
-Payments; Legal & Compliance = Payments + Compliance; Engineering & Platform), **split** a seat for
-a large one (Frontend → Web + Mobile; Sales → Sales + Marketing), or **create** a seat no catalogue
-row covers (written into the project's `.claude/skills/seat-<team>/` from the seat contract). Check seats
-(Bar Raiser, Scope Trimmer, User, Security) are never merged into a seat whose work they check.
+**Other seats**, in the two coordination rows above, means every seat except the Chief of Staff and
+the Scope Trimmer; a merged, split or derived seat counts as one. The planner and the re-evaluation
+apply the same thresholds.
+
+**Composed seats.** Setup and re-evaluation compose seats in exactly three ways (the scripts hold the
+lists: `MERGES` and `DERIVED_ROLES` in `scripts/teamlib.py`, the splits in `scripts/plan.py`):
+- **Merge**, for a small project: one session holds several roles. 📈 Growth (Sales & Marketing, SEO &
+  Publicity, Social Media Manager); 🎨 Product & Design; 🔧 Engineering & Platform (not past 2,000 code
+  files); 🛡️ Quality (Testing, Bar Raiser); 💰 Money (Funding, Payments); 📜 Legal & Compliance
+  (Payments, Compliance); 🧮 Data & ML; 🫱 Customer (Customer Success, Community & DevRel). A merge needs
+  two members present, and two merges never share a member. A check seat joins only a check merge
+  (Quality, formed at setup); a merge proposed after setup never holds the CEO or the Bar Raiser.
+- **Split**: the Frontend engineer becomes one seat per UI app (up to four) when the repo has two or
+  more UI apps, in the full option or on a large project. Each split seat names its siblings.
+- **Derive**: a role no catalogue row covers (🔌 Hardware & firmware engineer, ⛓️ Smart-contract
+  engineer, 🖱️ Desktop engineer, 🧷 Browser-extension engineer) is copied from a base rulebook into the
+  project's `.claude/skills/seat-<team>/` and authored from the seat contract before anyone acts under it.
 
 **Starter sets.**
 - **Solo build** (a tool, a library, a prototype): CEO, Engineering, Testing, Bar Raiser.

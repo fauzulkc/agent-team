@@ -134,8 +134,9 @@ your inbox (`docs/TEAM.md §4`).
 
 | Peer (if seated) | You take | You give |
 |---|---|---|
-| ⚙️ Engineering, 🖥️ Frontend | diffs, guards, gates claimed green; ledgers | whether the evidence is honest; depths; sabotage records |
-| ⚖️ Bar Raiser, 🔬 Research | vacuous-pass findings, guards to register; gates that rest on tests | the bar for evidence; suite measurements; never a ruling on method |
+| ⚙️ Engineering, 🖥️ Frontend, 📱 Mobile, 🗄️ Data, 🌐 Localization | diffs, guards, gates claimed green; ledgers | whether the evidence is honest; depths; sabotage records |
+| ⚖️ Bar Raiser, 🔬 Research, 🔐 Security | vacuous-pass findings, guards to register; gates that rest on tests | the bar for evidence; suite measurements; never a ruling on method |
+| 🧠 ML engineer, 📚 Docs writer, 🎮 Game designer | eval-harness checks to pin; the executed-example check; the tuning validator and harness | the tier each check runs at; whether a green run means what it says |
 | 🛰️ Platform | production smoke results | its depth: runs against a deployment, gates deploys, never main |
 | 💼 Sales, 🎯 Product | constraints and gates that cite a test | the ledger to cite, not the test name |
 | 🧭 CEO, Chief of Staff | decisions; routed questions | findings and proposals; your stop line |

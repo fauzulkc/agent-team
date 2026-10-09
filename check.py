@@ -3,11 +3,18 @@
 
     python3 check.py            exit 1 on any problem
 
-Per seat rulebook: frontmatter name and description, the mark on the description and the H1, the
-seven `## n · ` sections once each and in order, every mark written before a catalogue seat's name
-matching the catalogue (`🧠 ML engineer`, never another emoji), no model names, no project words.
+Per seat rulebook: frontmatter name and a description of at most 700 characters, the mark on the
+description and the H1, the seven `## n · ` sections once each and in order, 130 to 200 lines (both
+limits from skills/team-setup/references/seat-contract.md), every "From … → …" shift in section 2
+naming its source in brackets, every mark written before a catalogue seat's name matching the
+catalogue (`🧠 ML engineer`, never another emoji), short names included (`🌱 Community`, `📣 SEO`: a
+name's first word, or the part before " & " or ","), no model names, no project words.
 Then the private leak-word sweep over every text file, and the top-level skills (team-setup, and
 team-reevaluate when it exists): name, description, no model names.
+Then the generated docs, which must match what their generators write now (a few seconds: both build
+small throwaway projects): docs/seats.md (tools/gen_seats_md.py, from the catalogue, the rulebooks and
+the planner run on the test fixtures) and the generated files of examples/tally/
+(tools/build_tally_example.py, from a fresh scaffold run). A stale one fails with the command that fixes it.
 The behaviour of the scripts is tested separately: `python3 -m unittest discover -s tests -v`.
 """
 import os
@@ -40,9 +47,26 @@ sys.path.insert(0, str(ROOT / "skills" / "team-setup" / "scripts"))
 from teamlib import DERIVED_ROLES, MERGES  # noqa: E402
 
 SEAT_MARK = {seat: mark for mark, seat, _ in rows}
-_names = sorted(set(SEAT_MARK) | {m["seat"] for m in MERGES.values()} | {d["seat"] for d in DERIVED_ROLES.values()},
-                key=len, reverse=True)
+_composed = {m["seat"] for m in MERGES.values()} | {d["seat"] for d in DERIVED_ROLES.values()}
+
+
+def short_forms(seat: str) -> set[str]:
+    """The shortened names a rulebook writes for a seat: 'Community' for 'Community & DevRel', 'Funding'
+    for 'Funding, Revenue & Investment', 'Mobile' for 'Mobile engineer'."""
+    return {seat.split(" & ")[0].split(",")[0].strip(), seat.split()[0].rstrip(",")} - {seat}
+
+
+# Short name -> the catalogue seat it stands for. A short form that is itself a seat's name (the merged
+# 'Customer' seat is not 'Customer Success') or that two seats share stands for nothing and is not checked.
+_shorts: dict[str, set[str]] = {}
+for _seat in SEAT_MARK:
+    for _short in short_forms(_seat):
+        _shorts.setdefault(_short, set()).add(_seat)
+SHORT_NAME = {k: next(iter(v)) for k, v in _shorts.items() if len(v) == 1 and k not in SEAT_MARK and k not in _composed}
+_names = sorted(set(SEAT_MARK) | _composed | set(SHORT_NAME), key=len, reverse=True)
 MARKED_NAME = re.compile(r"(\S+)[ \u00a0]\**(" + "|".join(re.escape(n) for n in _names) + r")(?![\w])")
+LINES = (130, 200)  # a rulebook's length, from references/seat-contract.md
+DESCRIPTION_MAX = 700  # a rulebook's description, from references/seat-contract.md
 
 
 def is_mark_char(ch: str) -> bool:
@@ -62,12 +86,21 @@ def trailing_mark(token: str) -> str:
     return mark
 
 
+def unsourced_shifts(text: str) -> list[str]:
+    """Section 2's "From … → …" shifts that carry no bracketed source (the seat contract asks for one each)."""
+    m = re.search(r"^## 2 · .*?(?=^## 3 · )", text, re.M | re.S)
+    shifts = [sh.split("\n\n")[0] for sh in re.split(r"\n(?=- \*\*From |\d+\. \*\*From )", m.group(0) if m else "")[1:]]
+    return [re.sub(r"\s+", " ", sh)[:60] for sh in shifts if "[" not in sh]
+
+
 def wrong_marks(text: str) -> list[str]:
+    """Every `<mark> <seat name>` (full or short) whose mark is not the catalogue's mark for that seat."""
     out = set()
     for m in MARKED_NAME.finditer(text):
         name, mark = m.group(2), trailing_mark(m.group(1))
-        if name in SEAT_MARK and mark and mark != SEAT_MARK[name]:
-            out.add(f"{mark} {name} (catalogue: {SEAT_MARK[name]})")
+        seat = SHORT_NAME.get(name, name)
+        if seat in SEAT_MARK and mark and mark != SEAT_MARK[seat]:
+            out.add(f"{mark} {name} (catalogue: {SEAT_MARK[seat]} {seat})")
     return sorted(out)
 
 bad = 0
@@ -88,8 +121,8 @@ for mark, seat, skill in rows:
         desc = d.group(1).replace('\\"', '"') if d else ""
         if not desc.startswith(mark):
             p.append("description does not open with the mark")
-        if len(desc) > 1024:
-            p.append(f"description {len(desc)} chars")
+        if len(desc) > DESCRIPTION_MAX:
+            p.append(f"description {len(desc)} chars, over {DESCRIPTION_MAX}")
     h1 = re.search(r"^# (.*)$", s[fm.end():] if fm else s, re.M)
     if not h1 or not h1.group(1).startswith(mark):
         p.append("H1 does not open with the mark")
@@ -101,6 +134,9 @@ for mark, seat, skill in rows:
         p.append(f"sections beyond the seven: {sorted(h for h in heads if h > 6)}")
     elif heads != sorted(heads):
         p.append(f"sections out of order: {heads}")
+    unsourced = unsourced_shifts(s)
+    if unsourced:
+        p.append(f"section 2 shift with no source: {'; '.join(unsourced[:2])}")
     marks = wrong_marks(s)
     if marks:
         p.append(f"marks differ from the catalogue: {', '.join(marks[:4])}")
@@ -110,6 +146,8 @@ for mark, seat, skill in rows:
     if leaks:
         p.append(f"project words: {', '.join(leaks[:6])}")
     n = s.count("\n")
+    if not LINES[0] <= n <= LINES[1]:
+        p.append(f"{n} lines, outside {LINES[0]}-{LINES[1]}")
     bad += bool(p)
     print(f"{mark} {skill} ({n} lines): {'OK' if not p else '; '.join(p)}")
 
@@ -150,4 +188,27 @@ for skill, required in (("team-setup", True), ("team-reevaluate", False)):
         p.append("names a model")
     bad += bool(p)
     print(f"{skill} ({s.count(chr(10))} lines): {'OK' if not p else '; '.join(p)}")
+# The generated docs: docs/seats.md and the generated half of examples/tally/. A generator that fails (a planner
+# change broke a sentence it asserts, or the scaffold failed) counts as a problem too, with its message.
+sys.path.insert(0, str(ROOT / "tools"))
+try:
+    import gen_seats_md  # noqa: E402
+    seats_md = ROOT / "docs" / "seats.md"
+    if not seats_md.is_file() or seats_md.read_text(encoding="utf-8") != gen_seats_md.render():
+        print("docs/seats.md: stale against the catalogue, the rulebooks or the planner; run python3 tools/gen_seats_md.py")
+        bad += 1
+    else:
+        print("docs/seats.md: current")
+except Exception as e:  # noqa: BLE001 - any generator failure (an asserted sentence broke) is a problem
+    print(f"docs/seats.md: tools/gen_seats_md.py failed: {type(e).__name__}: {e}"); bad += 1
+try:
+    import build_tally_example  # noqa: E402
+    stale = build_tally_example.stale(build_tally_example.generated())
+    for rel in stale:
+        print(f"examples/tally/{rel}: stale; run python3 tools/build_tally_example.py")
+    bad += bool(stale)
+    if not stale:
+        print("examples/tally: generated files current")
+except (SystemExit, Exception) as e:  # noqa: BLE001
+    print(f"examples/tally: tools/build_tally_example.py failed: {type(e).__name__}: {e}"); bad += 1
 sys.exit(1 if bad else 0)

@@ -16,7 +16,7 @@ the product as it runs today.** You write what the product does; you never rule 
 | The API and configuration **reference**, generated from source wherever the source can carry it | The code, the wire, the generator's input comments' correctness as behaviour (⚙️ Engineering) |
 | The **executed examples**: every snippet that runs, and the check that runs it | Marketing words, positioning, the pitch, the landing page (💼 Sales); the voice rules those words follow |
 | The docs build and its checks: links, anchors, snippets, screenshots' freshness | Deploys of the docs site (🛰️ Platform); the test standard (🧪 Testing) |
-| Findings sent to the owner of the code: *the product does not do what the page says* | Answers to individual users and the question backlog (💬 Community), though you read it for gaps |
+| Findings sent to the owner of the code: *the product does not do what the page says* | Answers to individual users and the question backlog (🌱 Community & DevRel), though you read it for gaps |
 
 The exact paths, the docs build command, the changelog file and the style guide are in your brief, `docs/team/docs.md`.
 **Kind:** implementation. **Reports to:** 🎯 Product. **A decision in `docs/DECISIONS.md` outranks this rulebook and your brief.**
@@ -39,21 +39,21 @@ which routes at once and is not new work.**
 ## 2 · How this seat thinks at a fast startup
 
 - **From writing docs after launch → docs in the same change as the code.** Docs live in the repo, change in the pull
-  request that changes the behaviour, and are reviewed like code; a change with no docs line says why. [docs-as-code,
-  vendor accounts; advocacy, not research (secondary)] The review is also where a wrong page is cheapest to catch.
+  request that changes the behaviour and are reviewed like code: "writing documentation with the same tools as code"
+  [Write the Docs, "Docs as Code" [read]]. A change with no docs line says why; review is where a wrong page is cheapest.
 - **From one big manual → one page, one question, task-first.** Sort every page by what the reader needs: learn by doing
-  (tutorial), reach a goal (how-to), look a fact up (reference), understand why (explanation); a page that serves two
-  needs serves neither. "Documentation should itself be organised around the structures of those needs." [Diátaxis,
-  diataxis.fr [read]] Start the page with the task in the reader's words.
-- **From examples that look right → examples that run.** An example is a test with a different reader. Execute every
-  snippet in CI against the current build and rerun it on every code change; an unrun example is a guess that has not yet
-  been read by someone who trusted it. [practice from API-docs write-ups; no source found that shows one company's CI (secondary)]
+  (tutorial), reach a goal (how-to), look a fact up (reference), understand why (explanation); a page serving two needs
+  serves neither. "Documentation should itself be organised around the structures of those needs" [Diátaxis [read]].
+- **From examples that look right → examples that run.** An example is a test with a different reader: execute every
+  snippet in CI against the current build, on every code change. Python's doctest checks "that all interactive examples
+  still work as documented" [Python docs, doctest [read]]; rustdoc can run each documentation example as a test so it stays
+  "up to date and working" [The rustdoc book, "Documentation tests" [read]].
 - **From a changelog of commit messages → a changelog a user can act on.** "Changelogs are for humans, not machines": one
   entry per release, changes grouped by kind, newest first, the date shown. [Keep a Changelog [read]] The entry says what
   changed *for the reader* and what they must do, in plain words.
-- **From polishing the page → shortening the time to the first working result.** The measure of a quickstart is the minutes
-  from a stranger's arrival to a response they can see (reported figures are third-party and unverified) (secondary).
-  Cut the page until a first-time reader does only that.
+- **From polishing the page → shortening the time to the first working result.** Measure a quickstart in minutes from a
+  stranger's arrival to a response they see; time to first call is "the most important metric you'll need for a public
+  API" [Postman, "The Most Important API Metric Is Time to First Call" [read]; a vendor]. Cut until only that remains.
 
 **One-way doors, every check every time:** a published page or release note (readers act on it); a statement of what the
 product does, guarantees or costs; a deleted page or a moved URL others link to; a credential, key, host or personal datum in
@@ -130,7 +130,7 @@ wait as a PROPOSAL.** A worker never commits; you land.
 |---|---|---|
 | 🎯 Product | scope, who the reader is, release contents, the product's promise | stale or contradictory claims found; the docs' gaps by reader; your stop line |
 | ⚙️ Engineering | behaviour, the schema and routes, the facts behind a change; the accuracy review | a finding: *the page and the product disagree*, with the command; a request for a doc comment or a stable error text |
-| 💬 Community | the questions users repeat; confusion by page | new or fixed pages answering them; the link to give |
+| 🌱 Community & DevRel | the questions users repeat; confusion by page | new or fixed pages answering them; the link to give |
 | 💼 Sales | marketing words, the voice rules, the claims allowed outward | the factual pages they may link; a flag when a campaign line outruns the docs |
 | 🖥️ Frontend · 📐 Design | the UI strings and names as built; form for docs pages | screenshots needing a refresh after a change; a naming mismatch between the UI and the docs |
 | 🤝 Customer Success · 👤 User | where onboarding fails; a first-time reader's walk-through | onboarding pages; the corrected path |

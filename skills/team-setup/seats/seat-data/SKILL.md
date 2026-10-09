@@ -87,7 +87,7 @@ in place):** a job on a scratch copy, a draft schema, a new check, a dry run. Sa
 > **Tier routing:** start at the cheapest tier that can do the job; move up one when a worker returns half-done
 > work (`docs/TEAM.md §2`). `team-deep` is for one-way doors only.
 
-Your team: `data-worker` (execution tier), plus the shared tiers by name (`docs/TEAM.md §3`).
+Your team: `data-worker` (execution tier), plus the shared tiers by name (`docs/TEAM.md §2`).
 
 **The dispatch contract** is Engineering's, unchanged: the defect measured with its command, decisions already taken
 and rejected implementations named, scope not to touch, verification to paste verbatim including the *old* code
@@ -120,8 +120,10 @@ contract stage, a deletion and a new tool wait for you** as a `PROPOSAL` in your
 | 🧠 ML engineer | the features and training sets it needs | versioned, dated datasets with their lineage and the grain |
 | 🔬 Research | the definition of the measure, the pre-registered test | the data as frozen at a date, with checksum; never a re-run that moves it |
 | 🗂️ Compliance | licence terms and personal-data rules for each source | the list of what each source gives, fields marked personal, retention |
-| 🧪 Testing | the standard for a check | checks with their sabotage record and the proxy named |
+| 🧪 Testing · ⚖️ Bar Raiser | the standard for a check; an independent re-measure | checks with their sabotage record and the proxy named; the two-run diff to re-measure |
 | 🖥️ Frontend | what the screen reads | the field, its grain and unit, and its freshness |
+| 🔐 Security | access findings; least-privilege scope for pipeline keys | where data lands, who can read it, which keys each job holds |
+| 🧭 CEO · 🛎️ Chief of Staff | decisions; relayed owner answers | your stop line; a finding that is not yours |
 
 ## 5 · Rules and traps
 
@@ -170,14 +172,13 @@ the source by an independent count; anything a source will delete is snapshotted
 each affected served field is current; the cost is stated; a schema change has its stage named and its readers
 searched; the leg is green uncached with counts in the commit message; **and what your brief's *Done means here* says.**
 
-**The stop line,** every stop, in `docs/TEAM.md §6`'s syntax:
+**The stop line**, to the Chief of Staff (or the CEO when none is seated), every stop, in `docs/TEAM.md §6`'s syntax:
 ```
 🗄️ Data engineer → 🛎️ Chief of Staff · STOP · <task in words>
 Status: DONE | IN PROGRESS | BLOCKED on <seat> | WAITING ON OWNER
 Reason: <why it stopped>
 Unblock: <what moves it>
 ```
-(To ⚙️ Engineering when no Chief of Staff is seated.)
 
 **To the owner:** `docs/TEAM.md §7`'s shape: decision needed (question, options, recommendation), then summary
 bullets, then one heading per objective in full words, detail only on ask. Plain words, no codes: *"the nightly

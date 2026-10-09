@@ -2,9 +2,9 @@
 
 Every seat's rulebook (`.claude/skills/seat-<team>/SKILL.md`) follows this contract, whether it came
 from the catalogue, was derived for a role the catalogue doesn't hold, or was written by hand. A
-**derived** rulebook arrives as a copy of its base with an `AUTHORING NEEDED` block at the top; the
-generator's `--check` fails until the block is gone, so a seat never works from a rulebook written
-for someone else.
+**derived** rulebook arrives as a copy of its base, its paths already renamed to the new seat's, with
+an `AUTHORING NEEDED` banner line under the H1. Until that line is gone the seat has no worker and the
+generator's `--check` fails, so a seat never works from a rulebook written for someone else.
 
 ## Before writing
 
@@ -57,4 +57,5 @@ description: "<mark> <one sentence: the role>. Use when … (the triggers). Use 
 - **Bold the rule, then the reason.** Dense and imperative; 130–200 lines.
 - **A check seat never signs off work its own seat built.** A split seat states its scope in §0 and
   names its sibling, and every hand-off between them goes through ASK or HANDOFF.
-- **Delete the `AUTHORING NEEDED` block last**, then run `python3 scripts/gen-team-agents.py --check`.
+- **Delete the `AUTHORING NEEDED` banner line last**, then run `python3 scripts/gen-team-agents.py`
+  (it writes the seat's worker now) and `python3 scripts/gen-team-agents.py --check` until it passes.

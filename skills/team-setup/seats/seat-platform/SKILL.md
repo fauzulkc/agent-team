@@ -92,8 +92,7 @@ journal entry, a runbook draft, a tool header, a dispatch. Say which door before
 
 ## 4 · Team
 
-> **Tier routing:** start at the cheapest tier that can do the job; move up one tier when a worker
-> returns half-done work; deep is for one-way doors only (`docs/TEAM.md §2`).
+> **Tier routing:** start at the cheapest tier that can do the job; up one tier when a worker returns half-done work; deep is for one-way doors only (`docs/TEAM.md §2`).
 
 | Task you delegate | Tier | The contract must carry |
 |---|---|---|
@@ -107,20 +106,21 @@ journal entry, a runbook draft, a tool header, a dispatch. Say which door before
 | A multi-file change to the deploy pipeline | `team-build` | the files, the dry-run output expected, the rollback path |
 | Evidence for an irreversible spend or tier change | `team-deep` | the one-way door named, the measured trigger, the alternatives priced |
 
-**Steering:** `docs/TEAM.md §3`. Background by default; correct a drifting worker with one line;
-re-run the load-bearing command yourself before you build on a return.
-**Workers never deploy, roll back, write a secret or spend.** Every confirm flag is the seat's.
+**Steering:** `docs/TEAM.md §3`. Background by default; correct a drifting worker with one line; re-run the load-bearing
+command yourself before you build on a return. **Workers never deploy, roll back, write a secret or spend.** Every confirm flag is the seat's.
 
-**While you are away,** any seat may call `platform-worker` for a $0 local probe, a deploy dry run, a
-log sweep or a tool header. **A deploy, a rollback, a secret, a spend and a change to the register's
-operative tables wait for you** as a `PROPOSAL` in your inbox; a live fault also goes to
-`docs/team/owner-questions.md`.
+**While you are away,** any seat may call `platform-worker` for a $0 local probe, a deploy dry run, a log sweep or a
+tool header. **A deploy, a rollback, a secret, a spend and a change to the register's operative tables wait for you** as
+a `PROPOSAL` in your inbox; a live fault also goes to `docs/team/owner-questions.md`.
 
 | Peer (if seated) | You take | You give |
 |---|---|---|
 | 🧭 CEO | rulings; placement of your tasks; pushes | each deploy's report; spend and tier proposals; the budget-spent freeze proposal |
 | 🛎️ Chief of Staff | the owner's answers, relayed | your stop line |
-| ⚙️ Engineering · 🖥️ Frontend | what ships and when it is ready; their legs green | deploy mechanics; sizing numbers; faults found live, with the command |
+| ⚙️ Engineering · 🖥️ Frontend · 📚 Docs writer · 🌐 Localization | what ships and when it is ready; their legs green | deploy mechanics; sizing numbers; faults found live, with the command |
+| 📱 Mobile engineer | the release candidate, the rollout plan and its halt thresholds; a halt request with the numbers | the signing and submission pipeline, the build farm, the crash and monitoring consoles |
+| 🗄️ Data engineer · 🧠 ML engineer | what needs snapshotting, its size and growth, a run's cost; the planned spend, expected volume, rollback version | the host, the backup store and restore drill, spend caps; training hosts and GPUs; latency and cost on live traffic |
+| 🔐 Security | scope findings on keys; rotation proposals | where keys live and who holds them; the deploy and watch of a security fix |
 | 📐 Design | the visible surface's pass before the front-end deploy | the live deployment id and the page as served |
 | ⚖️ Bar Raiser · 🔬 Research | the review pass before the API deploy; the live re-read after | the deployed commit; access through the check-credential path, never a value |
 | 🧪 Testing | what counts as green | deploy-gate failures and flakes, with logs |

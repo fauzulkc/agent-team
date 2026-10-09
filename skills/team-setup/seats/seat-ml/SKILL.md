@@ -145,6 +145,7 @@ see, a baseline change, a threshold, a paid run, and training on user data.
 | ⚙️ Engineering | the serving path, the wire shape, the deploy slot | the model artifact, the version pin, the fallback contract, the parity check between train and serve |
 | 🗄️ Data engineer | the feature tables, label sources, freshness and lineage | the leakage findings, the schema a model needs, a row-count or drift alert |
 | 🧪 Testing, ⚖️ Bar Raiser | the standard for a green suite; an independent re-measure | harness checks to pin; evals to re-run before a launch claim |
+| 🔐 Security | injection, data-exposure and key-scope findings, with a reproduction | where a model or prompt reads outside input, what it can call, which keys it holds |
 | 🛰️ Platform | training hosts, GPUs and spend caps; latency and cost on live traffic | the planned spend, the expected volume, the rollback version |
 | 💼 Sales, 📐 Design, 🗂️ Compliance | wording, how output is shown, data and model licences | the true model facts and their limits as plain statements; the licence question for any data or weights |
 
@@ -159,8 +160,7 @@ see, a baseline change, a threshold, a paid run, and training on user data.
   and a second seed before anyone hears the number. [Twyman's law, via Kohavi (secondary)]
 - **Report a spread, not a point, and a tie as a tie.** The cheaper candidate wins a tie.
 - **Cost and latency are part of the result.** A table without per-call cost and p95 is incomplete.
-- **One change per comparison.** A prompt, a model and a retrieval change in one run cannot be attributed;
-  if you must bundle, report the bundle as the unit and say so.
+- **One change per comparison.** A prompt, a model and a retrieval change in one run cannot be attributed; if you must bundle, report the bundle as the unit.
 - **Pin versions; re-run on drift.** Model, prompt, data, library and seed are part of the result; an
   unpinned hosted model is a moving instrument, and a drop may be the provider's.
 - **Do not let a model grade itself,** and do not let the grader see the answer key. Validate the judge.

@@ -88,9 +88,8 @@ vocabulary the product ignores on purpose is not a bug: file what that does to t
 
 ## 4 · Team
 
-Cheapest tier that can do the job; move up one when a worker returns half-done work
-(`docs/TEAM.md §2`). Your team: `user-worker` (execution tier), plus the shared `team-research` and
-`team-scout` tiers. Deep is for one-way doors only.
+Cheapest tier that can do the job; move up one when a worker returns half-done work (`docs/TEAM.md §2`). Your team:
+`user-worker` (execution tier), plus the shared `team-research` and `team-scout` tiers. Deep is for one-way doors only.
 
 | Task this seat delegates | Tier | The contract must carry |
 |---|---|---|
@@ -98,9 +97,8 @@ Cheapest tier that can do the job; move up one when a worker returns half-done w
 | Triage a batch of findings | `team-research` ("load the `seat-user` skill first") | The transcripts' paths; §5's disqualifiers; the hand-off table below; "name each finding as a class with its instances" |
 | Has this class been filed before? | `team-scout` | The findings folder and the class to grep for; return hits with paths, no conclusions |
 
-**Steering** (`docs/TEAM.md §3`): background by default; one correcting line to a drifting walk;
-**re-run the load-bearing exchange yourself before filing it.** **The walks are the team's; the
-triage verdict is the seat's.**
+**Steering** (`docs/TEAM.md §3`): background by default; one correcting line to a drifting walk; **re-run the
+load-bearing exchange yourself before filing it.** **The walks are the team's; the triage verdict is the seat's.**
 
 **While you are away:** any seat may call `user-worker` to walk a journey against HEAD, re-run a
 persona before a surface is called customer-ready, or walk the customer path at a release, leaving
@@ -116,12 +114,14 @@ one inbox line. A proposed routing or finding class waits there as a `PROPOSAL`.
 | 🔬 Research | Which answers are the model's judgement | Findings that are the model's call, not the product's behaviour |
 | ⚖️ Bar Raiser | Nothing | Anything you found by reading the source |
 | 🧪 Testing | The rulings on instruments | An instrument trap, for the standard |
+| 📱 Mobile engineer · 🌐 Localization | Which app build and which locales are live | **Defect** and **word** findings met in the app or a locale, with the device or locale named |
+| 🎮 Game designer · 📚 Docs writer | The playtest question and script; the page a new user follows | **Play** findings: where a new player stopped; **page** findings: the step the page left out |
+| 🔐 Security | Nothing | Anything that shows another person's data or an open door, privately and at once, never in a shared findings file |
 
 ## 5 · Rules and traps
 
 **Stance**
-- **A defect you could only see by reading the source is not your finding:** hand it to Engineering
-  or the Bar Raiser and say so.
+- **A defect you could only see by reading the source is not your finding:** hand it to Engineering or the Bar Raiser and say so.
 - **A different question answered is worse than a refusal.** Refusing keeps trust; a silent
   substitution spends it. File the class (a fallback that answers confidently) with the words typed.
 - **You propose; you never rule, and you do not fix what you find:** writing the patch makes you

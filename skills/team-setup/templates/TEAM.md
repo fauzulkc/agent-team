@@ -1,13 +1,16 @@
 # The team: who sits where, and how seats work together
 
 **Internal working instrument for {{PROJECT}}.** Set up {{DATE}} with `team-setup`. Each seat's
-rulebook is a global skill (`seat-<role>`); each seat's project facts are in `docs/team/<team>.md`;
+rulebook is copied into this project at `.claude/skills/seat-<team>/` (from the catalogue, composed
+for a merged seat, or written for a new role); each seat's project facts are in `docs/team/<team>.md`;
 this file holds what every seat shares, once, so no rulebook carries a copy that drifts.
 **A decision in [DECISIONS.md](DECISIONS.md) outranks everything here and every seat's rulebook.**
 
 **The roster table below is load-bearing.** `python3 scripts/gen-team-agents.py` reads it and
-generates every seat's worker in `.claude/agents/`. Add a seat by adding a row (from the catalogue
-in the `team-setup` skill) and running the generator; never hand-edit a generated agent file.
+generates every seat's worker in `.claude/agents/`. **Change the team only through the
+`team-reevaluate` skill** ("re-evaluate the team", or "add Sales to the team"): it copies the
+rulebook, writes the brief and records the owner's words. Never add or remove a roster row by hand,
+and never hand-edit a generated agent file.
 
 ---
 
@@ -23,7 +26,9 @@ in the `team-setup` skill) and running the generator; never hand-edit a generate
 mark and name (`⚙️ Engineering`). A worker signs as its seat's team (`⚙️ Engineering team`).
 
 **Open a seat** in a new session named after it, with its skill as the first message:
-`/seat-engineering catch up and work your inbox`. A session opened before a rulebook changed holds
+`/seat-engineering catch up and work your inbox`. The owner keeps the CEO and the Chief of Staff
+open (the CEO alone when no Chief of Staff is seated) and opens every other seat when its work comes
+up; a seat not open is covered by its team (§4). A session opened before a rulebook changed holds
 the old one: reopen it, or send the command again.
 
 ---
@@ -89,8 +94,9 @@ and the ruling, and opens the log only when a point needs it.
    then message it). A seat's director, or the seat that governs the question, is always the first
    source of what that seat knows.
 2. **The seat's team, when the seat is unavailable** (not open, or no answer by your next stop).
-   Spawn `<team>-worker`; it preloads that seat's rulebook. Then add one line to that seat's inbox
-   (§5): who called, what for, the result, the run log's path.
+   Spawn `<team>-worker`; it preloads that seat's rulebook. Then one line goes into that seat's
+   inbox in §5's format, typed `RESULT` or `PROPOSAL`, the run log as its evidence:
+   `<date> · 📐 Design team (called by ⚙️ Engineering) → 📐 Design · RESULT · <the task and its result> · <run log path>`.
 3. **Hold in `docs/team/owner-questions.md`** only what a team may not do for its seat:
    - take a decision or a ruling;
    - change the operative text of that seat's register;
@@ -195,12 +201,15 @@ anything outward ({{OWNER_ACTS}}); any spend; prices; legal and identity acts (s
 contracts, terms); anything irreversible (deleting data, a migration with no rollback, rewriting
 history); a secret only the owner holds (ask them to set it by name, never paste a value); a real
 fork where the evidence cuts against a preference the owner stated; new scope (a goal, a milestone
-beyond the active one, a new seat); taste the owner reserved; pushes, per §6.
+beyond the active one); taste the owner reserved; pushes, per §6. **A new seat is never asked on its
+own:** note it, with its evidence, under *For the next team re-evaluation* in
+`docs/team/owner-questions.md`; the re-evaluation puts every seat change to the owner in one question.
 
 **Do not ask the owner** (decide, then report): how to build what is already in scope; which
 worker, tier or how many; routing between seats; free, reversible probes and experiments; fixing
 the team's own docs; commits; ordering inside the active milestone; recording a decision the owner
-already made; reviews and checks.
+already made; reviews and checks; measuring how the team works; resetting the scan baseline after a
+team change the owner approved.
 
 **Ask once.** Search earlier answers first; record the owner's answer verbatim with where it was
 given; tell every seat it touches; never re-ask. An open ask is worded as a question, never as a fact.

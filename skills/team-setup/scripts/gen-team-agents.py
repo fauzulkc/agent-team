@@ -12,9 +12,13 @@
 
 The roster is the table between `<!-- roster:start -->` and `<!-- roster:end -->`
 in docs/TEAM.md. Columns: Mark | Seat | Skill | Team | Kind | Register | Reports to.
+Cells split on unescaped pipes (`\\|` stays inside a cell); a table row between the
+markers that does not parse to seven cells is a problem, named, and fails --check.
 Each row yields `.claude/agents/<team>-worker.md` at the execution tier, with the
-seat's skill preloaded. Six shared tier agents are added: team-quick, -scout,
--check, -build, -research and -deep. A model alias follows model updates without an edit, a
+seat's skill preloaded, except a seat whose rulebook still carries AUTHORING NEEDED:
+it gets no worker until the rulebook is authored, an existing one is removed, and
+--check fails naming it. Marks are compared without the U+FE0F variation selector.
+Six shared tier agents are added: team-quick, -scout, -check, -build, -research and -deep. A model alias follows model updates without an edit, a
 pinned id does not;
 effort cannot be set per spawn, so it is fixed here per tier. Standard library only.
 """
@@ -65,7 +69,7 @@ seat's project facts, decisions and traps are in `docs/team/{team}.md`. Read bot
    propose any of these: mark it `PROPOSAL` in your summary and in the inbox line.
 6. **When another seat called you** because {seat} is away, append one line to
    `scratchpad/team/inbox/{team}.md`:
-   `<date> · <caller's mark and seat> · <task> · <result or PROPOSAL> · <run log path>`.
+   `<date> · {mark} {seat} team (called by <caller's mark and seat>) → {mark} {seat} · <RESULT or PROPOSAL> · <the task and its result> · <run log path>`.
 7. **Stop on surprise.** A failed precondition, a peer editing the same file, a rule that conflicts
    with the contract, or a service that is down: stop and report.
    Never work around it.
@@ -211,14 +215,38 @@ Never committed (scratchpad/ is in .gitignore). Nothing here is a source of trut
 """
 
 
-def parse_roster(text: str) -> list[dict[str, str]]:
+CELL_SPLIT = re.compile(r"(?<!\\)\|")
+
+
+def table_cells(line: str) -> list[str] | None:
+    """The stripped cells of one table line, split on unescaped pipes. None for a line that is not a
+    table row, the header row, or the separator row."""
+    body = line.strip()
+    if not body.startswith("|"):
+        return None
+    body = body[1:]
+    if body.endswith("|") and not body.endswith("\\|"):
+        body = body[:-1]
+    cells = [c.strip() for c in CELL_SPLIT.split(body)]
+    if cells[0] == "Mark" or all(set(c) <= set("-: ") for c in cells):
+        return None
+    return cells
+
+
+def parse_roster(text: str, problems: list[str] | None = None) -> list[dict[str, str]]:
+    """The roster rows. A table row that does not parse to seven cells is appended to `problems`."""
     match = re.search(r"<!-- roster:start -->(.*?)<!-- roster:end -->", text, re.S)
     if not match:
         sys.exit("gen-team-agents: no roster markers in docs/TEAM.md")
     rows = []
     for line in match.group(1).strip().splitlines():
-        cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) != 7 or cells[0] in ("Mark", "") or set(cells[0]) <= {"-"}:
+        cells = table_cells(line)
+        if cells is None:
+            continue
+        if len(cells) != 7 or cells[0] == "":
+            if problems is not None:
+                problems.append(f"roster row does not parse to seven cells ({len(cells)} found), so it has "
+                                f"no worker: {line.strip()}")
             continue
         mark, seat, skill, team, kind, register, reports_to = cells
         rows.append({
@@ -226,6 +254,16 @@ def parse_roster(text: str) -> list[dict[str, str]]:
             "kind": kind, "register": register, "reports_to": reports_to,
         })
     return rows
+
+
+def rulebook(row: dict[str, str]) -> Path | None:
+    """The seat's SKILL.md: the project's copy first, then the global skill folders."""
+    return next((d / row["skill"] / "SKILL.md" for d in SKILL_DIRS if (d / row["skill"] / "SKILL.md").is_file()), None)
+
+
+def unauthored(row: dict[str, str]) -> bool:
+    found = rulebook(row)
+    return found is not None and "AUTHORING NEEDED" in found.read_text(encoding="utf-8")
 
 
 def worker_file(row: dict[str, str]) -> str:
@@ -242,7 +280,8 @@ def worker_file(row: dict[str, str]) -> str:
 
 
 def expected_files(rows: list[dict[str, str]]) -> dict[Path, str]:
-    files = {AGENTS_DIR / f"{row['team']}-worker.md": worker_file(row) for row in rows}
+    """Every generated file; a seat whose rulebook awaits authoring gets no worker."""
+    files = {AGENTS_DIR / f"{row['team']}-worker.md": worker_file(row) for row in rows if not unauthored(row)}
     files[AGENTS_DIR / "team-research.md"] = RESEARCHER.format(generated=GENERATED, **TIERS["research"])
     files[AGENTS_DIR / "team-scout.md"] = SCOUT.format(generated=GENERATED, **TIERS["scout"])
     files[AGENTS_DIR / "team-quick.md"] = QUICK.format(generated=GENERATED, **TIERS["quick"])
@@ -255,17 +294,18 @@ def expected_files(rows: list[dict[str, str]]) -> dict[Path, str]:
 def validate(rows: list[dict[str, str]]) -> list[str]:
     problems = []
     for key in ("mark", "team", "skill"):
-        values = [row[key] for row in rows]
+        values = [row[key].replace("\ufe0f", "") if key == "mark" else row[key] for row in rows]
         duplicates = sorted({v for v in values if values.count(v) > 1})
         if duplicates:
             problems.append(f"duplicate {key}: {', '.join(duplicates)}")
     for row in rows:
-        found = [d / row["skill"] / "SKILL.md" for d in SKILL_DIRS if (d / row["skill"] / "SKILL.md").is_file()]
-        if not found:
+        found = rulebook(row)
+        if found is None:
             problems.append(f"{row['seat']}: skill {row['skill']} found in no skills folder (project or global)")
-        elif "AUTHORING NEEDED" in found[0].read_text(encoding="utf-8"):
-            problems.append(f"{row['seat']}: rulebook {found[0].relative_to(ROOT) if ROOT in found[0].parents else found[0]} "
-                            "still carries AUTHORING NEEDED: rewrite it for its role, then delete the block")
+        elif unauthored(row):
+            problems.append(f"{row['seat']}: rulebook {found.relative_to(ROOT) if ROOT in found.parents else found} "
+                            "still carries AUTHORING NEEDED, so it has no worker: rewrite it for its role, then "
+                            "delete the banner line")
     return problems
 
 
@@ -274,15 +314,18 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="exit 1 if a generated file is stale, missing or orphaned")
     args = parser.parse_args()
 
-    rows = parse_roster(TEAM_DOC.read_text(encoding="utf-8"))
-    problems = validate(rows)
+    problems: list[str] = []
+    rows = parse_roster(TEAM_DOC.read_text(encoding="utf-8"), problems)
+    problems += validate(rows)
     files = expected_files(rows)
+    held_back = {AGENTS_DIR / f"{row['team']}-worker.md" for row in rows if unauthored(row)}
 
     generated_on_disk = {
         p for p in AGENTS_DIR.glob("*.md")
         if GENERATED.split(" from ")[0] in p.read_text(encoding="utf-8")
     } if AGENTS_DIR.is_dir() else set()
-    orphans = sorted(generated_on_disk - set(files))
+    orphans = sorted(generated_on_disk - set(files) - held_back)
+    unauthored_on_disk = sorted(p for p in held_back if p.is_file())
 
     if args.check:
         stale = [p for p, body in files.items() if not p.is_file() or p.read_text(encoding="utf-8") != body]
@@ -290,6 +333,8 @@ def main() -> int:
             problems.append(f"stale or missing: {p.relative_to(ROOT)}")
         for p in orphans:
             problems.append(f"orphaned (no roster row): {p.relative_to(ROOT)}")
+        for p in unauthored_on_disk:
+            problems.append(f"worker for a rulebook that awaits authoring, to be removed: {p.relative_to(ROOT)}")
         for problem in problems:
             print(f"gen-team-agents: {problem}", file=sys.stderr)
         if not problems:
@@ -301,7 +346,7 @@ def main() -> int:
     AGENTS_DIR.mkdir(parents=True, exist_ok=True)
     for path, body in files.items():
         path.write_text(body, encoding="utf-8")
-    for path in orphans:
+    for path in orphans + unauthored_on_disk:
         path.unlink()
     for sub in ("inbox", "shared"):
         (SCRATCH / sub).mkdir(parents=True, exist_ok=True)
@@ -310,7 +355,9 @@ def main() -> int:
     readme = SCRATCH / "README.md"
     if not readme.exists():
         readme.write_text(SCRATCH_README, encoding="utf-8")
-    print(f"gen-team-agents: wrote {len(files)} agents for {len(rows)} seats; removed {len(orphans)} orphans")
+    print(f"gen-team-agents: wrote {len(files)} agents for {len(rows)} seats; removed {len(orphans)} orphans"
+          + (f"; no worker for {len(held_back)} seat(s) until their rulebooks are authored"
+             + (f" ({len(unauthored_on_disk)} removed)" if unauthored_on_disk else "") if held_back else ""))
     return 0
 
 
