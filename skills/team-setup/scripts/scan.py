@@ -119,9 +119,15 @@ def walk(root: Path) -> list[str]:
 MANIFESTS = {"package.json", "pyproject.toml", "go.mod", "Cargo.toml", "Gemfile", "pubspec.yaml", "composer.json"}
 
 
+WEB_UI = re.compile(r"^(react-dom|vue|svelte|@sveltejs/kit|next|nuxt|@angular/core|solid-js|astro|preact|@remix-run/react)$")
+MOBILE_UI = re.compile(r"^(react-native|expo|@capacitor/core|@ionic/react|@ionic/vue|nativescript)$")
+UI_APPS: list[str] = []  # folders whose package.json is a web UI app (not mobile), filled by deps_from_manifests
+
+
 def deps_from_manifests(root: Path, rels: list[str]) -> tuple[set[str], list[str]]:
     deps: set[str] = set()
     found: list[str] = []
+    UI_APPS.clear()
     for rel in rels:
         name = rel.rsplit("/", 1)[-1]
         if name not in MANIFESTS and not (name.startswith("requirements") and name.endswith(".txt")):
@@ -130,8 +136,12 @@ def deps_from_manifests(root: Path, rels: list[str]) -> tuple[set[str], list[str
         try:
             if name == "package.json":
                 j = json.loads(f.read_text(encoding="utf-8", errors="replace"))
+                own: set[str] = set()
                 for k in ("dependencies", "devDependencies", "peerDependencies"):
-                    deps |= {d.lower() for d in (j.get(k) or {})}
+                    own |= {d.lower() for d in (j.get(k) or {})}
+                deps |= own
+                if any(WEB_UI.match(d) for d in own) and not any(MOBILE_UI.match(d) for d in own):
+                    UI_APPS.append(rel.rsplit("/", 1)[0] if "/" in rel else ".")
                 found.append(rel)
             elif name in ("requirements.txt", "requirements-dev.txt") or (name.startswith("requirements") and name.endswith(".txt")):
                 for line in f.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -279,6 +289,7 @@ def scan(root: Path) -> dict:
         "scanned": datetime.date.today().isoformat(),
         "root": root.name,
         "size": {"files": len(paths), "code_files": len(code_files), "manifests": manifests[:10],
+                 "ui_apps": sorted(UI_APPS)[:8],
                  "contributors": len(authors), "commits": int(commits) if commits.isdigit() else 0,
                  "first_commit": first or None},
         "signals": dict(sorted(signals.items())),

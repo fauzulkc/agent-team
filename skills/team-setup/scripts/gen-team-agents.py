@@ -260,8 +260,12 @@ def validate(rows: list[dict[str, str]]) -> list[str]:
         if duplicates:
             problems.append(f"duplicate {key}: {', '.join(duplicates)}")
     for row in rows:
-        if not any((d / row["skill"] / "SKILL.md").is_file() for d in SKILL_DIRS):
+        found = [d / row["skill"] / "SKILL.md" for d in SKILL_DIRS if (d / row["skill"] / "SKILL.md").is_file()]
+        if not found:
             problems.append(f"{row['seat']}: skill {row['skill']} found in no skills folder (project or global)")
+        elif "AUTHORING NEEDED" in found[0].read_text(encoding="utf-8"):
+            problems.append(f"{row['seat']}: rulebook {found[0].relative_to(ROOT) if ROOT in found[0].parents else found[0]} "
+                            "still carries AUTHORING NEEDED: rewrite it for its role, then delete the block")
     return problems
 
 

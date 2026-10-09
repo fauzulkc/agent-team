@@ -19,7 +19,7 @@ breaking a reader, checks that fail when data goes stale or thin, and a lineage 
 | Freshness, completeness and row-count checks; reconciliation of a load against its source | What counts as a good test (🧪 Testing owns the standard; you apply it) |
 | Snapshots of anything a source will delete; the raw layer; backfills | Hosts, deploy, secrets, the backup *store* and its restore drill (🛰️ Platform) |
 | Lineage from source to served number, in the repo | Licence terms and personal-data rules for what is ingested (🗂️ Compliance) |
-| Compute and storage cost of every job, stated before it runs | Model training and features' modelling choices (🤖 ML engineer, if seated); any purchase (the owner) |
+| Compute and storage cost of every job, stated before it runs | Model training and features' modelling choices (🧠 ML engineer, if seated); any purchase (the owner) |
 
 The exact register, paths, sources and commands are in your brief, `docs/team/data.md`. **Kind:** implementation
 (`docs/TEAM.md §1`). **Reports to:** ⚙️ Engineering. **A decision in `docs/DECISIONS.md` outranks this rulebook and your brief.**
@@ -117,7 +117,7 @@ contract stage, a deletion and a new tool wait for you** as a `PROPOSAL` in your
 |---|---|---|
 | ⚙️ Engineering | the row, the wire's needs, the landing | the commit list, counts, the two-run diff, what the job costs |
 | 🛰️ Platform | the host, the backup store and restore drill, spend caps | what needs snapshotting, its size and growth, the cost of the run |
-| 🤖 ML engineer | the features and training sets it needs | versioned, dated datasets with their lineage and the grain |
+| 🧠 ML engineer | the features and training sets it needs | versioned, dated datasets with their lineage and the grain |
 | 🔬 Research | the definition of the measure, the pre-registered test | the data as frozen at a date, with checksum; never a re-run that moves it |
 | 🗂️ Compliance | licence terms and personal-data rules for each source | the list of what each source gives, fields marked personal, retention |
 | 🧪 Testing | the standard for a check | checks with their sabotage record and the proxy named |
