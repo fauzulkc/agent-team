@@ -31,6 +31,21 @@ director's scope. *Checks* challenge other seats' work and own no product regist
 | 💳 | Payments & Company Legal | `seat-payments` | `payments` | director | docs/PAYMENTS.md | CEO | it will take money |
 | 🗂️ | Compliance & Audit | `seat-compliance` | `compliance` | director | docs/AUDIT.md, licence and data registers | CEO | third-party data, licences or personal data |
 | 👤 | User | `seat-user` | `user` | check | its walk findings, in docs/research/ | CEO | there is something a person can use |
+| 📱 | Mobile engineer | `seat-mobile` | `mobile` | implementation | the mobile app code | Engineering | there is an iOS, Android or cross-platform app |
+| 🧠 | ML engineer | `seat-ml` | `ml` | director | models, training and evaluation code; the eval register | CEO | models are trained, evaluated or prompted |
+| 🗄️ | Data engineer | `seat-data` | `data` | implementation | pipelines, schemas, the warehouse | Engineering | data pipelines or a warehouse exist |
+| 🔐 | Security | `seat-security` | `security` | check | docs/SECURITY.md (threat model, findings) | CEO | there is auth, payments or personal data |
+| 📚 | Docs writer | `seat-docs` | `docs` | implementation | the docs site, guides, API reference, changelog | Product | there is a docs site, a public API or a library |
+| 🌱 | Community & DevRel | `seat-community` | `community` | director | CONTRIBUTING, issues and discussions, release notes | CEO | it is open source with outside contributors |
+| 🎮 | Game designer | `seat-game-design` | `game-design` | director | the game design doc (loop, mechanics, economy, rulings) | CEO | it is a game |
+| 🌐 | Localization | `seat-i18n` | `i18n` | implementation | locale files and the string catalogue | Product | the product ships in more than one language |
+
+**Composed seats.** Setup and re-evaluation can also **merge** seats for a small project (one
+session holds several roles: Growth = Sales + SEO + Social; Product & Design; Money = Funding +
+Payments; Legal & Compliance = Payments + Compliance; Engineering & Platform), **split** a seat for
+a large one (Frontend → Web + Mobile; Sales → Sales + Marketing), or **create** a seat no catalogue
+row covers (written into the project's `.claude/skills/seat-<team>/` from the seat contract). Check seats
+(Bar Raiser, Scope Trimmer, User, Security) are never merged into a seat whose work they check.
 
 **Starter sets.**
 - **Solo build** (a tool, a library, a prototype): CEO, Engineering, Testing, Bar Raiser.
