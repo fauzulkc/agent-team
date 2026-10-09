@@ -9,7 +9,7 @@ prompt-by-prompt story of seating a team on it and shipping one feature. What yo
 ## 1. Install (once per machine)
 
 ```
-/plugin install agent-team --marketplace <github-user>/agent-team
+/plugin install agent-team --marketplace fauzulkc/agent-team
 ```
 
 ## 2. Seat the team (once per project)

@@ -1,7 +1,7 @@
 # agent-team
 
 **Seat a team of AI roles in any project.** Say *"set up the team"* and Claude Code seats the roles
-your project needs (CEO, Engineering, Design, Sales and up to 21 more), each one a session with
+your project needs, from a catalogue of 21 (CEO, Engineering, Design, Sales and more), each one a session with
 its own rulebook, its own team of workers on the right model, and a clear line on what it decides
 and what it brings to you.
 
@@ -32,13 +32,13 @@ flowchart LR
 As a Claude Code plugin, from any session:
 
 ```
-/plugin install agent-team --marketplace <github-user>/agent-team
+/plugin install agent-team --marketplace fauzulkc/agent-team
 ```
 
 or from a shell:
 
 ```bash
-claude plugin marketplace add <github-user>/agent-team
+claude plugin marketplace add fauzulkc/agent-team
 claude plugin install agent-team@agent-team
 ```
 

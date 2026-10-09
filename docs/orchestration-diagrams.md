@@ -90,8 +90,8 @@ sequenceDiagram
 
     You->>CoS: "Freelancers keep asking for recurring invoices. Let's do it."
     CoS->>CEO: ASK · recurring invoices into the active milestone? (evidence: 9 support emails)
-    CEO->>CEO: two-way door, in scope → decides, records DEC-7
-    CEO->>PM: RULED · DEC-7: recurring invoices, this milestone
+    CEO->>CEO: two-way door, in scope → decides, records DEC-2
+    CEO->>PM: RULED · DEC-2: recurring invoices, this milestone
     PM->>ENG: HANDOFF · scope note: monthly and weekly only, no proration (appetite: one milestone)
     ENG->>W: contract: schema + scheduler, tests to paste, paths allowed, "no git"
     W-->>ENG: ≤10 lines: done, tests green (pasted), run log path
