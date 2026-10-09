@@ -1,0 +1,7 @@
+{
+  "name": "agent-team",
+  "owner": { "name": "Fauzul Chowdhury" },
+  "plugins": [
+    { "name": "agent-team", "source": "./", "description": "21 seat skills and team-setup: seat an AI team in any project." }
+  ]
+}

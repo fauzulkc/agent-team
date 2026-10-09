@@ -1,0 +1,8 @@
+{
+  "name": "agent-team",
+  "description": "A white-labeled AI team for any project: 21 seat skills (CEO, Chief of Staff, Product, Engineering, Frontend, Testing, Platform, Research, Bar Raiser, Scope Trimmer, Design, Motion, Sales, SEO, Social, Competition, Customer Success, Funding, Payments, Compliance, User) and team-setup, which seats a team in a project with its own worker teams and model tiers.",
+  "version": "1.2.0",
+  "author": { "name": "Fauzul Chowdhury" },
+  "license": "MIT",
+  "keywords": ["team", "agents", "seats", "orchestration", "startup"]
+}

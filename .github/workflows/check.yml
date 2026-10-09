@@ -1,0 +1,16 @@
+name: check
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Every seat rulebook is in shape and project-neutral
+        run: python3 check.py
+      - name: The scaffold seats a fresh project and the generator agrees
+        run: |
+          d=$(mktemp -d) && git -C "$d" init -q
+          python3 skills/team-setup/scripts/scaffold.py --root "$d" --project Demo --seats engineering,testing,bar-raiser,design
+          python3 "$d/scripts/gen-team-agents.py" --check

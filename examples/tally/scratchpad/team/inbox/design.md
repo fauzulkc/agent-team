@@ -1,0 +1,1 @@
+2026-03-04 · 🖥️ Frontend team (called by 🖥️ Frontend) → 📐 Design · RESULT · the overdue badge reuses pattern P-3 (warning tone; red stays for errors) · scratchpad/team/runs/design/2026-03-04-overdue-badge.md
