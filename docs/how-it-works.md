@@ -65,8 +65,9 @@ See [orchestration-diagrams.md](orchestration-diagrams.md) for these flows drawn
 | Research | Opus, high effort | probes, audits, reviews, web research | `team-research` |
 | Deep | Opus, maximum effort | one-way doors only | `team-deep` |
 
-**Routing:** start at the cheapest tier that can do the job, and move up one tier when a worker
-returns half-done work. **Spawn by tier name only**: a generic agent given a model shorthand can
+**Routing:** start at the cheapest tier that can do the job, and move up to the next tier that can do
+that kind of work when a worker returns half-done work. The tiers form two ladders: work that edits
+climbs Quick, Execution, Build; reading and judging climbs Scout, Check, Research, Deep. **Spawn by tier name only**: a generic agent given a model shorthand can
 land on an older model generation. The models live in one place per project (the generator's
 `TIERS` and `docs/TEAM.md` §2), so a new model is a one-line change and one command.
 

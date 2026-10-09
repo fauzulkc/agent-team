@@ -53,8 +53,9 @@ an edit runs the old definition).
 | **Research and judgement** | probes, audits, drafting a decision's evidence, reviewing a worker's output, web research | Opus, effort high | `subagent_type: team-research`, contract opens *"load the `<skill>` skill first"* |
 | **Deep** | **one-way doors only** (§8): the evidence behind a decision, an outward number before it ships, a pre-registered test's design, an irreversible spend or send | Opus, effort max | `subagent_type: team-deep`, contract opens *"load the `<skill>` skill first"* |
 
-**Routing: start at the cheapest tier that can do the job, and move up one tier when a worker
-returns half-done work.** Half-done means a summary where the contract asked for a table, a skipped
+**Routing: start at the cheapest tier that can do the job, and move up to the next tier that can do
+that kind of work when a worker returns half-done work.** The tiers form two ladders: work that
+edits climbs Quick, Execution, Build; reading and judging climbs Scout, Check, Research, Deep. Half-done means a summary where the contract asked for a table, a skipped
 verification, a guess where the contract said stop, or a fix that does not pass the whole test leg.
 Deep is never a default: name the one-way door in the contract, or use Research.
 

@@ -150,7 +150,8 @@ flowchart LR
     review --> land["commit by explicit paths"]
 ```
 
-**The rule:** start at the cheapest tier that can do the job. Move up one tier only when a worker
+**The rule:** start at the cheapest tier that can do the job. Move up to the next tier that can do
+that kind of work only when a worker
 returns half-done work: a summary instead of a table, a skipped check, a guess where the contract
 said stop, or a fix that doesn't pass the whole test leg. `team-deep` is never a default.
 

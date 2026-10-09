@@ -88,8 +88,8 @@ Full rules: [docs/owner-touchpoints.md](docs/owner-touchpoints.md).
 | Research | Opus, high effort | probes, audits, reviews |
 | Deep | Opus, maximum effort | decisions that can't be undone |
 
-Workers start at the cheapest tier that can do the job and move up one step only when work comes
-back half-done. Models are named in one place per project, so a new model is a one-line change.
+Workers start at the cheapest tier that can do the job and move up only when work comes back
+half-done: edits climb Quick, Execution, Build; reading and judging climb Scout, Check, Research, Deep. Models are named in one place per project, so a new model is a one-line change.
 
 ## Capacity, briefly
 
