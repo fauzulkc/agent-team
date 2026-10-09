@@ -7,7 +7,11 @@ The diagrams are [Mermaid](https://mermaid.js.org/); GitHub renders them in plac
 **Legend.** *You* are the owner. A **seat** is a Claude session you open with its skill (`/seat-ceo`).
 A **team** is that seat's own worker (`engineering-worker`), spawned by the seat. The **tiers**
 (`team-quick`, `team-scout`, `team-check`, `team-build`, `team-research`, `team-deep`) are shared workers on
-cheaper or stronger models.
+cheaper or stronger models. A **merged seat** is one session holding several roles while their work
+is small, every rule of each kept (📈 Growth holds Sales, SEO and Social). A **new seat** is a role
+the catalogue does not have, or one seat split per app (🔌 Hardware & firmware engineer): its
+rulebook is derived from the nearest one, then written for its role before it works.
+**🧩 team-setup** seats the team once; **🔁 team-reevaluate** resizes it later. You run both.
 
 ---
 
@@ -26,7 +30,7 @@ flowchart TB
         fe["🖥️ Frontend"]
         design["📐 Design"]
         sales["💼 Sales"]
-        more["… up to 21 seats"]
+        more["… a catalogue of 29,<br/>merged or new as the repo needs"]
     end
     subgraph checks["Check seats"]
         br["⚖️ Bar Raiser"]
@@ -52,22 +56,39 @@ flowchart TB
 
 ## 1 · Seating the team
 
+Setup scans the repo, sizes it, and offers three teams, every seat with the evidence that put it
+there. Tally's repo measures medium (661 code files, four contributors), so the recommended team
+keeps each role in its own seat. A smaller repo gets merged seats instead (scenario 8).
+
 ```mermaid
 sequenceDiagram
     autonumber
     actor You
     participant Setup as 🧩 team-setup
+    participant Tools as scan · plan · scaffold
     participant Repo as Tally repo
     You->>Setup: "set up the team"
-    Setup->>Repo: read README, package.json, CI, deploy config, git log
-    Setup-->>You: "Seat CEO, Chief of Staff, Product, Engineering, Frontend, Testing, Bar Raiser? Only you publish, spend and sign. You push."
-    You->>Setup: "yes, and add Design"
-    Setup->>Repo: scaffold: docs/TEAM.md, DECISIONS.md, one brief per seat, .claude/skills, .claude/agents, scratchpad
+    Setup->>Repo: read README, CLAUDE.md, git log, test commands, deploy config
+    Setup->>Tools: scan the repo
+    Tools->>Repo: manifests, file names, CI, contributors, commits
+    Tools-->>Setup: signals, each with its evidence: web UI, payments, sign-in, email,<br/>pricing page, blog, tests, deploy · size: medium<br/>saved as docs/team/scan.json, the baseline for re-evaluating later
+    Setup->>Tools: plan three options
+    Tools-->>Setup: recommended 19 · lean 10 · full 21, every seat with its why
+    Setup-->>You: "Decision needed: which team for Tally?<br/>Recommended, 19 seats, each with its reason:<br/>Frontend, the code has a web interface ·<br/>Payments, a payment library is in the dependencies ·<br/>Social, there is a blog · …<br/>Lean, 10: related roles share one session<br/>(Sales, SEO and Social as one Growth seat).<br/>Full, 21: adds Competition and Funding.<br/>Settings: only you publish, spend and sign. You push."
+    You->>Setup: "recommended"
+    Setup->>Tools: scaffold that plan, with your answer
+    Tools->>Repo: docs/TEAM.md, one brief per seat, .claude/skills, .claude/agents, scratchpad
+    Tools->>Repo: DECISIONS.md: the team, with your word verbatim
+    opt a seat the catalogue does not have (a new role, or a split)
+        Setup->>Repo: write its rulebook for its role
+        Note over Setup,Repo: the agent generator refuses while any rulebook still says AUTHORING NEEDED
+    end
     Setup->>Repo: fill each seat's brief from what it measured (commands, paths, traps)
     Setup-->>You: "Open the CEO first: /seat-ceo catch up and work your inbox"
 ```
 
-**Asks you:** once, for the seats and the two settings. Everything else is measured from the repo.
+**Asks you:** once: which of the three teams, with the two settings (what only you do, who pushes).
+You may edit the pick (add, drop, merge or split a seat). Everything else is measured from the repo.
 
 ---
 
@@ -226,3 +247,91 @@ sequenceDiagram
     end
     CoS-->>You: evening: what landed, what is blocked on whom, what waits on you
 ```
+
+---
+
+## 8 · Sizing the team: merged, separate and new seats
+
+The scan's signals say which roles the repo needs. Its size says how many sessions should hold them.
+
+```mermaid
+flowchart TB
+    scan["🔎 Repo scan<br/>signals, each with its evidence<br/>web UI · mobile app · payments · sign-in · blog · firmware · …"]
+    scan --> size{"Size class<br/>code files · commits · contributors"}
+    size -->|"under 60 code files<br/>and 50 commits"| tiny["tiny"]
+    size -->|"under 600 code files<br/>and 3 people or fewer"| small["small"]
+    size -->|"under 3,000 code files"| medium["medium"]
+    size -->|"3,000 or more"| large["large"]
+    tiny & small & medium & large --> options
+    subgraph options["Three options, every seat with its why"]
+        lean["Lean<br/>every allowed merge<br/>optional seats dropped"]
+        rec["Recommended<br/>tiny: every merge<br/>small: the commercial seats merge<br/>medium: every role separate<br/>large: separate + a Frontend per UI app"]
+        full["Full<br/>every role separate<br/>optional seats added<br/>a Frontend per UI app"]
+    end
+    options --> pick(["👤 You pick one, and may edit it"])
+    pick -->|"lean, or a tiny or small repo"| merged
+    pick -->|"full, or a large repo,<br/>with two or more UI apps"| split
+    pick -->|"any option, when a signal<br/>has no catalogue seat"| created
+    subgraph merged["Merged: one session, several roles"]
+        sales["💼 Sales"] & seo["📣 SEO"] & social["💬 Social"] --> growth["📈 Growth<br/>every rule of each kept"]
+    end
+    subgraph split["Split: one Frontend per UI app"]
+        fe["🖥️ Frontend"] --> fe_admin["🖥️ Frontend (admin)<br/>only apps/admin/"]
+        fe --> fe_web["💻 Frontend (web)<br/>only apps/web/"]
+    end
+    subgraph created["New: a role the catalogue lacks"]
+        firmware["signal: firmware/"] --> derived["🔌 Hardware & firmware engineer<br/>derived from the nearest rulebook"]
+        derived --> authored["written for its role<br/>before it works"]
+    end
+    merged -.-|"every merge obeys"| checks
+    subgraph checks["Check seats never merge with a builder"]
+        quality["⚖️ Bar Raiser + 🧪 Testing<br/>→ 🛡️ Quality<br/>allowed: still a check"]
+        never["⚖️ Bar Raiser + ⚙️ Engineering<br/>never: a seat would<br/>check its own work"]
+    end
+```
+
+**The rules:** the CEO and the Bar Raiser are in every option (in lean, the Bar Raiser sits inside
+Quality). The Chief of Staff joins from five seats (seven in lean) and the Scope Trimmer from ten,
+because they earn their seat by the sessions they coordinate.
+Check seats (Bar Raiser, Scope Trimmer, User, Security) never merge into a seat whose work they
+check; Quality is the one check merge. Other new roles come the same way as Hardware & firmware:
+a smart-contract, desktop or browser-extension engineer, each raised by its own signal.
+
+---
+
+## 9 · Re-evaluating the team a month later
+
+Tally has worked for a month. You ask for a re-evaluation; it measures, proposes, and changes
+nothing until you answer.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor You
+    participant RE as 🔁 team-reevaluate
+    participant Tools as reevaluate · scaffold · scan
+    participant Repo as Tally repo
+    participant Inbox as seat inboxes
+    You->>RE: "re-evaluate the team"
+    RE->>Tools: measure the last 30 days
+    Tools->>Repo: commits by seat prefix (seo: …, design(web): …)
+    Tools->>Repo: worker run logs, inbox lines waiting, BLOCKED lines in the tracker
+    Tools->>Repo: a fresh scan against the baseline saved at setup
+    Tools-->>RE: Sales 1 commit, SEO 1, Social 0, no worker runs for any of them<br/>new since setup: a mobile app in apps/mobile/
+    RE-->>You: report: activity per seat, then two proposals, each with its evidence<br/>1. Merge 💼 Sales, 📣 SEO and 💬 Social into one 📈 Growth seat: all three quiet for 30 days<br/>2. Add a 📱 Mobile engineer: a mobile app appeared since setup
+    RE-->>You: "Decision needed: apply both changes?"
+    You->>RE: "apply all"
+    RE->>Tools: scaffold the proposed plan, with your answer
+    Tools->>Repo: seat 📈 Growth and 📱 Mobile engineer<br/>retire Sales, SEO and Social (briefs kept, marked retired)
+    Tools->>Repo: DECISIONS.md: the team change, with your words verbatim
+    opt a seat the catalogue does not have
+        RE->>Repo: write its rulebook for its role before it works
+    end
+    RE->>Tools: save a fresh scan as the new baseline
+    RE->>Inbox: one line each to 📈 Growth, 📱 Mobile, ⚙️ Engineering and 🛎️ Chief of Staff:<br/>what moved, and where its brief is
+    RE-->>You: "Open /seat-growth and /seat-mobile in new sessions.<br/>Close the Sales, SEO and Social sessions."
+```
+
+**Asks you:** once, after the report. A retired seat keeps its brief, so its history stays readable,
+and it is not proposed again unless its signal is new since setup. A merged seat whose work grows to
+carry the team is proposed for splitting back into its roles the same way.

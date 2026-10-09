@@ -1,10 +1,20 @@
 # agent-team
 
-**Seat a team of AI roles in any project.** Say *"set up the team"* and Claude Code seats the roles
-your project needs, from a catalogue of 21 (CEO, Engineering, Design, Sales and more), each one a session with
-its own rulebook, its own team of workers on the right model, and a clear line on what it decides
-and what it brings to you.
+**Seat a team of AI roles in any project.** Say *"set up the team"* and Claude Code scans your repo,
+then offers three teams sized to it: **lean**, **recommended** and **full**, every seat with the evidence
+that put it there. Seats come from a catalogue of 29 roles (CEO, Engineering, Design, Sales, Mobile,
+Security, Data and more), from **merged seats** where one session holds several small roles, and from
+**new seats** written for work no catalogue role covers. Each seat is a session with its own rulebook,
+its own team of workers on the right model, and a clear line on what it decides and what it brings to you.
+Later, say *"re-evaluate the team"* and it measures how each seat actually works and proposes changes.
 
+- **A team sized from evidence, not a template.** The scan reads manifests, file names, CI, deploy
+  configs and git history; each proposed seat cites what raised it (*"a payment library is in the
+  dependencies"*). A small project gets merged seats; a large one with several apps gets a
+  frontend seat per app.
+- **The team changes as the work does.** Re-evaluation counts each seat's commits, worker runs,
+  inbox and blocked lines, re-scans the repo, and proposes adding, retiring, merging, splitting back
+  or splitting seats. Nothing changes without your yes.
 - **Roles that think like the best operator of the job at a fast startup**, written as rulebooks
   with sourced principles, a method, hard-won traps, and a fixed way to report.
 - **Every seat runs its own team.** The typing goes to cheap, fast models and the thinking to
@@ -47,31 +57,37 @@ Without the plugin system: `./install.sh` links `team-setup` into your global sk
 
 ## Use
 
-1. **Seat the team.** Open Claude Code in your project and say **"set up the team"**. It reads the
-   project, proposes the smallest set of seats with a reason for each, asks you once, then writes the
-   team in (rulebooks, roster, decisions register, one brief per seat, workers, scratch space).
+1. **Seat the team.** Open Claude Code in your project and say **"set up the team"**. It reads and
+   scans the project, sizes it, and asks you once: which of three teams (lean, recommended, full,
+   each seat with its reason), plus what only you do and who pushes. You can edit the pick: add, drop,
+   merge or split a seat. Then it writes the team in (rulebooks, roster, decisions register, one brief
+   per seat, workers, scratch space), and writes the rulebook of any new seat for its role before
+   that seat works.
 2. **Open the seats you need**, each in its own session named after it:
    `/seat-ceo catch up and work your inbox` (the CEO first, then the Chief of Staff).
 3. **Talk to the Chief of Staff** like a person: *"Freelancers keep asking for recurring invoices.
    Let's do it."* It comes back with only what needs you, in one shape: decision needed, summary,
    progress by objective, detail if you ask.
-4. **Grow it** as the work appears: *"add Sales to the team"*. **Refresh it** after an update:
-   *"sync the team's rulebooks"*.
+4. **Re-evaluate it** as the work changes: say **"re-evaluate the team"** (after a milestone is a good
+   moment). It reports each seat's activity over the last 30 days and what changed in the repo, then
+   asks once: apply all, some, or none of its proposals. **Add a seat by name** any time: *"add Sales
+   to the team"*. **Refresh the rulebooks** after a plugin update: *"sync the team's rulebooks"*.
 
 A full prompt-by-prompt story on an example project is in [examples/walkthrough.md](examples/walkthrough.md);
-the files it produced are in [examples/tally/](examples/tally/).
+a seated example of the same project is in [examples/tally/](examples/tally/).
 
 ## What you'll be asked, and what you won't
 
 | You're asked | You're not asked |
 |---|---|
-| which seats, at setup | how to build what's already in scope |
+| which team, at setup: lean, recommended or full, with any edits | how to build what's already in scope |
+| a re-evaluation's proposals, once, when you ask for one | each seat one by one, or how a merged or new seat's rulebook is written |
 | anything public: posts, emails to customers, invites, press | which worker or model does a task |
 | any spend, and prices | routing between seats, covering an absent seat |
 | sign-ups, contracts, terms | free, reversible experiments and checks |
 | anything irreversible | fixing the team's own docs |
 | a real fork that cuts against a preference you stated | ordering work inside the current milestone |
-| new goals, milestones or seats | recording decisions you already made |
+| new goals or milestones | recording decisions you already made |
 
 Questions are batched through one seat, asked once, and your answers are recorded word for word.
 Full rules: [docs/owner-touchpoints.md](docs/owner-touchpoints.md).
@@ -93,8 +109,14 @@ half-done: edits climb Quick, Execution, Build; reading and judging climb Scout,
 
 ## Capacity, briefly
 
-- **Seats:** 21 in the catalogue; most projects run well on 4 to 9. The method has run with all 21
-  seated on one production project.
+- **Seats:** 29 in the catalogue, plus 8 merged seats and 4 new roles setup can create. The scan
+  sizes the project as **tiny** (under 60 source files and 50 commits), **small** (under 600 source
+  files, three contributors or fewer), **medium** (under 3,000 source files) or **large**, and the
+  recommended team scales with it: every allowed merge when tiny, the commercial seats merged when
+  small, every role separate when medium, and a frontend seat per UI app when large. Measured on
+  invented test projects: a small library gets 5 to 7 seats; a web product that takes sign-ups and
+  payments gets 10 to 12 lean, 13 to 19 recommended, 21 or more full. The method has run with 21
+  seats on one production project.
 - **Open at once:** each open seat is a Claude session, so your plan's limits set the ceiling; closed
   seats are covered by their teams, so 3 to 6 open seats is a typical day.
 - **Workers:** each seat runs waves of background workers, kept under about ten at a time.
@@ -107,16 +129,18 @@ Details: [docs/how-it-works.md](docs/how-it-works.md#capacity-what-to-expect).
 
 | | |
 |---|---|
-| [How it works](docs/how-it-works.md) | the layers, the seat rulebook anatomy, the work loop, tiers, messages, capacity |
-| [Orchestration diagrams](docs/orchestration-diagrams.md) | seven scenarios drawn out, with the prompts at each step |
+| [How it works](docs/how-it-works.md) | the layers, how the team is sized and re-evaluated, the seat rulebook anatomy, the work loop, tiers, messages, capacity |
+| [Orchestration diagrams](docs/orchestration-diagrams.md) | the scenarios drawn out, from seating and sizing the team to re-evaluating it, with the prompts at each step |
 | [When you're asked](docs/owner-touchpoints.md) | the full line between your decisions and the team's |
-| [The seats](docs/seats.md) | all 21, what each does, and when to seat it |
+| [The seats](docs/seats.md) | all 29, the merged seats and the new roles: what each does, and when to seat it |
 | [Walkthrough](examples/walkthrough.md) | an example project, prompt by prompt |
 | [Example project](examples/tally/) | the files a seated project carries |
 
 ## Develop
 
 `python3 check.py` proves every seat rulebook has its mark, the seven sections, no model names and
-no project-specific facts. `claude plugin validate .` checks the plugin. See [CONTRIBUTING.md](CONTRIBUTING.md).
+no project-specific facts. `python3 -m unittest discover -s tests` runs the scan, planner, scaffold
+and re-evaluation against invented fixture projects. `claude plugin validate .` checks the plugin.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 MIT licensed.

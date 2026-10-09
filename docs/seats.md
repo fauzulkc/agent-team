@@ -1,8 +1,14 @@
 # The seats
 
-Every seat in the catalogue, with its one-line job (from its rulebook's description), its kind,
-whom it reports to, and when a project needs it. `team-setup` proposes the smallest set; add the
-rest the day their work appears.
+Every seat in the catalogue (29), then the merged seats a small team can run as one
+session, then the new roles setup creates when no catalogue seat covers the work. Each row's job
+is the opening of that seat's rulebook description (the part before *Use when*); kinds, reporting
+lines and *seat it when* come from the catalogue (`skills/team-setup/references/seats.md`). Setup
+scans the repo and proposes seats with the evidence for each
+([how the team is sized](how-it-works.md#how-the-team-is-sized)); add the rest the day their work
+appears, or let a re-evaluation propose them.
+
+## The catalogue
 
 | | Seat | Open with | Kind | Reports to | What it does | Seat it when |
 |---|---|---|---|---|---|---|
@@ -20,19 +26,84 @@ rest the day their work appears.
 | 🎬 | **Motion & Production** | `/seat-motion` | director | CEO | Motion & Production: governs how anything moves (numbered motion rulings) and makes the moving outward assets (product loop, demo and launch videos, explainers, social cuts, rendered stills, sound) and their render pipeline. | video, animation or UI motion matters |
 | 💼 | **Sales & Marketing** | `/seat-sales` | director | CEO | Sales & Marketing: the seat that owns every outward word, the order true things are said in, positioning, the first buyers and the pricing case. | it will be sold, or words go outward |
 | 📣 | **SEO & Publicity** | `/seat-seo` | director | CEO | The SEO & Publicity director: owns measured reach that turns into sign-ups: the funnel by source, the angle ledger, discoverability and bold bets. | people must find it |
-| 💬 | **Social Media Manager** | `/seat-social` | manager | SEO & Publicity (timing), Sales (words) | The Social Media Manager: runs the social channels day to day under two directors (words: Sales; slot, cadence, angle ledger: SEO & Publicity). | there are social channels to run |
+| 💬 | **Social Media Manager** | `/seat-social` | manager | SEO & Publicity (timing), Sales (words) | The Social Media Manager: runs the social channels day to day under two directors (words: Sales; slot, cadence, angle ledger: SEO & Publicity). Owns the posting-day package, the morning live-figure check, comment replies from an approved bank, the exact post minute, and the +48 h and +7 d reads. | there are social channels to run |
 | ♟️ | **Competition & Market** | `/seat-competition` | director | CEO | The Competition & Market director: keeps the competitor and alternatives record, sizes the market bottom-up, gathers ICP evidence, scans for new data sources and checks every comparative claim. | there are buyers with alternatives |
 | 🤝 | **Customer Success** | `/seat-customer-success` | director | CEO | The Customer Success director: the customer's champion inside the team, owning the journey after the first click (join, wait, invite, first session, follow-up, return), the demand ledger, member health and the time from join to first answer. | there are users or testers |
 | 🏦 | **Funding, Revenue & Investment** | `/seat-funding` | director | CEO | Funding, Revenue & Investment: keeps the register of where money can come from (grants, programmes, prizes, credits, investors), the deadline calendar, the use-of-funds plan and the runway arithmetic. | money must be raised or runway matters |
 | 💳 | **Payments & Company Legal** | `/seat-payments` | director | CEO | Payments & Company Legal: owns the payments register (which channel takes which price line, from which region, on what fees, limits and approval times), the compliance of receiving money in the founder's country, tax by buyer type, the legal pages a platform requires, and entity advice. | it will take money |
 | 🗂️ | **Compliance & Audit** | `/seat-compliance` | director | CEO | The Compliance & Audit director: owns the internal record of what the product does not answer and why, the licence register, the credits licences require, the source-claim check and the personal-data rows. | third-party data, licences or personal data |
-| 👤 | **User** | `/seat-user` | check | CEO | The User: the buyer, not the builder. | there is something a person can use |
+| 👤 | **User** | `/seat-user` | check | CEO | The User: the buyer, not the builder. Drives the product from outside through the project's personas, using only what a customer can reach, replays a real buyer's last decision, and reports what broke as a customer would meet it. | there is something a person can use |
+| 📱 | **Mobile engineer** | `/seat-mobile` | implementation | Engineering | Mobile engineer: the implementation seat that builds the native or cross-platform app (iOS, Android, React Native, Flutter) under Engineering's scope, Design's form and Sales's words, with every store release a one-way door. | there is an iOS, Android or cross-platform app |
+| 🧠 | **ML engineer** | `/seat-ml` | director | CEO | The ML director: owns models, training and evaluation code, the frozen held-out set, the baseline every model must beat, and the eval record; treats prompts and LLM calls as models. | models are trained, evaluated or prompted |
+| 🗄️ | **Data engineer** | `/seat-data` | implementation | Engineering | The Data engineer: builds and runs pipelines, schemas, warehouse or lake and orchestration that turn raw sources into served numbers, with idempotent jobs, data contracts, freshness and row-count checks, snapshots of anything a source will delete, and lineage. | data pipelines or a warehouse exist |
+| 🔐 | **Security** | `/seat-security` | check | CEO | Security: the independent check on what an attacker could reach: a light threat model per surface, authentication, authorization and session review before ship, secret and dependency triage by reachability, least privilege for keys, and logs without personal data. | there is auth, payments or personal data |
+| 📚 | **Docs writer** | `/seat-docs` | implementation | Product | Docs writer: the implementation seat that writes and keeps true the user docs, API reference, guides, README and changelog, versioned with the code. | there is a docs site, a public API or a library |
+| 🌱 | **Community & DevRel** | `/seat-community` | director | CEO | The Community & DevRel director: the outside contributor's champion, owning triage of outside issues, discussions and pull requests, CONTRIBUTING, the code of conduct, good first issues, release announcements, recognition, the public roadmap and adoption measured by real signals. | it is open source with outside contributors |
+| 🎮 | **Game designer** | `/seat-game-design` | director | CEO | Game design: owns the game design document as a register of numbered design rulings (core loop, mechanics, progression, economy), finds the fun in a rough prototype before content, and tunes difficulty and balance from data and playtests. | it is a game |
+| 🌐 | **Localization** | `/seat-i18n` | implementation | Product | Localization: the implementation seat that makes every user-facing string, number, date and currency work in more than one language and script, carrying Sales's source words into each locale without changing what they say. | the product ships in more than one language |
 
 **Kinds.** *Owner-side* seats speak for or to you. *Directors* own a register and rule inside it. The
-*manager* runs a daily operation under directors. The *implementation* seat builds under a director's
+*manager* runs a daily operation under directors. *Implementation* seats build under a director's
 scope. *Checks* challenge other seats' work and own no product register.
 
-**Starter sets.** Solo build: CEO, Engineering, Testing, Bar Raiser. Product with users: add Chief of
-Staff, Product, Design, User, and Frontend if there is a UI. Startup: add Sales, Platform, Customer
-Success, Scope Trimmer, then Research, Competition, SEO, Payments, Funding and Compliance as the work
-appears. Content: Motion, Social, SEO, Sales.
+## Merged seats
+
+One session holding several roles. Its rulebook is composed from its members' rulebooks, every
+section of each kept under "As <member>", and recomposed when they improve. Setup offers a merge
+only when two or more members are called for; re-evaluation proposes one when the members have
+all been quiet, and splits it back when its work grows.
+
+| | Seat | Open with | Holds | Kind | Why one session can hold it |
+|---|---|---|---|---|---|
+| 📈 | **Growth** | `/seat-growth` | 💼 Sales & Marketing + 📣 SEO & Publicity + 💬 Social Media Manager | director | one seat owns words, reach and the channels while the audience is small |
+| 🎨 | **Product & Design** | `/seat-product-design` | 🎯 Product + 📐 Design | director | one seat decides what to build and how it looks while the surface is small |
+| 🔧 | **Engineering & Platform** | `/seat-engineering-platform` | ⚙️ Engineering + 🛰️ Platform | director | one seat builds and ships while there is one deploy target |
+| 🛡️ | **Quality** | `/seat-quality` | 🧪 Testing + ⚖️ Bar Raiser | check | one independent check owns the test standard and re-measures finished work |
+| 💰 | **Money** | `/seat-money` | 🏦 Funding, Revenue & Investment + 💳 Payments & Company Legal | director | one seat tracks where money comes from and how it is received |
+| 📜 | **Legal & Compliance** | `/seat-legal-compliance` | 💳 Payments & Company Legal + 🗂️ Compliance & Audit | director | one seat holds the legal pages, licences and personal data |
+| 🧮 | **Data & ML** | `/seat-data-ml` | 🗄️ Data engineer + 🧠 ML engineer | director | one seat owns the pipelines and the models built on them while both are young |
+| 🫱 | **Customer** | `/seat-customer` | 🤝 Customer Success + 🌱 Community & DevRel | director | one seat champions users and contributors while there are few of either |
+
+**Which option merges what.** *Lean* takes every merge whose members are present. *Recommended*
+takes every merge for a tiny project; for a small one only Growth, Money, Legal & Compliance,
+Customer and Data & ML; none for a medium or large one. Engineering & Platform is never offered
+past 2,000 source files. **A check seat (Bar Raiser, Scope Trimmer, User, Security) never merges
+into a seat whose work it checks**: Quality, the one merge that holds the Bar Raiser, is itself a
+check seat.
+
+## New roles
+
+Roles no catalogue seat covers, raised by what the scan finds. Each is derived from the base
+rulebook named here and arrives with an `AUTHORING NEEDED` block: the session that seats it
+rewrites it for the role (`skills/team-setup/references/seat-contract.md`) before the seat works,
+and `scripts/gen-team-agents.py --check` fails until it does.
+
+| | Seat | Open with | Derived from | Kind | Reports to | Scope | Raised by |
+|---|---|---|---|---|---|---|---|
+| 🔌 | **Hardware & firmware engineer** | `/seat-hardware` | `seat-mobile` | implementation | Engineering | firmware and board design: a shipped device can't be patched like a web page | files `platformio.ini`, `*.ino`, `*.kicad_pcb`, `*.kicad_sch`, `sdkconfig`, `*.dts`, `Kconfig` |
+| ⛓️ | **Smart-contract engineer** | `/seat-contracts` | `seat-security` | implementation | Engineering | on-chain code: every deployment is a one-way door, audits before mainnet | files `*.sol`, `hardhat.config.*`, `foundry.toml`, `Anchor.toml`; dependencies such as `hardhat`, `ethers`, `viem` |
+| 🖱️ | **Desktop engineer** | `/seat-desktop` | `seat-mobile` | implementation | Engineering | the desktop app: signed installers and auto-update are one-way doors | dependencies such as `electron`, `@tauri-apps/`, `tauri` |
+| 🧷 | **Browser-extension engineer** | `/seat-extension` | `seat-frontend` | implementation | Engineering | the browser extension: permissions and store review decide what ships | files `manifest.json` containing `manifest_version` |
+
+**Splits.** A project with two or more web UI apps can run one frontend seat per app
+(`Frontend engineer (<app>)`, marks 🖥️ 💻 🪟 📟, up to four), each derived from `seat-frontend`
+with its scope set to its own folder (each other app has its own seat). *Full* offers the split
+whenever there are two or more UI apps; *recommended* only once the project is large.
+
+## Starter shapes
+
+What setup tends to propose, measured on invented test projects (the exact set always comes
+from your repo's own evidence):
+
+- **A small library or tool:** CEO, Engineering, Quality (Testing with the Bar Raiser) or the two
+  separately, Docs and Community when it is open source, and a Chief of Staff once five seats run.
+  Five to seven seats.
+- **A web product that takes sign-ups and payments:** CEO, Chief of Staff, Product, Engineering,
+  Frontend, Testing, Platform, Bar Raiser, Scope Trimmer, Design, Customer Success, User, Security,
+  and the commercial seats, merged into Growth and Legal & Compliance while small; Research too
+  once product analytics are in. Ten to twelve seats lean; thirteen to fifteen recommended while
+  tiny or small, nineteen once medium (every role in its own seat, as in the
+  [walkthrough](../examples/walkthrough.md)).
+- **A project with several apps:** add Mobile, Data & ML (or each on its own), Localization,
+  Research, and any new role its firmware, desktop app, extension or contracts call for; *full*
+  splits the frontend per app, *recommended* once the project is large.

@@ -1,8 +1,9 @@
 # Walkthrough: seating a team on Tally
 
-**Tally** is an invented invoicing app for freelancers (Node API, React web, Postgres). This is the
-prompt-by-prompt story of seating a team on it and shipping one feature. What you type is in
-**bold quotes**; what the team says back is condensed. The files it produced are in [tally/](tally/).
+**Tally** is an invented invoicing app for freelancers: a React web app, a Node API, Postgres, card
+payments, sign-ups and a blog. This is the prompt-by-prompt story of seating a team on it, shipping
+one feature, and resizing the team a month later. What you type is in **bold quotes**; what the team
+says back is condensed. A seated example of the same app is in [tally/](tally/).
 
 ---
 
@@ -18,23 +19,60 @@ Open Claude Code in the Tally repo:
 
 > **"set up the team"**
 
-`team-setup` reads the README, `package.json`, the CI workflow and the last thirty commits, then asks
-once:
+`team-setup` reads the README, the CI workflow and the last thirty commits, then scans the repo. The
+scan finds, each with its evidence: React in the dependencies, a payment library, a sign-in library,
+an email service, product analytics, a pricing page, a `blog/` folder, a Dockerfile and a hosting
+config, a test suite run by CI, and email columns in the database schema. It sizes Tally as
+**medium** (661 source files, four contributors) and saves the scan as the baseline for later.
+Then it asks once:
 
-> *Decision needed: seat these seven roles for Tally?*
-> *CEO (decision register) · Chief of Staff (three or more seats) · Product (paying users) ·
-> Engineering (a code project) · Frontend (a React web app) · Testing (a CI suite exists) ·
-> Bar Raiser (the independent check).*
-> *Also: what only you do (default: publishing, sending, spending, signing), and who pushes (default: you).*
+> *Decision needed: which team for Tally?*
 
-> **"yes, add Design, and emailing customers is mine too"**
+| Option | Seats | What it is |
+|---|---|---|
+| **Recommended** | 19 | every role the evidence calls for, each in its own seat: Tally is past the size where one session should hold several roles |
+| Lean | 10 | the fewest sessions: Sales, SEO and Social share one **Growth** seat; Product with Design; Engineering with Platform; Testing with the Bar Raiser as **Quality**; Payments with Compliance as **Legal & Compliance**; no User or Research seat |
+| Full | 21 | the recommended team plus Competition & Market and Funding |
 
-It scaffolds `docs/TEAM.md`, `docs/DECISIONS.md`, eight seat briefs, the copied rulebooks, fourteen
-workers and the scratch area, then fills each brief from what it measured (test commands, paths,
-the dev server's health URL). It ends with:
+> *The recommended seats, and why each:*
+
+| | Seat | Why |
+|---|---|---|
+| 🧭 | CEO | every team keeps one decision register |
+| 🛎️ | Chief of Staff | seventeen other seats: one seat talks to you and keeps the tracker |
+| 🎯 | Product | people pay for it (a payment library is in the dependencies) |
+| ⚙️ | Engineering | 661 source files |
+| 🖥️ | Frontend engineer | a React web app |
+| 🧪 | Testing | a test suite that CI runs |
+| 🛰️ | Platform | a Dockerfile and a hosting config: it is deployed |
+| 🔬 | Research | product analytics: claims will rest on measurement |
+| ⚖️ | Bar Raiser | every team keeps one independent check |
+| ✂️ | Scope Trimmer | seventeen other seats: someone cuts the queue to the shortest path to a customer |
+| 📐 | Design | a React web app: people look at it |
+| 💼 | Sales & Marketing | a payment library: it will be sold |
+| 📣 | SEO & Publicity | a pricing page: people must find it |
+| 💬 | Social Media Manager | a blog to publish and share |
+| 🤝 | Customer Success | a sign-in library: people join and need to reach their first invoice |
+| 💳 | Payments & Company Legal | a payment library: it takes money |
+| 🗂️ | Compliance & Audit | customers' email addresses in the database |
+| 👤 | User | people sign up and pay: someone walks it as a customer would |
+| 🔐 | Security | sign-in plus payments and personal data: someone checks what an attacker could reach |
+
+> *A merged seat is one session holding several roles, every rule of each kept; it splits back when
+> its work grows. Any option can be edited: add, drop, merge or split a seat.*
+> *Also: what only you do (default: publishing, sending, spending, signing), and who pushes
+> (default: you).*
+
+> **"recommended, and emailing customers is mine too"**
+
+It writes the plan, then scaffolds `docs/TEAM.md`, `docs/DECISIONS.md` with your answer word for
+word, nineteen seat briefs, the nineteen rulebooks copied from the catalogue, twenty-five workers
+(one per seat plus the six shared tiers) and the scratch area. It fills each brief from what it
+measured (test commands, paths, the dev server's health URL). No seat here is new to the catalogue,
+so no rulebook needs writing. It ends with:
 
 > *Open the CEO first: `/seat-ceo catch up and work your inbox`. Then the Chief of Staff, who you'll
-> talk to day to day.*
+> talk to day to day. Say "re-evaluate the team" whenever a milestone closes.*
 
 **Asked you: once.**
 
@@ -49,7 +87,7 @@ Each in its own session, named after the seat:
 /seat-frontend catch up and work your inbox
 ```
 
-Design, Product, Testing and Bar Raiser stay closed for now. Their teams cover them.
+The other fifteen stay closed for now. Their teams cover them.
 
 ## 4. Ask for a feature, in one sentence
 
@@ -98,12 +136,63 @@ Your words are recorded verbatim as **DEC-3**
 
 Emailing customers is yours, so the email waits for you. Making the list faster doesn't.
 
-## 7. Grow the team when the work appears
+## 7. A month later: re-evaluate
 
-> **"add Sales to the team"**: Tally is about to charge for a Pro plan.
+Tally has started a mobile app in `apps/mobile/`, and the blog launch has slipped. After the
+milestone closes:
+
+> **"re-evaluate the team"**
+
+`team-reevaluate` counts each seat's commits, worker runs, inbox lines and blocked lines over the
+last 30 days, and re-scans the repo against the baseline saved at setup. Condensed:
+
+| Seat | Commits | Worker runs |
+|---|---|---|
+| ⚙️ Engineering, 🖥️ Frontend, ⚖️ Bar Raiser and thirteen more | active | active |
+| 💼 Sales & Marketing | 1 | 0 |
+| 📣 SEO & Publicity | 1 | 0 |
+| 💬 Social Media Manager | 0 | 0 |
+
+*New in the repo since setup: a mobile app (a mobile app framework in `apps/mobile/`'s dependencies).*
+
+The session reads the numbers before you do: nothing in the tracker or the active milestone holds
+work for the three quiet seats, and their commits are prefixed, so the counts are real. Then:
+
+> *Decision needed: apply these two changes to the team?*
+> *1. Merge Sales, SEO and Social into one Growth seat. All three were quiet for 30 days (one
+> commit each from Sales and SEO, nothing from Social, no worker runs). The blog still needs
+> Social's work, so it is merged rather than retired.*
+> *2. Add a Mobile engineer: a mobile app appeared since setup.*
+> *For you: close the Sales, SEO and Social sessions if they are open; open Growth and Mobile
+> engineer when you need them.*
+> *Apply all (recommended), apply some, or change nothing?*
+
+> **"apply all"**
+
+What happens without you:
+
+1. The plan is applied: **📈 Growth** is seated with a rulebook composed from Sales's, SEO's and
+   Social's (every rule of each kept) and a brief that carries all three briefs; **📱 Mobile engineer**
+   is copied from the catalogue.
+2. Sales, SEO and Social are retired: their briefs stay, under a "Retired" line, and their workers
+   are removed. Their unread inbox lines move to Growth.
+3. Your words go into `docs/DECISIONS.md` verbatim, as a team change.
+4. The scan baseline resets to today, so the mobile app is not raised again.
+5. The generator's check runs green; Growth, Mobile, Engineering and the Chief of Staff each get an
+   inbox line saying what moved and where the brief is.
+
+Had the scan found a role the catalogue does not hold (firmware for a card reader, say), the new
+seat's rulebook would be written for its role before it worked, and it would have been one more
+line in the same question, not a question of its own.
+
+**Asked you: once.**
+
+## 8. Keep it current
+
+> **"add Motion to the team"**: when a launch video is planned. You named it, so there is no question.
 
 > **"sync the team's rulebooks"**: after a plugin update, this refreshes every rulebook the project
-> hasn't edited, and names any it kept.
+> hasn't edited, recomposes Growth from its members' new rulebooks, and names any it kept.
 
 A new model ships: edit `TIERS` in `scripts/gen-team-agents.py` and the table in `docs/TEAM.md` §2,
 run `python3 scripts/gen-team-agents.py`, open a new session, and ask one worker which model it runs.
@@ -114,9 +203,11 @@ run `python3 scripts/gen-team-agents.py`, open a new session, and ask one worker
 
 | Asked | Not asked |
 |---|---|
-| which seats, what only you do, who pushes (setup) | scope of recurring invoices |
-| turn recurring invoices on for everyone | the design of the badge |
-| the reminder email's words | how to build it, which workers, which models |
+| which team (recommended), what only you do, who pushes (setup) | the nineteen seats, one by one |
+| turn recurring invoices on for everyone | scope of recurring invoices |
+| the reminder email's words | the design of the badge |
+| the re-evaluation's two changes, together | how to build it, which workers, which models |
 | | the review, the failure and the fix |
-| | covering the four closed seats |
+| | covering the closed seats |
+| | how Growth's rulebook was composed, or the scan baseline reset |
 | | recording your answers |
