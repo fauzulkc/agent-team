@@ -7,6 +7,10 @@ version; a new seat, flag or skill is a minor one; fixes and wording are a patch
 
 ## Unreleased
 
+Nothing yet.
+
+## 1.3.1 — 2026-10-10
+
 - **Works on Windows.** The scripts print seat marks in UTF-8 whatever the console's code page, read
   git and their own output as UTF-8, print project paths with forward slashes, and hash rulebooks the
   same way on every system, so `PYTHONUTF8` is no longer needed.

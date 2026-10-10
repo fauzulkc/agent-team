@@ -9,7 +9,7 @@
     {
       "name": "agent-team",
       "source": "./",
-      "version": "1.3.0",
+      "version": "1.3.1",
       "description": "29 seat rulebooks and two skills, team-setup and team-reevaluate: seat an AI team in any project, sized from the repo, and resize it as the work changes."
     }
   ]
