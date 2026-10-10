@@ -1,7 +1,8 @@
 # The seat catalogue
 
-Every seat the team can seat, with its mark, its global skill, its worker name, its kind, the
-register it keeps by default, whom it reports to, and when a project needs it. `team-setup` picks
+Every seat the team can seat, with its mark, its skill (copied into the project's `.claude/skills/`
+at setup), its worker name, its kind, the register it keeps by default, whom it reports to, and when
+a project needs it. `team-setup` picks
 from this list; the project's `docs/TEAM.md` roster is the copy that binds.
 
 **Kinds.** *Owner-side* seats speak for or to the owner. *Directors* own a register and rule inside

@@ -8,11 +8,6 @@ jobs:
       matrix:
         # 3.9 is the scripts' floor (no tomllib, so scan.py's own pyproject reader runs); 3.12 is current.
         python-version: ["3.9", "3.12"]
-    env:
-      GIT_AUTHOR_NAME: CI
-      GIT_AUTHOR_EMAIL: ci@example.invalid
-      GIT_COMMITTER_NAME: CI
-      GIT_COMMITTER_EMAIL: ci@example.invalid
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -25,6 +20,13 @@ jobs:
           python skills/team-setup/scripts/scaffold.py --root "$d" --project Demo --seats engineering,testing,bar-raiser,design
           python "$d/scripts/gen-team-agents.py" --check
       - name: The skills' commands run in order on a fresh project (setup, re-evaluate, add, retire, sync)
+        # Identity for this step's one commit only: set job-wide, it would override the fixtures' per-commit
+        # authors and the walkthrough step would measure one contributor instead of four.
+        env:
+          GIT_AUTHOR_NAME: CI
+          GIT_AUTHOR_EMAIL: ci@example.invalid
+          GIT_COMMITTER_NAME: CI
+          GIT_COMMITTER_EMAIL: ci@example.invalid
         run: |
           s="$GITHUB_WORKSPACE/skills/team-setup/scripts"
           d=$(mktemp -d) && cd "$d" && git init -q

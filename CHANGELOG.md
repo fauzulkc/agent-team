@@ -77,8 +77,14 @@
   measures, applies with the owner's words as the record, and asks only when the measurement argues
   against the request. A declined merge keeps its members, so "change nothing" is not asked again in
   another shape.
-- **Tests and CI:** 94 tests, none marked as expected to fail; CI runs them on Python 3.9 and 3.12,
+- **Tests and CI:** every test runs, none marked as expected to fail; CI runs them on Python 3.9 and 3.12,
   walks the skills' commands in order on a fresh project, and re-measures the walkthrough's figures.
+- **Second review pass.** Seats ask the owner before each push unless the owner chose otherwise;
+  the tracker and the owner-questions file are written for every team (the CEO keeps them when no
+  Chief of Staff is seated); a merged seat's rulebook names only its own brief, inbox and worker; a
+  re-evaluation's question names who takes each retiring seat's work; "apply all" passes every
+  proposal put to the owner; the walkthrough check passes in CI; and the new seats' sources each say
+  whether the page was read or found.
 - **Upgrading a 1.2 project:** the project keeps its copy of `scripts/gen-team-agents.py`; copy the
   new one from `skills/team-setup/scripts/` to get the no-worker-before-authoring rule.
 

@@ -7,13 +7,16 @@
 
 Measures, per seated team, over the window:
   commits   subjects starting with a seat's prefix (`design:`, `design(web):`). A prefix maps to the team
-            of that name or rulebook name; a seat name's slug or first word maps only when no other seated
-            row shares it. A scope names a seat when `<prefix>-<scope>` is one: `frontend(web):` counts
-            for `frontend-web` when it is seated.
+            of that name or rulebook name; then a member's name maps to the merged seat holding it
+            (`design:` counts for Product & Design) unless the member has a roster row of its own; a seat
+            name's slug or first word maps only when no other seated row shares it. A scope names a seat
+            when `<prefix>-<scope>` is one: `frontend(web):` counts for `frontend-web` when it is seated.
   runs      worker run logs written under scratchpad/team/runs/<team>/
   inbox     lines waiting in scratchpad/team/inbox/<team>.md
   blocked   tracker lines saying BLOCKED, inside the window: a table row counts for the seat in its seat
-            column; a dated log line ("<date> · <sender> → <receiver> · … BLOCKED …") for its sender.
+            column, dated only by a date, status or updated column (a due date in "done when" does not
+            make it old; an undated row is current); a dated log line ("<date> · <sender> → <receiver> ·
+            … BLOCKED …") counts for its sender, a "(called by …)" note left out.
 Re-scans the repo and diffs the signals against docs/team/scan.json, the setup baseline. With no
 baseline, no signal counts as new or gone, and a note says to start one (`scan.py --root . --save`).
 
@@ -23,9 +26,16 @@ in plain words and the `signals` it rests on:
            that no seated seat covers (teamlib.coverage: a merged seat covers its members, a frontend
            split covers the Frontend engineer). A merge in that plan whose members are all missing is
            proposed as the one merged seat; one with a member already held is proposed member by member.
-           A frontend split is left to the split step while the catalogue Frontend engineer is seated.
+           A merge already seated has its missing members proposed one by one. A frontend split is left
+           to the split step while the catalogue Frontend engineer is seated; splits already seated keep
+           their names (plan.build's `held`), so a newer app with the same folder name never renames
+           one or seats its app twice. The catalogue Frontend engineer is proposed beside the splits
+           when the plan has it hold the apps they leave (a fifth app, or one at the repository root).
            The Chief of Staff and the Scope Trimmer by plan.coordination, counting the other seats after
-           the adds.
+           the adds. A seat the owner struck from docs/team/plan.json at setup (the plan for the recorded
+           option has it, the plan file does not; never a coordination seat, which follows the seat count)
+           is not proposed again unless one of its signals is new.
+           A why names the new evidence when a signal new since setup brought the seat back.
   retire   a seat idle in the window that nothing calls for any more: not the CEO or the Bar Raiser; not
            a seat a signal still calls for (catalogue, derived role, or frontend split whose app folder
            still exists); not a coordination seat plan.coordination still gives the team
@@ -33,13 +43,16 @@ in plain words and the `signals` it rests on:
            the CEO or the Bar Raiser, never Engineering & Platform past 2,000 source files). A merge
            claims its members: no two proposals share one; more members first, then MERGES order.
   unmerge  a merged seat whose work now dominates the team
-  split    a frontend seat per UI app once the project is large and the catalogue seat is seated
+  split    a frontend seat per UI app once the project is large and the catalogue seat is seated; the
+           catalogue seat retires only when the splits hold every app (none past four, none at the root)
 A seat seated inside the window (the lock's `seated` date, else the newest commit that added its
 rulebook, else treated as old) is never proposed for retirement or a merge; a note names it. A retired
 seat is not proposed again unless one of its signals is new since the baseline. A proposal the owner
 declined (docs/team/declined.json, written by scaffold.py --only) is not proposed again unless one of its
 signals is new since the baseline and was not already part of the declined proposal's evidence. A note
-names each one skipped.
+names each one skipped, in plain words that claim only what the script knows: with no baseline it says
+so; a declined or retired Chief of Staff or Scope Trimmer (no signal of its own) waits for the owner to
+ask. The report renders repo changes in plain sentences (plan.PLAIN_SIGNALS), never signal keys.
 
 --out writes the re-evaluation plan scaffold.py --plan applies (with --only KEY,... for some of it):
   {"project", "option": "reevaluation", "source", "date",
@@ -95,12 +108,19 @@ def weak_aliases(row: dict) -> set[str]:
     return {a for a in (planner.slugify(seat), first) if a}
 
 
-def alias_map(rows: list[dict]) -> dict[str, str]:
-    """prefix -> team. Strong aliases first (first row wins); a weak alias only when exactly one row has it."""
+def alias_map(rows: list[dict], merged: dict[str, list[str]] | None = None) -> dict[str, str]:
+    """prefix -> team. Strong aliases first (first row wins); then each member of a merged seat (`merged`:
+    {merged team: members}) names that seat unless the member has a row of its own; a weak alias only when
+    exactly one row has it."""
     out: dict[str, str] = {}
     for r in rows:
         for a in strong_aliases(r):
             out.setdefault(a, r["team"])
+    own = {r["team"] for r in rows}
+    for team, members in (merged or {}).items():
+        for m in members:
+            if m not in own:
+                out.setdefault(m, team)
     weak_count: dict[str, int] = {}
     for r in rows:
         for a in weak_aliases(r) - strong_aliases(r):
@@ -135,11 +155,12 @@ def seat_in(text: str, rows: list[dict]) -> str | None:
 
 
 def tracker_blocked(text: str, rows: list[dict], since: datetime.date) -> dict[str, int]:
-    """BLOCKED lines per team, inside the window. A table row counts for the seat in its `seat` column (an
-    undated row is the current state and counts); any other line needs a date in the window and counts for
-    its sender, the text before `→`."""
+    """BLOCKED lines per team, inside the window. A table row counts for the seat in its `seat` column; only
+    a date in a date, status or updated column dates it (an undated row is the current state and counts).
+    Any other line needs a date in the window and counts for its sender, the text before `→` without a
+    "(called by …)" note."""
     out: dict[str, int] = {}
-    seat_col = None
+    seat_col, date_cols = None, []
     for line in text.splitlines():
         stripped = line.strip()
         if stripped.startswith("|"):
@@ -147,10 +168,12 @@ def tracker_blocked(text: str, rows: list[dict], since: datetime.date) -> dict[s
             lowered = [c.lower() for c in cells]
             if "seat" in lowered:
                 seat_col = lowered.index("seat")
+                date_cols = [i for i, c in enumerate(lowered)
+                             if any(w in c for w in ("date", "status", "updated")) and not any(w in c for w in ("due", "when"))]
                 continue
             if "BLOCKED" not in line or seat_col is None or seat_col >= len(cells):
                 continue
-            date = ISO_DATE.search(line)
+            date = next((m for i in date_cols if i < len(cells) for m in [ISO_DATE.search(cells[i])] if m), None)
             if date and date.group(1) < since.isoformat():
                 continue
             team = seat_in(cells[seat_col], rows)
@@ -160,15 +183,16 @@ def tracker_blocked(text: str, rows: list[dict], since: datetime.date) -> dict[s
             date = ISO_DATE.search(line)
             if not date or date.group(1) < since.isoformat():
                 continue
-            team = seat_in(line.split("→", 1)[0], rows)
+            sender = re.sub(r"\(called by[^)]*\)", "", line.split("→", 1)[0])
+            team = seat_in(sender, rows)
         if team:
             out[team] = out.get(team, 0) + 1
     return out
 
 
-def measure(root: Path, rows: list[dict], days: int) -> dict:
+def measure(root: Path, rows: list[dict], days: int, merged: dict[str, list[str]] | None = None) -> dict:
     since = datetime.date.today() - datetime.timedelta(days=days)
-    by_alias = alias_map(rows)
+    by_alias = alias_map(rows, merged)
     stats = {r["team"]: {"commits": 0, "runs": 0, "inbox": 0, "blocked": 0, "last": None} for r in rows}
     unattributed = 0
     for date, subject in git_subjects(root, days):
@@ -247,11 +271,40 @@ def app_folder(row: dict) -> str | None:
     return m.group(1) if m else None
 
 
+def plural(n: int, word: str) -> str:
+    """"1 commit", "2 commits"."""
+    return f"{n} {word}" if n == 1 else f"{n} {word}s"
+
+
+def lower_first(text: str) -> str:
+    return text[:1].lower() + text[1:]
+
+
+def plain_signals(keys: list[str]) -> str:
+    """Signal keys as the owner reads them: "it has a web interface; it publishes posts or other content"."""
+    return "; ".join(lower_first(planner.PLAIN_SIGNALS.get(k, k.replace("_", " "))) for k in keys)
+
+
 def listed(items: list[str]) -> str:
     """Names joined in words: "A", "A and B", "A, B and C"."""
     if len(items) <= 1:
         return "".join(items)
     return ", ".join(items[:-1]) + " and " + items[-1]
+
+
+def setup_struck(root: Path, option: str, base_scan: dict) -> set[str]:
+    """Teams the owner struck from the setup plan: the plan for `option` on the setup scan has them (as a seat
+    or a merge member), docs/team/plan.json does not. The Chief of Staff and the Scope Trimmer are left out:
+    they follow the seat count, not the plan. Empty without a setup plan file."""
+    plan = read_json(root / "docs" / "team" / "plan.json", {})
+    seats = plan.get("seats") if isinstance(plan, dict) and plan.get("option") in OPTIONS else None
+    if not isinstance(seats, list):
+        return set()
+    flat = lambda specs: {s["team"] for s in specs} | {m for s in specs for m in s.get("of", [])}  # noqa: E731
+    planned = flat([s for s in seats if isinstance(s, dict) and s.get("team")])
+    offered = plan.get("offered")  # what setup put to the owner; a plan written before 1.3.0 lacks it
+    base = set(offered) if isinstance(offered, list) else flat(planner.build(base_scan, option))
+    return base - planned - set(planner.COORDINATION)
 
 
 def evaluate(root: Path, days: int) -> dict:
@@ -268,12 +321,21 @@ def evaluate(root: Path, days: int) -> dict:
     cat = catalogue()
     names = {r["team"]: f"{r['mark']} {r['seat']}" for r in rows}
     seated_marks = {planner.norm_mark(r["mark"]) for r in rows}
+    # frontend splits already seated, by the app folder they hold: they keep their names
+    held = {app_folder(r): (r["team"][len("frontend-"):], r["mark"]) for r in rows
+            if r["team"].startswith("frontend-") and app_folder(r)}
+    held_team = {folder: f"frontend-{slug}" for folder, (slug, _) in held.items()}
 
     def name_of(t: str) -> str:
         return names.get(t) or (f"{cat[t]['mark']} {cat[t]['seat']}" if t in cat else t)
 
     def spec_name(spec: dict) -> str:
         return name_of(spec["team"]) if spec.get("type", "catalogue") == "catalogue" else f"{spec['mark']} {spec['seat']}"
+
+    def held_elsewhere(spec: dict) -> bool:
+        """A split spec for an app a seated split already holds under another name."""
+        folder = app_folder(spec) if spec["team"].startswith("frontend-") else None
+        return bool(folder) and held_team.get(folder, spec["team"]) != spec["team"]
 
     fresh = run_scan(root)
     baseline = read_json(root / "docs" / "team" / "scan.json", None)
@@ -288,7 +350,8 @@ def evaluate(root: Path, days: int) -> dict:
                      "run `scan.py --root . --save` to start one from today.")
     core, opt, derived = planner.needs(fresh)
     option = recorded_option(root)
-    activity = measure(root, rows, days)
+    struck = setup_struck(root, option, baseline if has_baseline else fresh)
+    activity = measure(root, rows, days, merged_members)
     stats = activity["stats"]
     since = (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
     young = {t for t, d in seated_dates(root, rows, lock).items() if d and d >= since}
@@ -305,54 +368,79 @@ def evaluate(root: Path, days: int) -> dict:
             return False
         d = declined.get(p["key"])
         if d and not [s for s in p["signals"] if s in new_signals and s not in (d.get("signals") or [])]:
-            notes.append(f"{p['title']} was declined on {d.get('date') or 'an earlier date'}; its evidence has not "
-                         "changed, so it is not proposed again.")
+            when = d.get("date") or "an earlier date"
+            if p["action"] == "add" and not p["signals"]:
+                notes.append(f"{p['title']} was declined on {when}; it is not proposed again until you ask for it.")
+            elif p["signals"] and not has_baseline:
+                notes.append(f"{p['title']} was declined on {when}; there is no setup baseline to tell whether its "
+                             "evidence changed, so it is not proposed again.")
+            else:
+                notes.append(f"{p['title']} was declined on {when}; its evidence has not changed, so it is not "
+                             "proposed again.")
             return False
         proposals.append(p)
         proposed.update(s["team"] for s in p["seats"])
         return True
 
     def stays_retired(team: str, signals: list[str], why: str) -> bool:
-        if team in retired and not any(s in new_signals for s in signals):
+        if team not in retired or any(s in new_signals for s in signals):
+            return False
+        if has_baseline:
             notes.append(f"{name_of(team)} was retired and its evidence is unchanged since setup, so it is not "
                          f"proposed again. {planner.plain_why(why)}")
-            return True
-        return False
+        else:
+            notes.append(f"{name_of(team)} was retired, and there is no setup baseline to tell whether its evidence "
+                         f"changed, so it is not proposed again. {planner.plain_why(why)}")
+        return True
 
     def add(spec: dict, why: str) -> None:
         sigs = planner.spec_signals(spec, fresh)
-        text = planner.plain_why(why).rstrip(".") + (", new since setup" if set(sigs) & set(new_signals) else "") + "."
+        new = [s for s in sigs if s in new_signals]
+        if spec["team"] in struck and not new:
+            notes.append(f"{spec_name(spec)} was left out of the team at setup"
+                         + (" and nothing new calls for it" if has_baseline else "") + ", so it is not proposed again.")
+            return
+        text = planner.plain_why(why)
+        if new:  # name the evidence that is new, not the seat's first evidence
+            evidence = planner.ev(fresh["signals"], *new)
+            text = (text.rstrip(".") + ", new since setup." if evidence == why
+                    else f"{text} New since setup: {lower_first(planner.plain_why(evidence))}")
         offer({"key": f"add:{spec['team']}", "action": "add", "title": f"Add {spec_name(spec)}", "why": text,
                "signals": sigs, "spec": spec, "seats": [spec], "retire": []})
 
     # add: what the plan for the recorded option calls for that nothing seated covers
-    splits_now = {s["team"]: s for s in planner.ui_splits(fresh, taken_marks=seated_marks)}
-    for spec in planner.build(fresh, option):
+    splits_now = {s["team"]: s for s in planner.ui_splits(fresh, taken_marks=seated_marks, held=held)}
+    for spec in planner.build(fresh, option, held=held):
         t, kind = spec["team"], spec.get("type", "catalogue")
-        if t in planner.COORDINATION or t in cov or t in proposed:
+        if t in planner.COORDINATION or t in proposed:
+            continue
+        # the catalogue Frontend engineer holding the apps the seated splits leave
+        frontend_holder = (t == "frontend" and kind == "catalogue" and t not in seated
+                           and spec["why"].startswith(planner.FRONTEND_HOLDS))
+        if t in cov and kind != "merge" and not frontend_holder:
             continue
         if kind == "merge":
             why_of = lambda m: core.get(m) or opt.get(m) or spec["why"]  # noqa: E731
             missing = [m for m in spec["of"] if m not in cov and m not in proposed]
             keep = [m for m in missing if not stays_retired(m, planner.spec_signals({"team": m}, fresh), why_of(m))]
-            if len(missing) == len(spec["of"]) and planner.merge_allowed(t, keep, fresh, after_setup=True):
+            if t not in cov and len(missing) == len(spec["of"]) and planner.merge_allowed(t, keep, fresh, after_setup=True):
                 merged = planner.merge_spec(t, keep)
                 evidence = next((why_of(m) for m in keep if core.get(m) or opt.get(m)), "")
                 why = (planner.plain_why(evidence).rstrip(".") + "; " if evidence else "") + MERGES[t]["why"]
                 if not stays_retired(t, planner.spec_signals(merged, fresh), why):
                     add(merged, why)
                 continue
-            for m in keep:
+            for m in keep:  # a merge already seated, or one with a member held elsewhere: member by member
                 add({"team": m, "type": "catalogue", "why": why_of(m)}, why_of(m))
         elif kind == "derive":
             is_split = spec.get("base") == "seat-frontend" and t.startswith("frontend-")
-            if is_split and "frontend" in seated:
+            if is_split and ("frontend" in seated or held_elsewhere(spec)):
                 continue  # the split step proposes these, retiring the catalogue seat
             spec = splits_now.get(t, spec) if is_split else spec
             if not stays_retired(t, planner.spec_signals(spec, fresh), spec["why"]):
-                add(spec, spec["why"])
+                add(spec, planner.describe(spec, cat)[2] if is_split else spec["why"])
         else:
-            why = core.get(t) or opt.get(t) or spec["why"]
+            why = spec["why"] if frontend_holder else core.get(t) or opt.get(t) or spec["why"]
             if not stays_retired(t, planner.spec_signals(spec, fresh), why):
                 add({"team": t, "type": "catalogue", "why": why}, why)
 
@@ -361,8 +449,13 @@ def evaluate(root: Path, days: int) -> dict:
                + sum(1 for p in proposals if p["spec"]["team"] not in planner.COORDINATION))
     coordination = planner.coordination(n_other, option)
     for t, why in coordination.items():
-        if t not in cov and not stays_retired(t, [], why):
-            add({"team": t, "type": "catalogue", "why": why}, why)
+        if t in cov:
+            continue
+        if t in retired:  # no signal of its own: it waits for the owner to ask
+            notes.append(f"{name_of(t)} was retired, so it is not proposed again. With {n_other} other seats the "
+                         "usual rule would seat it; it comes back when you ask for it.")
+            continue
+        add({"team": t, "type": "catalogue", "why": why}, why)
 
     # retire: idle in the window, and nothing calls for it any more
     needed = set(core) | set(opt) | {d["team"] for d in derived} | set(splits_now) | set(coordination)
@@ -402,7 +495,8 @@ def evaluate(root: Path, days: int) -> dict:
         if not planner.merge_allowed(team, present, fresh, after_setup=True):
             continue
         spec = planner.merge_spec(team, present)
-        detail = "; ".join(f"{name_of(t)} {stats[t]['commits']} commits, {stats[t]['runs']} runs" for t in present)
+        detail = "; ".join(f"{name_of(t)} {plural(stats[t]['commits'], 'commit')}, {plural(stats[t]['runs'], 'run')}"
+                           for t in present)
         key = f"merge:{team}"
         if offer({"key": key, "action": "merge",
                   "title": f"Merge {listed([name_of(t) for t in present])} into {spec['mark']} {spec['seat']}",
@@ -423,16 +517,21 @@ def evaluate(root: Path, days: int) -> dict:
 
     # split: one frontend seat per UI app when the project is large
     if planner.size_class(fresh) == "large" and "frontend" in seated:
-        splits = [s for s in splits_now.values() if s["team"] not in cov and s["team"] not in proposed]
-        _, count = planner.ui_apps(fresh)
-        retire = ["frontend"] if count <= len(splits_now) else []
+        splits = [s for s in splits_now.values()
+                  if s["team"] not in cov and s["team"] not in proposed and not held_elsewhere(s)]
+        count = max(fresh.get("size", {}).get("ui_app_count", 0), len(splits_now))
+        holds = planner.frontend_holds(fresh, list(splits_now.values()))
+        retire = [] if holds else ["frontend"]  # the catalogue seat stays while it holds an app
         if splits and retire and "frontend" in young:
             held_back.append("frontend")
         elif splits:
             offer({"key": "split:frontend", "action": "split", "team": "frontend",
                    "title": f"Split {name_of('frontend')} into one seat per web app: {listed([spec_name(s) for s in splits])}",
-                   "why": f"The project is large and has {count} web apps; each gets its own frontend seat"
-                          + ("." if retire else ", and the Frontend engineer keeps the rest."),
+                   "why": f"The project is large and has {count} web apps; "
+                          + ("each gets its own frontend seat." if retire else
+                             f"{listed([spec_name(s) for s in splits])} "
+                             + ("gets its own seat" if len(splits) == 1 else "each get their own seat")
+                             + f", and {name_of('frontend')} keeps the apps without one."),
                    "signals": ["ui_web"], "spec": splits, "seats": splits, "retire": retire})
 
     if held_back:
@@ -464,9 +563,10 @@ def to_markdown(result: dict) -> str:
     lines = [f"## Team re-evaluation: {result['project']} ({result['date']}, last {result['days']} days)", "",
              f"Project size: **{result['size']}**. Seated: {len(result['seated'])}. "
              f"Commits attributed to a seat: {a['attributed']} (unattributed: {a['unattributed']}).", ""]
-    if result["new_signals"] or result["gone_signals"]:
-        lines.append(f"Repo changes since setup: new {', '.join(result['new_signals']) or 'none'}; "
-                     f"gone {', '.join(result['gone_signals']) or 'none'}.\n")
+    changes = ([f"New since setup: {plain_signals(result['new_signals'])}."] if result["new_signals"] else []) + \
+              ([f"Gone since setup: {plain_signals(result['gone_signals'])}."] if result["gone_signals"] else [])
+    if changes:
+        lines.append(" ".join(changes) + "\n")
     lines += ["| Seat | Commits | Runs | Inbox | Blocked | Last active |", "|---|---|---|---|---|---|"]
     for t, st in sorted(a["stats"].items(), key=lambda kv: -kv[1]["commits"]):
         name = result["names"].get(t, t)

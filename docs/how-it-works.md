@@ -172,8 +172,9 @@ which sessions to open and close and whom you talk to now, and *apply all, apply
 nothing*.
 
 **Applying** is `scaffold.py --plan docs/team/reevaluation.json --only <the keys you approved>
---record "<your words>" --question "<the question>"`; *apply all* leaves out `--only`, and *change
-nothing* is `--only none`. Your words become one decision row: what changed, in seat names, and
+--record "<your words>" --question "<the question>"`. *Apply all* passes every key put to you (a
+proposal the session dropped stays declined unless you take it back), and *change nothing* is
+`--only none`. Your words become one decision row: what changed, in seat names, and
 what you declined. Every proposal you did not approve goes to `docs/team/declined.json`, so it is not
 asked again. A change that is refused leaves the project untouched: seating a role a merged seat
 already holds (unless the same plan splits that seat), or a mark already in use. Retired seats keep

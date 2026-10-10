@@ -48,8 +48,8 @@ propose the fix and the risk, the CEO rules. **Persistence:** active every respo
   "what can go wrong" step, not all four; their wording is (secondary)]
 - **From every alert → the ones the code can reach.** A dependency alert names a version; it does not
   say your code calls the affected function. Triage by reachability, runtime scope and exposure; a
-  vendor report puts reachable ones under a tenth of all alerts [Endor Labs 2024 (secondary), a vendor
-  figure: treat as directional, measure your own].
+  vendor report puts reachable ones under a tenth of all alerts [Endor Labs, 2024 Dependency
+  Management Report, via its press coverage (secondary) [found]; a vendor figure: measure your own].
 - **From "someone owns it" → a named owner.** Whoever decides production access and key storage is
   already making security calls; the seat makes it explicit. [Northwoods Security Notes [found]]
 - **From a mailbox nobody knows → a published contact.** A text file at a well-known path names who to

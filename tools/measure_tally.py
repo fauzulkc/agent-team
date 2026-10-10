@@ -90,6 +90,8 @@ def measure() -> dict:
     with tempfile.TemporaryDirectory(prefix="tally-measure-") as tmp:
         tmp = Path(tmp)
         env = isolated_env(tmp, tmp)
+        for name in ("GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_COMMITTER_NAME", "GIT_COMMITTER_EMAIL"):
+            env.pop(name, None)  # an inherited identity would override each commit's -c author: one contributor, not four
         root = tmp / "tally"
         root.mkdir()
         build(root, env)

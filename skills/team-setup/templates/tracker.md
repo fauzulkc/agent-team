@@ -2,7 +2,7 @@
 
 **Kept by the 🛎️ Chief of Staff.** Where each seat's task stands in the active milestone, and why any
 seat has stopped. The milestones themselves are the CEO's (DECISIONS.md). A seat that stops sends
-the Chief of Staff one stop line (docs/TEAM.md §6); the Chief of Staff updates this file and routes
+the keeper one stop line (docs/TEAM.md §6); the keeper updates this file and routes
 the unblock.
 
 **Status words:** DONE · IN PROGRESS · BLOCKED (on a seat) · WAITING ON OWNER · SEAT CLOSED · NOT REPORTED.

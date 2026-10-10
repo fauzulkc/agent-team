@@ -13,7 +13,8 @@
 The roster is the table between `<!-- roster:start -->` and `<!-- roster:end -->`
 in docs/TEAM.md. Columns: Mark | Seat | Skill | Team | Kind | Register | Reports to.
 Cells split on unescaped pipes (`\\|` stays inside a cell); a table row between the
-markers that does not parse to seven cells is a problem, named, and fails --check.
+markers that does not parse to seven cells is a problem, named, and fails --check; while one
+is there, no worker is removed as an orphan (it may belong to that row).
 Each row yields `.claude/agents/<team>-worker.md` at the execution tier, with the
 seat's skill preloaded, except a seat whose rulebook still carries AUTHORING NEEDED:
 it gets no worker until the rulebook is authored, an existing one is removed, and
@@ -316,6 +317,7 @@ def main() -> int:
 
     problems: list[str] = []
     rows = parse_roster(TEAM_DOC.read_text(encoding="utf-8"), problems)
+    unparsed = len(problems)  # a row that does not parse may still be a seat: keep its worker until it is fixed
     problems += validate(rows)
     files = expected_files(rows)
     held_back = {AGENTS_DIR / f"{row['team']}-worker.md" for row in rows if unauthored(row)}
@@ -346,6 +348,10 @@ def main() -> int:
     AGENTS_DIR.mkdir(parents=True, exist_ok=True)
     for path, body in files.items():
         path.write_text(body, encoding="utf-8")
+    if unparsed and orphans:
+        print(f"gen-team-agents: WARNING kept {len(orphans)} worker(s) with no parsed roster row until the "
+              "roster rows above are fixed: " + ", ".join(p.name for p in orphans), file=sys.stderr)
+        orphans = []
     for path in orphans + unauthored_on_disk:
         path.unlink()
     for sub in ("inbox", "shared"):

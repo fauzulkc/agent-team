@@ -82,7 +82,7 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/plan.py --scan <project>/docs/team/scan.json
 ```
 
 **`--push-rule` from the uploading answer:**
-- *ask me each time*: `a seat asks the owner before each push and pushes on the owner's yes.`
+- *ask me each time* (also the rule when `--push-rule` is left out): `a seat asks the owner before each push and pushes on the owner's yes.`
 - *on its own*: `a seat pushes its landed work once the checks pass and a reviewing seat has passed it, and reports the push after.`
 - *I upload it myself*: `the owner pushes; a seat never pushes unless DECISIONS.md says otherwise.`
 
@@ -107,7 +107,8 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/scaffold.py --root <project> --plan <project
 ```
 
 It writes `docs/TEAM.md` (the roster), `docs/DECISIONS.md` with the owner's question and words as a
-decision row, a brief per seat, the tracker and owner-questions with a Chief of Staff, each rulebook in
+decision row, a brief per seat, the tracker and owner-questions (kept by the Chief of Staff, or the
+CEO when none is seated), each rulebook in
 `.claude/skills/` (origin, hash and seated date in `docs/team/seat-skills.lock`), the generator and
 `.claude/agents/`, a gitignored `scratchpad/team/` and a `CLAUDE.md` pointer. **It never overwrites a
 file** (it says what it skipped); `--force` only on the owner's word. **A refusal changes nothing:**

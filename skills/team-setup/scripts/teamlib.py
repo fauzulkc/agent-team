@@ -100,7 +100,7 @@ def roster_cells(line: str) -> list[str] | None:
 
 
 def roster_problems(team_doc: Path) -> list[str]:
-    """Lines between the roster markers that look like table rows but do not parse to seven cells."""
+    """Lines between the roster markers that look like table rows but that roster() drops: not seven cells, or no mark."""
     text = team_doc.read_text(encoding="utf-8")
     m = ROSTER_RE.search(text)
     out = []
@@ -108,6 +108,8 @@ def roster_problems(team_doc: Path) -> list[str]:
         cells = roster_cells(line)
         if cells is not None and len(cells) != 7:
             out.append(f"roster row has {len(cells)} cells, not 7: {line.strip()}")
+        elif cells is not None and cells[0] == "":
+            out.append(f"roster row has no mark: {line.strip()}")
     return out
 
 
@@ -127,9 +129,16 @@ def roster(team_doc: Path) -> list[dict[str, str]]:
     return rows
 
 
+def table_cell(s: str) -> str:
+    """Text safe inside one Markdown table cell: newlines collapsed, pipes escaped (roster_cells keeps `\\|`)."""
+    return re.sub(r"\s*\n\s*", " ", str(s)).replace("\\|", "|").replace("|", "\\|").strip()
+
+
 def roster_row(r: dict[str, str]) -> str:
-    return (f"| {r['mark']} | {r['seat']} | `{r['skill']}` | `{r['team']}` | {r['kind']} | "
-            f"{r['register']} | {r['reports_to']} |")
+    """One roster line; every cell escaped (table_cell), so a `|` in a register cannot add a cell."""
+    c = {k: table_cell(r[k]) for k in ("mark", "seat", "skill", "team", "kind", "register", "reports_to")}
+    return (f"| {c['mark']} | {c['seat']} | `{c['skill']}` | `{c['team']}` | {c['kind']} | "
+            f"{c['register']} | {c['reports_to']} |")
 
 
 def load_lock(root: Path) -> dict[str, dict]:
@@ -170,8 +179,15 @@ def merge_members(team: str, skill: str, lock: dict[str, dict]) -> list[str]:
     return []
 
 
+DERIVED_TEAMS = {d["team"] for d in DERIVED_ROLES.values()}
+
+
 def covers_frontend(team: str, skill: str, lock: dict[str, dict]) -> bool:
-    """A seated derive whose base is seat-frontend (lock `derive:seat-frontend`, or a `frontend-*` team)."""
+    """A seated split of the Frontend engineer: a `frontend-*` team, or a derive of seat-frontend (lock
+    `derive:seat-frontend`). A derived role built on that base for another job (the 🧷 Browser-extension
+    engineer, any team in DERIVED_ROLES) is its own role and does not cover the Frontend engineer."""
+    if team in DERIVED_TEAMS:
+        return False
     origin = (lock.get(skill) or {}).get("origin") or ""
     return origin == "derive:seat-frontend" or team.startswith("frontend-")
 
@@ -213,7 +229,9 @@ def members_covered(lock: dict[str, dict]) -> set[str]:
 
 
 def project_name(root: Path) -> str:
-    """docs/team/plan.json's project, else docs/TEAM.md's title line, else the folder name."""
+    """docs/team/plan.json's project, else docs/TEAM.md's "Internal working instrument for <name>." line, else
+    its first H1 when that reads "# Team: <name>" or "# <name> team", else the folder name. Only the first
+    H1 is read: a section heading added later never becomes the project's name."""
     try:
         plan = json.loads((root / "docs" / "team" / "plan.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
@@ -222,8 +240,12 @@ def project_name(root: Path) -> str:
         return plan["project"].strip()
     doc = root / "docs" / "TEAM.md"
     text = doc.read_text(encoding="utf-8") if doc.is_file() else ""
-    for rx in (r"^#\s*Team:\s*(.+?)\s*$", r"^#\s*(.+?)\s+team\s*$", r"Internal working instrument for (.+?)\.\*\*"):
-        m = re.search(rx, text, re.M | re.I)
-        if m and "{{" not in m.group(1):
+    m = re.search(r"Internal working instrument for (.+?)\.\*\*", text)
+    if m and "{{" not in m.group(1) and m.group(1).strip():
+        return m.group(1).strip()
+    h1 = re.search(r"^# (?!#)(.+?)\s*$", text, re.M)
+    for rx in (r"^Team:\s*(.+?)$", r"^(.+?)\s+team$"):
+        m = re.match(rx, h1.group(1).strip(), re.I) if h1 else None
+        if m and "{{" not in m.group(1) and m.group(1).strip():
             return m.group(1).strip()
     return root.name

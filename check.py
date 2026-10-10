@@ -86,11 +86,22 @@ def trailing_mark(token: str) -> str:
     return mark
 
 
-def unsourced_shifts(text: str) -> list[str]:
-    """Section 2's "From … → …" shifts that carry no bracketed source (the seat contract asks for one each)."""
+# Seats written under skills/team-setup/references/seat-contract.md: each section 2 source carries a
+# [read] or [found] tag. The original 21 cite by name without tags and need only a bracket.
+CONTRACT_SEATS = {"seat-community", "seat-data", "seat-docs", "seat-game-design", "seat-i18n", "seat-ml",
+                  "seat-mobile", "seat-security"}
+SOURCE_TAG = re.compile(r"\[(?:[^\]]*[,;]\s*)?(?:read|found)\s*[\],;(]")
+
+
+def unsourced_shifts(text: str, tagged: bool = False) -> list[str]:
+    """Section 2's "From … → …" shifts that carry no bracketed source (the seat contract asks for one each).
+
+    With `tagged`, a bracket counts only when it carries a `read` or `found` tag, so a bracket that
+    names no page opened or found ("[practice from write-ups (secondary)]") is flagged too."""
     m = re.search(r"^## 2 · .*?(?=^## 3 · )", text, re.M | re.S)
-    shifts = [sh.split("\n\n")[0] for sh in re.split(r"\n(?=- \*\*From |\d+\. \*\*From )", m.group(0) if m else "")[1:]]
-    return [re.sub(r"\s+", " ", sh)[:60] for sh in shifts if "[" not in sh]
+    shifts = [re.sub(r"\s+", " ", sh.split("\n\n")[0])
+              for sh in re.split(r"\n(?=- \*\*From |\d+\. \*\*From )", m.group(0) if m else "")[1:]]
+    return [sh[:60] for sh in shifts if not (SOURCE_TAG.search(sh) if tagged else "[" in sh)]
 
 
 def wrong_marks(text: str) -> list[str]:
@@ -134,7 +145,7 @@ for mark, seat, skill in rows:
         p.append(f"sections beyond the seven: {sorted(h for h in heads if h > 6)}")
     elif heads != sorted(heads):
         p.append(f"sections out of order: {heads}")
-    unsourced = unsourced_shifts(s)
+    unsourced = unsourced_shifts(s, tagged=skill in CONTRACT_SEATS)
     if unsourced:
         p.append(f"section 2 shift with no source: {'; '.join(unsourced[:2])}")
     marks = wrong_marks(s)

@@ -795,6 +795,24 @@ class ScaffoldTests(unittest.TestCase):
         self.assertTrue((root / ".claude" / "skills" / "seat-testing" / "SKILL.md").is_file())
         self.assertEqual(teamlib.load_lock(root)["seat-testing"]["seated"], LONG_AGO)
 
+    def test_repairing_a_missing_brief_keeps_an_edited_rulebooks_hash(self):
+        root = fx.build_lib(new_dir("lib-repair-edited"), ENV)
+        seat_up(root, "full")
+        skill = root / ".claude" / "skills" / "seat-testing" / "SKILL.md"
+        rule = "- Project rule: run the suite twice before calling it green."
+        with skill.open("a", encoding="utf-8") as f:
+            f.write("\n" + rule + "\n")
+        (root / "docs" / "team" / "testing.md").unlink()
+        entry_before = json.dumps(teamlib.load_lock(root)["seat-testing"], sort_keys=True)
+        out = scaffold(root, "--plan", root / "docs" / "team" / "plan.json").stdout
+        self.assertIn(f"repairing {name('testing')}", out)
+        self.assertTrue((root / "docs" / "team" / "testing.md").is_file())
+        self.assertEqual(json.dumps(teamlib.load_lock(root)["seat-testing"], sort_keys=True), entry_before,
+                         "a repair must not re-hash an edited rulebook, or the next sync overwrites the edit")
+        out = scaffold(root, "--sync").stdout
+        self.assertIn("kept (edited in this project): .claude/skills/seat-testing", out)
+        self.assertIn(rule, skill.read_text(encoding="utf-8"))
+
     def test_an_untracked_rulebook_is_neither_synced_nor_deleted(self):
         root = fx.build_lib(new_dir("lib-untracked"), ENV)
         seat_up(root, "full")
@@ -876,13 +894,15 @@ class LibraryTeamTests(unittest.TestCase):
         self.assertEqual((root / "docs" / "DECISIONS.md").read_bytes(), before)
         self.assertFalse((root / "docs" / "team" / "declined.json").exists())
 
-    def test_no_tracker_without_a_chief_of_staff(self):
+    def test_the_tracker_and_owner_questions_are_written_with_or_without_a_chief_of_staff(self):
         self.assertNotIn("chief-of-staff", roster_teams(self.lean))
         for f in ("tracker.md", "owner-questions.md"):
-            self.assertFalse((self.lean / "docs" / "team" / f).exists(), f)
+            text = (self.lean / "docs" / "team" / f).read_text(encoding="utf-8")
+            self.assertIn("Kept by the 🧭 CEO", text, f)
+            self.assertNotIn("Kept by the 🛎️ Chief of Staff.", text, f)
         self.assertIn("chief-of-staff", roster_teams(self.full))
         for f in ("tracker.md", "owner-questions.md"):
-            self.assertTrue((self.full / "docs" / "team" / f).is_file(), f)
+            self.assertIn("Kept by the 🛎️ Chief of Staff.", (self.full / "docs" / "team" / f).read_text(encoding="utf-8"), f)
 
     def test_ceo_and_bar_raiser_refuse_to_retire(self):
         root = clone(self.full, "lib-keep")
@@ -1256,7 +1276,7 @@ class ReevaluateActivityTests(unittest.TestCase):
         with (root / "docs" / "team" / "tracker.md").open("a", encoding="utf-8") as f:
             f.write(f"\n| # | task | seat | done when | status | stop reason · unblock |\n|---|---|---|---|---|---|\n"
                     f"| 1 | release checks | {name('quality')} | the suite is green | BLOCKED (on {name('ceo')}) | waits |\n"
-                    f"| 2 | old checks | {name('quality')} | {stale} | BLOCKED | long ago |\n"
+                    f"| 2 | old checks | {name('quality')} | done | BLOCKED since {stale} | long ago |\n"
                     f"| 3 | pricing | {name('growth')} | live | IN PROGRESS | - |\n\n"
                     f"{recent} · {name('quality')} → {name('ceo')} · STOP · BLOCKED on the release date\n"
                     f"{stale} · {name('growth')} → {name('ceo')} · STOP · BLOCKED long ago\n")
@@ -1517,6 +1537,17 @@ class ReevaluateLargeTests(unittest.TestCase):
         teams = roster_teams(root)
         self.assertNotIn("frontend", teams)
         self.assertLessEqual({"frontend-admin", "frontend-web"}, set(teams))
+
+
+class WalkthroughMeasureTests(unittest.TestCase):
+    def test_a_job_wide_git_identity_does_not_merge_the_contributors(self):
+        """CI sets GIT_AUTHOR_*/GIT_COMMITTER_*; the walkthrough's four contributors must still measure four."""
+        env = dict(os.environ, GIT_AUTHOR_NAME="CI", GIT_AUTHOR_EMAIL="ci@example.invalid",
+                   GIT_COMMITTER_NAME="CI", GIT_COMMITTER_EMAIL="ci@example.invalid")
+        res = subprocess.run([sys.executable, str(REPO / "tools" / "measure_tally.py"), "--check"],
+                             env=env, capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+        self.assertIn("every measured figure holds", res.stdout)
 
 
 if __name__ == "__main__":

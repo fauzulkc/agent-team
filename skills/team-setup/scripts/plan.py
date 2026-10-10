@@ -8,7 +8,9 @@
                                                    write one option as the plan scaffold.py applies:
                                                    {"project", "option", "size", "owner_acts", "push_rule",
                                                     "seats", "retire": []}; reevaluate.py compares against
-                                                   the recorded "option"
+                                                   the recorded "option". --push-rule defaults to setup's
+                                                   recommendation: "a seat asks the owner before each push
+                                                   and pushes on the owner's yes."
 
 How the options differ:
   lean         the fewest sessions: every allowed merge, optional seats dropped
@@ -17,10 +19,14 @@ How the options differ:
                large one also splits a frontend seat per UI app
   full         every seat separate, the optional seats added, splits applied
 
-A split makes one frontend seat per web UI app, for up to four apps (MAX_SPLITS); past four, the
-catalogue Frontend engineer stays and holds the rest. A split's team is `frontend-<slug>`, the slug
-built from the app folder's name (its whole path when two apps share a name), lower-case [a-z0-9-],
-unique; its mark comes from SPLIT_MARKS, which no catalogue, merge or derived seat uses.
+A split makes one frontend seat per web UI app in a folder, for up to four apps (MAX_SPLITS). The
+catalogue Frontend engineer stays beside the splits and holds the rest when there are more apps than
+split seats, or a web app at the repository root (frontend_holds). A split's team is
+`frontend-<slug>`, the slug built from the app folder's name (its whole path when two apps share a
+name, or when a seated split already uses the name), lower-case [a-z0-9-], unique; its mark comes
+from SPLIT_MARKS, which no catalogue, merge or derived seat uses. `ui_splits(scan, held=...)` and
+`build(scan, option, held=...)` take the splits already seated ({app folder: (slug, mark)}): a held app
+keeps its seat's name and comes first, so a seated split is never renamed by a newer app.
 
 Rules reevaluate.py shares (one rule decides both):
   coordination(n_other, option)   the Chief of Staff at 5 or more other seats (7 in lean), the Scope
@@ -57,6 +63,10 @@ COORDINATION = ("chief-of-staff", "scope-trimmer")
 SMALL_MERGES = ("growth", "money", "legal-compliance", "customer", "data-ml")
 # seats lean drops when present, because another seat covers their job well enough while small
 LEAN_DROPS = ("user", "scope-trimmer", "competition", "funding", "research")
+# the push rule a plan carries when the owner did not answer the upload question: setup's recommendation
+DEFAULT_PUSH_RULE = "a seat asks the owner before each push and pushes on the owner's yes."
+# the start of the catalogue Frontend engineer's why when it stays beside the frontend splits
+FRONTEND_HOLDS = "holds the UI apps without a frontend seat of their own: "
 
 
 def ev(signals: dict, *names: str) -> str:
@@ -255,30 +265,59 @@ def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-") or "app"
 
 
-def app_slugs(apps: list[str]) -> list[str]:
-    """One unique [a-z0-9-] slug per app folder: its last name, or its whole path when two share a name."""
+def app_slugs(apps: list[str], held: dict | None = None) -> list[str]:
+    """One unique [a-z0-9-] slug per app folder: the seated slug for an app in `held` ({folder: slug or
+    (slug, mark)}); else its last name, or its whole path when another app shares that name or a held seat
+    already uses it."""
+    kept = {a: (v[0] if isinstance(v, (tuple, list)) else v) for a, v in (held or {}).items()}
     last = [slugify(a.rstrip("/").split("/")[-1]) for a in apps]
-    slugs = [slugify(a) if last.count(s) > 1 else s for a, s in zip(apps, last)]
+    reserved = {kept[a] for a in apps if a in kept}
+    slugs = [kept[a] if a in kept else slugify(a) if last.count(s) > 1 or s in reserved else s
+             for a, s in zip(apps, last)]
     out: list[str] = []
-    for s in slugs:
+    for a, s in zip(apps, slugs):
         base, n = s, 2
-        while s in out:
+        while s in out or (a not in kept and s in reserved):
             s, n = f"{base}-{n}", n + 1
         out.append(s)
     return out
 
 
-def ui_splits(scan: dict, taken_marks=()) -> list[dict]:
-    """One frontend seat per web UI app once there are two or more, for the first MAX_SPLITS apps; past
-    that the catalogue Frontend engineer holds the rest (build keeps it). Marks avoid `taken_marks`."""
+def frontend_holds(scan: dict, splits: list[dict]) -> str:
+    """Why the catalogue Frontend engineer stays beside the frontend splits: the web app at the repository
+    root and the UI apps no split holds, else "" (the splits hold every app)."""
+    apps, count = ui_apps(scan)
+    split_apps = {s.get("register", "").replace("the UI code under ", "", 1).rstrip("/") for s in splits}
+    parts = (["the app at the repository root"] if "." in scan.get("size", {}).get("ui_apps", []) else [])
+    parts += [a for a in apps if a not in split_apps]
+    more = count - len(apps)
+    if not parts and more <= 0:
+        return ""
+    listing = ", ".join(parts)
+    if more > 0:
+        listing = f"{listing} and {more} more" if listing else f"{more} more"
+    return FRONTEND_HOLDS + listing
+
+
+def ui_splits(scan: dict, taken_marks=(), held: dict | None = None) -> list[dict]:
+    """One frontend seat per web UI app in a folder once there are two or more, for MAX_SPLITS apps; past
+    that, or beside a web app at the repository root, the catalogue Frontend engineer holds the rest
+    (build keeps it). `held` ({app folder: (slug, mark)}) names the splits already seated: those apps come
+    first and keep their slug and mark. New marks avoid `taken_marks`."""
     apps, count = ui_apps(scan)
     if count < 2 or len(apps) < 2:
         return []
+    held = {a: (v if isinstance(v, (tuple, list)) else (v, "")) for a, v in (held or {}).items()}
+    kept = [a for a in apps if a in held]
     marks = split_marks(taken_marks)
-    split = apps[:min(MAX_SPLITS, len(marks))]
-    rest = count - len(split)
+    limit = max(len(kept), min(MAX_SPLITS, len(kept) + len(marks)))
+    chosen = set(kept + [a for a in apps if a not in held][:limit - len(kept)])
+    split = [a for a in apps if a in chosen]
+    rest = count - len(split) + (1 if "." in scan.get("size", {}).get("ui_apps", []) else 0)
+    free = iter(marks)
     out = []
-    for app, slug, mark in zip(split, app_slugs(split), marks):
+    for app, slug in zip(split, app_slugs(split, {a: held[a][0] for a in kept})):
+        mark = held[app][1] if app in held and held[app][1] else next(free, "")
         scope = (f"only {app}/; each other UI app has its own frontend seat" if not rest else
                  f"only {app}/; the other UI apps have their own frontend seats or sit with the Frontend engineer")
         out.append({"team": f"frontend-{slug}", "type": "derive", "base": "seat-frontend",
@@ -289,7 +328,8 @@ def ui_splits(scan: dict, taken_marks=()) -> list[dict]:
     return out
 
 
-def build(scan: dict, option: str) -> list[dict]:
+def build(scan: dict, option: str, held: dict | None = None) -> list[dict]:
+    """One option's seat specs. `held` names the frontend splits already seated (see ui_splits)."""
     core, opt, derived = needs(scan)
     seats = dict(core)
     size = size_class(scan)
@@ -297,7 +337,7 @@ def build(scan: dict, option: str) -> list[dict]:
     splits: list[dict] = []
     if option == "full":
         seats.update({k: v for k, v in opt.items() if k not in seats})
-        splits = ui_splits(scan)
+        splits = ui_splits(scan, held=held)
     elif option == "recommended":
         if size == "tiny":
             for t in ("scope-trimmer", "competition", "funding", "research"):
@@ -307,19 +347,16 @@ def build(scan: dict, option: str) -> list[dict]:
         elif size == "small":
             merges = apply_merges(seats, SMALL_MERGES, scan)
         elif size == "large":
-            splits = ui_splits(scan)
+            splits = ui_splits(scan, held=held)
     else:  # lean
         for t in LEAN_DROPS:
             if t not in ALWAYS:
                 seats.pop(t, None)
         merges = apply_merges(seats, list(MERGES), scan)
     if splits:
-        apps, count = ui_apps(scan)
-        if count > len(splits):  # more UI apps than split seats: the catalogue seat holds the rest
-            rest = apps[len(splits):]
-            more = count - len(splits) - len(rest)
-            seats["frontend"] = (f"holds the UI apps without a frontend seat of their own: {', '.join(rest)}"
-                                 + (f" and {more} more" if more > 0 else ""))
+        holds = frontend_holds(scan, splits)  # more UI apps than split seats, or one at the root
+        if holds:
+            seats["frontend"] = holds
         else:
             seats.pop("frontend", None)
     n = len(seats) + len(merges) + len(splits) + len(derived)
@@ -388,6 +425,11 @@ def describe(spec: dict, cat: dict) -> tuple[str, str, str]:
     if spec.get("base") == "seat-frontend" and spec["team"].startswith("frontend-"):
         app = spec.get("register", "").replace("the UI code under ", "")
         apps = spec["why"].replace("separate: ", "", 1).replace(" UI apps (", " web apps (", 1)
+        if "Frontend engineer" in spec.get("scope", ""):  # the catalogue seat holds the apps past the splits
+            fe = cat.get("frontend", {})
+            return (f"{spec['mark']} {spec['seat']}", f"a frontend seat of its own, for {app}",
+                    f"The project has {apps}; this one gets its own frontend seat, and the "
+                    f"{fe.get('mark', '')} {fe.get('seat', 'Frontend engineer')} holds the apps without one.")
         return (f"{spec['mark']} {spec['seat']}", f"one frontend seat per web app, this one for {app}",
                 f"The project has {apps}; each gets its own frontend seat.")
     return (f"{spec['mark']} {spec['seat']}", "a new role: its rulebook is written for it before it starts work",
@@ -421,13 +463,14 @@ def main() -> int:
     ap.add_argument("--out", type=Path)
     ap.add_argument("--project")
     ap.add_argument("--owner-acts", default="publishing, sending, spending, signing")
-    ap.add_argument("--push-rule", default="the owner pushes; a seat never pushes unless DECISIONS.md says otherwise.")
+    ap.add_argument("--push-rule", default=DEFAULT_PUSH_RULE)
     a = ap.parse_args()
     scan = json.loads(a.scan.read_text(encoding="utf-8"))
     opts = options(scan)
     if a.option:
         plan = {"project": a.project or scan.get("root"), "option": a.option, "size": opts["size"],
-                "owner_acts": a.owner_acts, "push_rule": a.push_rule, "seats": opts[a.option], "retire": []}
+                "owner_acts": a.owner_acts, "push_rule": a.push_rule, "seats": opts[a.option], "retire": [],
+                "offered": sorted({s["team"] for s in opts[a.option]} | {m for s in opts[a.option] for m in s.get("of", [])})}
         text = json.dumps(plan, indent=2, ensure_ascii=False)
         if a.out:
             a.out.parent.mkdir(parents=True, exist_ok=True)

@@ -48,8 +48,8 @@ The exact paths, the register that holds your status, the OS floor and the rulin
 - **From device-of-the-week → a stated matrix and floor.** Name the OS floor, smallest screen and slowest
   device; "works" names its row. One model can be flagged at 8% crashes with a fine average [Android vitals [read]].
 - **From "the network works" → the network is the exception.** The local store is the source of truth; queue
-  writes durably with a client-made id so a retry is idempotent; back off with a cap and jitter; tell the user
-  when a change is pending, failed or lost [offline-first sync guides (secondary) [found]].
+  writes, drain them with exponential backoff [Android Developers, "Build an offline-first app" [read]], give
+  each write a client-made id so a retry is idempotent, and show the user a pending, failed or lost change.
 - **From "no crashes in testing" → measured bars on live users.** Crash-free users and sessions, user-perceived
   ANR rate and cold-start time. The store's hard lines are 1.09% user-perceived crashes and 0.47% ANRs overall,
   with lower discoverability and a listing warning above them, on a 28-day window [Android vitals [read]].

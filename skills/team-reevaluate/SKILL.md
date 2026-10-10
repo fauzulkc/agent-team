@@ -85,7 +85,9 @@ plan's `proposals` before you ask, in the same shape (a unique `key` such as `ad
 
 One question, in `docs/TEAM.md §7`'s shape and plain words: seat names, never team slugs or codes.
 - **The proposals as a list**, each with its evidence in words ("📐 Design: no commits, no worker
-  runs, nothing waiting in its inbox for 30 days, and nothing in the repo calls for it").
+  runs, nothing waiting in its inbox for 30 days, and nothing in the repo calls for it"). **Each
+  retire names its new holder** ("Retire 🎬 Motion & Production; its open work moves to 📐 Design"):
+  the decision row is the only place the retired brief's "its work moved" line can point to.
 - **What you dropped**, one line each with the reason.
 - **What changes for the owner**: sessions to open or close, and any new seat that needs its
   rulebook written before it works.
@@ -102,6 +104,9 @@ measurement). Nothing is recorded; the baseline stays.
 python3 $SETUP/scripts/scaffold.py --root . --plan docs/team/reevaluation.json --only <keys> \
   --record "<the owner's answer, verbatim>" --question "<the question asked, in one line>"
 ```
+
+**`--question` keeps each retire's new holder** as step 4 asked it ("Retire 🎬 Motion & Production,
+its work to 📐 Design; add 📱 Mobile?"), so the decision row says where the work went.
 
 **`<keys>` is the accepted proposals' keys**, comma-separated (every key put to the owner for "Apply
 all"), or `none` for "Change nothing". **Every proposal not named is declined:** listed in the
@@ -181,9 +186,9 @@ change plan, `retired/`), the added and removed `.claude/skills/seat-*` and `.cl
    checks, Engineering & Platform past 2,000 source files) is not made: say why in one line, and what
    fits instead. Otherwise apply at once.
 3. **Apply with the owner's words as the record.** Every run carries `--record "<their words>"`,
-   `--question "<the change, in seat names>"` and `--project "<name>"` (the name in
-   `docs/team/plan.json`, else in `docs/TEAM.md`'s first paragraph; without it a new brief names the
-   folder). `--add <team>` adds a catalogue seat; `--retire <team>` retires one. **A role a merged
+   `--question "<the change, in seat names, naming who takes each retiring seat's work>"` and
+   `--project "<name>"` (the name in `docs/team/plan.json`, else in `docs/TEAM.md`'s first paragraph;
+   without it a new brief names the folder). `--add <team>` adds a catalogue seat; `--retire <team>` retires one. **A role a merged
    seat holds** is refused by `--add` (`… is held by …`): unmerge it with
    `--add <each member> --retire <merged team>` (members: its lock entry's origin or `of`), and tell
    the owner its other roles get their own seats too. **A merge, a split or a new role** goes in

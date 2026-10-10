@@ -13,8 +13,10 @@ Dependencies come from the dependency lists only: package.json's dependency maps
 pyproject.toml's [project] dependencies and optional-dependencies, [dependency-groups] and Poetry's
 dependency tables (read with tomllib on Python 3.11+, a section-aware reader before that), go.mod,
 Cargo.toml, Gemfile, composer.json. `mobile` needs Android or iOS evidence (an android/ or ios/
-folder, AndroidManifest.xml, a Gradle file applying a com.android plugin, pubspec.yaml, an Expo
-app.json, an Xcode project or a Podfile); a plain Gradle build is not a mobile app. `monorepo` means
+folder at the root, one folder down outside asset folders, or in an app under apps/ or packages/;
+AndroidManifest.xml, a Gradle file applying a com.android plugin, pubspec.yaml, an Expo app.json, an
+Xcode project's project.pbxproj or a Podfile); a plain Gradle build is not a mobile app, and icon
+folders named android/ or ios/ under public/ or assets/ are not one either. `monorepo` means
 package manifests in two or more different folders below the root, or a workspace config.
 `size.ui_apps` lists up to 8 web UI app folders; `size.ui_app_count` is the full count.
 Standard library only; finishes in seconds on large repos (it skips vendored and build folders).
@@ -73,7 +75,7 @@ DEP_SIGNALS = {
 }
 # path globs / names → signal
 PATH_SIGNALS = {
-    "mobile": ["ios/", "android/", "pubspec.yaml", "app.json:expo", "*.xcodeproj", "Podfile", "AndroidManifest.xml",
+    "mobile": ["ios/", "android/", "pubspec.yaml", "app.json:expo", "project.pbxproj", "Podfile", "AndroidManifest.xml",
                "build.gradle:com.android", "build.gradle.kts:com.android"],
     "deploy": ["Dockerfile", "docker-compose.yml", "compose.yml", "fly.toml", "vercel.json", "netlify.toml",
                "render.yaml", "wrangler.toml", "Procfile", "serverless.yml", "*.tf", "k8s/", "helm/",
@@ -101,6 +103,9 @@ PATH_SIGNALS = {
     "licence_data": ["datasets/", "data/raw/", "data/external/", "LICENSES/", "THIRD_PARTY_NOTICES*",
                      "NOTICE", "ATTRIBUTION*"],
 }
+# folders that count for `mobile` only where a mobile project keeps them, never under an asset folder
+MOBILE_DIRS = {"ios", "android"}
+ASSET_DIRS = {"public", "static", "assets", "icons", "images", "img", "res", "resources", "www"}
 CONTENT_EXTS = (".md", ".mdx", ".markdown", ".mp4", ".mov", ".webm", ".png", ".jpg", ".jpeg", ".webp", ".gif")
 PERSONAL_DATA_WORDS = re.compile(r"\b(email|phone|address|date_of_birth|dob|password|ssn|passport|"
                                  r"first_name|last_name|full_name|ip_address)\b", re.I)
@@ -143,6 +148,7 @@ REQ_NAME = re.compile(r"^\s*([A-Za-z0-9][A-Za-z0-9_.\-]*)")
 TOML_TABLE = re.compile(r"^\s*\[\[?\s*([^\[\]]+?)\s*\]\]?\s*(?:#.*)?$")
 TOML_KEY = re.compile(r"""^\s*("[^"]+"|'[^']+'|[A-Za-z0-9_.\-]+)\s*=\s*(.*)$""")
 POETRY_TABLE = re.compile(r"^tool\.poetry\.(dependencies|dev-dependencies|group\.[^.]+\.dependencies)$")
+POETRY_SUBTABLE = re.compile(r"^tool\.poetry\.(?:dependencies|dev-dependencies|group\.[^.]+\.dependencies)\.([^.]+)$")
 
 
 def requirement_names(reqs) -> set[str]:
@@ -156,35 +162,37 @@ def requirement_names(reqs) -> set[str]:
 
 
 def array_strings(text: str) -> tuple[list[str], bool]:
-    """The top-level strings of the TOML array `text` opens with `[` (strings inside inline tables are
-    skipped, comments run to their line's end), and whether the array closed within `text`."""
+    """The strings of a TOML value and whether it closed within `text`. For an array (`text` opens with
+    `[`): its top-level strings, strings inside its inline tables skipped. For an inline table (`{`): the
+    top-level strings of each array directly inside it (`{ ml = ["torch"] }`). Comments run to their
+    line's end; a backslash escapes the next character inside a basic ("...") string."""
     out: list[str] = []
-    depth = braces = 0
+    stack: list[str] = []
+    want = ["["] if text.lstrip().startswith("[") else ["{", "["]
     i, n = 0, len(text)
     while i < n:
         ch = text[i]
         if ch in "\"'":
-            end = text.find(ch, i + 1)
-            if end < 0:
+            j = i + 1
+            while j < n and text[j] != ch:
+                j += 2 if ch == '"' and text[j] == "\\" else 1
+            if j >= n:
                 return out, False
-            if depth == 1 and not braces:
-                out.append(text[i + 1:end])
-            i = end
+            if stack == want:
+                out.append(text[i + 1:j])
+            i = j
         elif ch == "#":
             end = text.find("\n", i)
             if end < 0:
                 return out, False
             i = end
-        elif ch == "[":
-            depth += 1
-        elif ch == "]":
-            depth -= 1
-            if depth == 0:
+        elif ch in "[{":
+            stack.append(ch)
+        elif ch in "]}":
+            if stack:
+                stack.pop()
+            if not stack:
                 return out, True
-        elif ch == "{":
-            braces += 1
-        elif ch == "}":
-            braces -= 1
         i += 1
     return out, False
 
@@ -205,21 +213,27 @@ def pyproject_deps_fallback(text: str) -> set[str]:
         m = TOML_TABLE.match(line)
         if m:
             table = m.group(1).replace('"', "").replace("'", "")
+            sub = POETRY_SUBTABLE.match(table)  # [tool.poetry.dependencies.stripe]: one dependency
+            if sub and sub.group(1).lower() != "python":
+                names.add(sub.group(1).lower())
             continue
         k = TOML_KEY.match(line)
         if not k:
             continue
         key, value = k.group(1).strip("\"'"), k.group(2)
-        array_key = ((table == "project" and key == "dependencies")
-                     or table in ("project.optional-dependencies", "dependency-groups"))
-        if array_key and value.lstrip().startswith("["):
+        full = f"{table}.{key}" if table else key  # a dotted key reads as its table: optional-dependencies.ml
+        array_key = full == "project.dependencies" or full.startswith(("project.optional-dependencies.",
+                                                                       "dependency-groups."))
+        table_key = full in ("project.optional-dependencies", "dependency-groups")
+        opener = value.lstrip()[:1]
+        if (array_key and opener == "[") or (table_key and opener == "{"):
             got, done = array_strings(value)
             if done:
                 reqs += got
             else:
                 pending = value
-        elif POETRY_TABLE.match(table) and key.lower() != "python":
-            names.add(key.lower())
+        elif POETRY_TABLE.match(table) and key.split(".")[0].lower() != "python":
+            names.add(key.split(".")[0].lower())
     return requirement_names(reqs) | names
 
 
@@ -303,6 +317,16 @@ def deps_from_manifests(root: Path, rels: list[str]) -> tuple[set[str], list[str
     return deps, found
 
 
+def mobile_place(parents: list[str]) -> bool:
+    """Whether an ios/ or android/ folder under `parents` is where a mobile project keeps it: the root, one
+    folder down outside an asset folder (mobile/ios/), or inside an app under apps/ or packages/."""
+    if len(parents) == 0:
+        return True
+    if len(parents) == 1:
+        return parents[0].lower() not in ASSET_DIRS
+    return len(parents) == 2 and parents[0] in ("apps", "packages") and parents[1].lower() not in ASSET_DIRS
+
+
 class PathMatcher:
     """Classifies PATH_SIGNALS once so each file costs a few set lookups, not dozens of regex scans."""
 
@@ -336,7 +360,9 @@ class PathMatcher:
     def signals_for(self, rel: str, name: str) -> list[tuple[str, str | None]]:
         out: list[tuple[str, str | None]] = list(self.exact.get(name, ()))
         parts = rel.split("/")[:-1]
-        for part in parts:
+        for i, part in enumerate(parts):
+            if part in MOBILE_DIRS and not mobile_place(parts[:i]):
+                continue
             for sig in self.dirs.get(part, ()):
                 out.append((sig, None))
         if parts:

@@ -7,8 +7,10 @@
 
 A MERGE is deterministic and complete: each member's whole preamble (the text between its H1 and
 section 0) is kept under "As <member>" ahead of section 0, and every section of every member
-rulebook is kept under "As <member>", with a short header on holding several roles at once. It can
-be recomposed from newer member rulebooks at any time (`scaffold.py --sync` does).
+rulebook is kept under "As <member>", with a short header on holding several roles at once. Every
+member's own paths, in every member's text, become the merged seat's (`docs/team/<member>.md`,
+`scratchpad/team/inbox/<member>.md`, `scratchpad/team/runs/<member>/`, `<member>-worker`,
+`seat-<member>`), as a derive's do. It can be recomposed from newer member rulebooks at any time (`scaffold.py --sync` does).
 
 A DERIVE copies a base rulebook under the new seat's name and mark, rewrites the base seat's own
 paths to the new seat's (`docs/team/<base>.md`, `scratchpad/team/inbox/<base>.md`,
@@ -66,6 +68,13 @@ def compose_merge(team: str, seat: str, mark: str, members: list[str]) -> str:
     for m in members:
         row = cat[m]
         parsed.append((row, parse((SEATS_SRC / row["skill"] / "SKILL.md").read_text(encoding="utf-8"))))
+    teams = [r["team"] for r, _ in parsed]
+
+    def own(text: str) -> str:  # every member's own paths, in every member's text, become the merged seat's
+        for m in teams:
+            text = own_paths(text, m, team)
+        return text
+
     roles = [r["seat"] for r, _ in parsed]
     role_list = ", ".join(roles[:-1]) + " and " + roles[-1] if len(roles) > 1 else roles[0]
     desc = (f"{mark} {seat}: one seat holding the {role_list} roles. Use for anything those seats handle: "
@@ -76,7 +85,7 @@ def compose_merge(team: str, seat: str, mark: str, members: list[str]) -> str:
     out = [f'---\nname: seat-{team}\ndescription: "{quote(desc)}"\n---\n',
            f"# {mark} {seat}\n",
            "**Single loyalty: each role below, held honestly at once.**\n",
-           *(f"*As {r['mark']} {r['seat']}:* " + re.sub(r"^(#+) ", r"\1### ", p["preamble"], flags=re.M) + "\n"
+           *(f"*As {r['mark']} {r['seat']}:* " + re.sub(r"^(#+) ", r"\1### ", own(p["preamble"]), flags=re.M) + "\n"
              for r, p in parsed if p["preamble"]),
            f"<!-- COMPOSED by agent-team seatgen from {', '.join(r['skill'] for r, _ in parsed)}. "
            "Recomposed by `scaffold.py --sync` while unedited; edit freely to make it this project's own. -->\n",
@@ -94,7 +103,7 @@ def compose_merge(team: str, seat: str, mark: str, members: list[str]) -> str:
         out.append(f"## {n} · {title}\n")
         for row, p in parsed:
             if n in p["sections"]:
-                body = p["sections"][n][1]
+                body = own(p["sections"][n][1])
                 body = re.sub(r"^### ", "#### ", body, flags=re.M)
                 out.append(f"### As {row['mark']} {row['seat']}\n\n{body}\n")
     return "\n".join(out).rstrip() + "\n"
@@ -165,7 +174,7 @@ def main() -> int:
         text = compose_derive(a.team, a.seat, a.mark, a.base, a.kind, a.reports_to, a.scope, a.register, a.sibling)
     dst = a.out / f"seat-{a.team}" / "SKILL.md"
     dst.parent.mkdir(parents=True, exist_ok=True)
-    dst.write_text(text, encoding="utf-8")
+    dst.write_bytes(text.encode("utf-8"))  # LF on every platform, so the lock's text hash matches
     print(f"wrote {dst} ({text.count(chr(10))} lines)")
     return 0
 

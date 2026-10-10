@@ -177,6 +177,8 @@ Unblock: <what moves it>
 - **The shared tree:** never `git add -A` and never a bare `git commit`; `git add <new paths>`,
   then `git commit -o <paths> -m "…"`, then read `git show --stat HEAD`. Check
   `git diff --cached` first: a peer's staged file rides into your commit otherwise.
+- **Start every commit subject with your team** (`design: …`, `design(web): …`); a merged seat may
+  use any member's. Re-evaluation counts a seat's work by these prefixes.
 - **Commits are the seat's. Pushes:** {{PUSH_RULE}}
 
 ---
@@ -196,13 +198,13 @@ summarised. **No day or week estimates:** size work by order and dependency; rea
 
 ### When the owner is asked, and when not
 
-**Ask the owner** (through the Chief of Staff, batched into `docs/team/owner-questions.md`):
-anything outward ({{OWNER_ACTS}}); any spend; prices; legal and identity acts (sign-ups,
-contracts, terms); anything irreversible (deleting data, a migration with no rollback, rewriting
-history); a secret only the owner holds (ask them to set it by name, never paste a value); a real
-fork where the evidence cuts against a preference the owner stated; new scope (a goal, a milestone
-beyond the active one); taste the owner reserved; pushes, per §6. **A new seat is never asked on its
-own:** note it, with its evidence, under *For the next team re-evaluation* in
+**Ask the owner** (through the Chief of Staff, or the CEO when none is seated, batched into
+`docs/team/owner-questions.md`): anything outward ({{OWNER_ACTS}}); any spend; prices; legal and
+identity acts (sign-ups, contracts, terms); anything irreversible (deleting data, a migration with no
+rollback, rewriting history); a secret only the owner holds (ask them to set it by name, never paste a
+value); a real fork where the evidence cuts against a preference the owner stated; new scope (a goal,
+a milestone beyond the active one); taste the owner reserved; pushes, per §6. **A new seat is never
+asked on its own:** note it, with its evidence, under *For the next team re-evaluation* in
 `docs/team/owner-questions.md`; the re-evaluation puts every seat change to the owner in one question.
 
 **Do not ask the owner** (decide, then report): how to build what is already in scope; which

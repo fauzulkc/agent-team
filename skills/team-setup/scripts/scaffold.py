@@ -19,7 +19,8 @@
 or declines a proposal, with --record, appends one row to docs/DECISIONS.md:
     | **DEC-n** | <question> | <the plan applied, relative to the root, or "named by the owner"> |
       ✅ <date>: <what changed, in seat names with marks>. Declined: <titles, or nothing>. Owner's words: "<verbatim>" |
-The question defaults to "Team change" for a plan and "Team change named by the owner" otherwise.
+A plan outside the project is cited by its file name alone. The default push rule written into a new
+TEAM.md is "a seat asks the owner before each push and pushes on the owner's yes." (--push-rule). The question defaults to "Team change" for a plan and "Team change named by the owner" otherwise.
 A run that changes nothing and declines nothing records no row and prints
 "nothing changed; no decision recorded". Declined proposals are appended to docs/team/declined.json
 (a JSON list of {"key", "title", "action", "signals", "date", "decision"}; "decision" is the row's
@@ -27,23 +28,31 @@ DEC-n, or null without --record), which reevaluate.py reads so it does not propo
 
 Refusals, checked before anything is written (the run exits 2 and writes nothing):
   - a seat spec with an unknown type, a missing key, a member or team not in the catalogue, or a
-    derive base that is not a seat rulebook in this setup skill;
+    derive base that is not a seat rulebook in this setup skill; a team named both to seat and to retire;
+  - a roster row in docs/TEAM.md that does not parse to seven cells (fix it by hand first; --sync too);
+  - --only with no proposal key (an empty list is refused, never read as "none");
   - a new roster row whose mark (compared without U+FE0F) is already seated or used twice in the plan;
   - a new seat for a role a seated merged seat already holds, unless the same plan retires that merged
     seat (an unmerge), or a new merged seat whose member is seated on its own, unless the same plan
     retires that member; --force overrides these two, never the others.
-A retire that would leave the CEO or the Bar Raiser held by no seat is refused on its own ("not retired")
-and the rest of the run goes ahead: retiring the Bar Raiser needs a merged seat that holds it in the same
-plan, and retiring a merged seat that holds it needs the same plan to seat it again.
+The retire list is settled before those checks, so a seat counts as gone only when its retire goes ahead.
+A retire of a seat with no roster row of its own is reported ("not seated") and skipped. A retire that
+would leave the CEO or the Bar Raiser held by no seat is refused on its own ("not retired"): retiring the
+Bar Raiser needs a merged seat that holds it in the same plan, and retiring a merged seat that holds it
+needs the same plan to seat it again. A new seat that needed a refused retire is then refused with the
+other conflicts, and nothing is written.
 
 Writes, never overwriting an existing file unless --force (it reports what it skipped):
-  docs/TEAM.md, docs/DECISIONS.md, docs/team/<team>.md (one brief per seat), docs/team/tracker.md and
-  owner-questions.md (with a Chief of Staff), .claude/skills/seat-<role>/ (each seat's rulebook:
+  docs/TEAM.md, docs/DECISIONS.md, docs/team/<team>.md (one brief per seat; a brief marked Retired is never
+  overwritten, even with --force, and a merged seat's surviving brief gets the member briefs it lacks),
+  docs/team/tracker.md and owner-questions.md (on every run, never overwritten; kept by the Chief of Staff,
+  or by the CEO while none is seated), .claude/skills/seat-<role>/ (each seat's rulebook:
   copied from the catalogue, composed for a merge, or derived for a new role), docs/team/seat-skills.lock
   (each rulebook's origin, hash and the date it was seated, for --sync; see teamlib), scripts/gen-team-agents.py,
   .claude/agents/*.md (generated), scratchpad/team/ (gitignored), and a pointer in CLAUDE.md.
 A rulebook folder that already exists is kept: recorded with origin "project" (the project's own; --sync
-never touches it) unless it is byte-identical to what this version would write. Retiring a seat archives,
+never touches it) unless it holds a SKILL.md byte-identical to what this version would write. A folder with
+no SKILL.md keeps its files and gets this version's rulebook beside them, recorded as "project". Retiring a seat archives,
 never deletes, a rulebook that is derived, the project's own, untracked, or edited since it was seated:
 to docs/team/retired/<skill>-<date> (-2, -3 if taken). Re-adding a seat removes the "Retired" line from
 its brief, and a derived seat comes back from its newest archived copy instead of a fresh unauthored one.
@@ -67,11 +76,15 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
+from plan import FRONTEND_HOLDS  # noqa: E402
 from seatgen import AUTHORING_MARK, compose_derive, compose_merge  # noqa: E402
 from teamlib import (ALWAYS, MERGES, ROSTER_RE, SEATS_SRC, SKILL, catalogue, coverage, covers_frontend,  # noqa: E402
-                     load_lock, merge_members, project_name, roster, roster_cells, roster_row, save_lock)
+                     load_lock, merge_members, project_name, roster, roster_cells, roster_problems, roster_row,
+                     save_lock)
 
 TEMPLATES = SKILL / "templates"
+PUSH_RULE = "a seat asks the owner before each push and pushes on the owner's yes."
+CEO_KEEPS = "**Kept by the 🧭 CEO while no 🛎️ Chief of Staff is seated.**"
 RETIRED = Path("docs") / "team" / "retired"
 VS16 = "️"
 TIER_LABELS = {
@@ -251,7 +264,10 @@ def vendor(root: Path, spec: dict, cat: dict, lock: dict, report: list[str]) -> 
 
     A folder that already holds a SKILL.md is kept. With a lock entry it keeps that entry and its seated
     date; without one it is recorded with this version's origin when byte-identical to what this version
-    would write, else as origin "project" (the project's own: --sync never touches it). A missing folder whose
+    would write, else as origin "project" (the project's own: --sync never touches it). A folder that
+    already exists with no SKILL.md and no lock entry is the project's too: its files stay, this version's
+    rulebook is added beside them, and it is recorded as "project", so --sync never replaces it and a
+    retire archives it. A missing folder whose
     lock entry is still there (a repair) is written again and keeps the entry's seated date. A derived seat
     that was retired comes back from its newest archived copy. Nothing is written before the text is composed."""
     t = spec.get("type", "catalogue")
@@ -274,6 +290,22 @@ def vendor(root: Path, spec: dict, cat: dict, lock: dict, report: list[str]) -> 
                 lock[skill]["of"] = list(spec["of"])
             report.append(f"kept (exists, the project's own; never synced or overwritten): .claude/skills/{skill}")
         return
+    if dst.exists() and skill not in lock:  # the project's own folder, without a rulebook: never ours to replace
+        own = rulebook_text(spec)
+        if own is None:
+            for f in sorted(p for p in (SEATS_SRC / skill).rglob("*") if p.is_file()):
+                target = dst / f.relative_to(SEATS_SRC / skill)
+                if not target.exists():
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(f, target)
+        else:
+            (dst / "SKILL.md").write_bytes(own.encode("utf-8"))
+        lock[skill] = {"hash": tree_hash(dst), "origin": "project", "seated": today(), **extra}
+        if t == "merge":
+            lock[skill]["of"] = list(spec["of"])
+        report.append(f"kept (exists, the project's own; its files stay, this version's rulebook added beside "
+                      f"them; never synced or overwritten): .claude/skills/{skill}")
+        return
     seated = (lock.get(skill) or {}).get("seated") or today()  # a repaired seat keeps its seated date
     prior = archives(root, skill)
     if t == "derive" and prior:
@@ -289,7 +321,7 @@ def vendor(root: Path, spec: dict, cat: dict, lock: dict, report: list[str]) -> 
     else:
         text = rulebook_text(spec)
         dst.mkdir(parents=True, exist_ok=True)
-        (dst / "SKILL.md").write_text(text, encoding="utf-8")
+        (dst / "SKILL.md").write_bytes(text.encode("utf-8"))  # LF everywhere, so tree_hash == text_hash
         if t == "merge":
             report.append(f"composed: .claude/skills/{skill} (holds {', '.join(spec['of'])})")
         else:
@@ -343,7 +375,7 @@ def sync_one(root: Path, skill: str, entry: dict, cat: dict, report: list[str]) 
         shutil.copytree(SEATS_SRC / skill, dst)
     else:
         dst.mkdir(parents=True, exist_ok=True)
-        (dst / "SKILL.md").write_text(text, encoding="utf-8")
+        (dst / "SKILL.md").write_bytes(text.encode("utf-8"))  # LF everywhere, so tree_hash == text_hash
     entry["hash"] = tree_hash(dst)
     return "compared"
 
@@ -356,6 +388,10 @@ def sync(root: Path, report: list[str]) -> None:
     lock = load_lock(root)
     cat = catalogue()
     seated = {r["skill"]: r for r in roster(root / "docs" / "TEAM.md")}
+    bad = roster_problems(root / "docs" / "TEAM.md")
+    if bad:  # a seat whose row does not parse would read as unseated and its rulebook be left out
+        report.extend(["not synced: fix these roster rows in docs/TEAM.md first"] + bad)
+        return
     status: dict[str, str] = {}
     for skill in sorted(seated):
         if skill not in lock:
@@ -533,28 +569,56 @@ def strip_retired(brief: Path, report: list[str], root: Path) -> None:
         report.append(f"back in use, Retired line removed: {rel(root, brief)}")
 
 
+def carried(root: Path, member: str) -> str | None:
+    """A member's brief as a merged seat's brief carries it (Retired line dropped, headings demoted), or None."""
+    mb = root / "docs" / "team" / f"{member}.md"
+    if not mb.exists():
+        return None
+    text = re.sub(r"\A> \*\*Retired [^\n]*\n(?:\n)?", "", read_doc(mb)[0])
+    return re.sub(r"^#", "###", text, flags=re.M).strip()
+
+
 def write_briefs(root: Path, project: str, rows: list[dict[str, str]], specs: dict[str, dict], force: bool,
                  report: list[str]) -> None:
+    """One brief per row. A merged seat's brief carries each member's brief; when the brief survives from an
+    earlier retirement, the member briefs it does not already hold are appended to it. A brief marked
+    Retired is never overwritten, even with --force: it is put back in use with its Retired line removed."""
     brief = (TEMPLATES / "seat-brief.md").read_text(encoding="utf-8")
     for r in rows:
         v = {"PROJECT": project, "MARK": r["mark"], "SEAT": r["seat"], "SKILL": r["skill"],
              "REGISTER": r["register"], "REPORTS_TO": r["reports_to"]}
         body = fill(brief, v)
         spec = specs.get(r["team"], {})
-        if spec.get("type") == "merge":  # carry the members' project facts into the merged seat's brief
-            for m in spec["of"]:
-                mb = root / "docs" / "team" / f"{m}.md"
-                if mb.exists():
-                    body += f"\n\n## Carried over from the {m} brief\n\n" + re.sub(r"^#", "###", mb.read_text(encoding="utf-8"), flags=re.M)
+        carry = [(m, c) for m in (spec["of"] if spec.get("type") == "merge" else []) for c in [carried(root, m)] if c]
+        for m, c in carry:  # carry the members' project facts into the merged seat's brief
+            body += f"\n\n## Carried over from the {m} brief\n\n{c}\n"
         if spec.get("type") == "derive" and spec.get("scope"):
             body = body.replace("- **Paths:** _(", f"- **Scope:** {spec['scope']}\n- **Paths:** _(", 1)
         path = root / "docs" / "team" / f"{r['team']}.md"
-        if not write(path, body, force, report):
+        kept_for_record = path.exists() and read_doc(path)[0].startswith("> **Retired")
+        if kept_for_record or not write(path, body, force, report):
+            if kept_for_record:
+                report.append(f"kept (retired brief, never overwritten): {rel(root, path)}")
             strip_retired(path, report, root)
-        if r["team"] == "chief-of-staff" or (spec.get("type") == "merge" and "chief-of-staff" in spec.get("of", [])):
-            for name in ("tracker.md", "owner-questions.md"):
-                write(root / "docs" / "team" / name, fill((TEMPLATES / name).read_text(encoding="utf-8"),
-                                                          {"PROJECT": project}), force, report)
+            text, nl = read_doc(path)
+            missing = [(m, c) for m, c in carry if c not in text]
+            if missing:
+                text = text.rstrip("\n") + "".join(f"\n\n## Carried over from the {m} brief ({today()})\n\n{c}\n"
+                                                  for m, c in missing)
+                write_doc(path, text, nl)
+                report.append(f"carried into {rel(root, path)}: the {', '.join(m for m, _ in missing)} brief(s)")
+
+
+def write_registers(root: Path, project: str, cos_seated: bool, report: list[str]) -> None:
+    """docs/team/tracker.md and owner-questions.md, on every run, never overwritten (not even with --force):
+    kept by the Chief of Staff, or by the CEO while no Chief of Staff is seated."""
+    for name in ("tracker.md", "owner-questions.md"):
+        body = fill((TEMPLATES / name).read_text(encoding="utf-8"), {"PROJECT": project})
+        if not cos_seated:
+            body = re.sub(r"\*\*Kept by the [^*\n]+\*\*", lambda _: CEO_KEEPS, body, count=1)
+        path = root / "docs" / "team" / name
+        if not path.exists():
+            write(path, body, False, report)
 
 
 def finish(root: Path, project: str, force: bool, report: list[str]) -> int:
@@ -590,10 +654,12 @@ def choose_plan(plan_data: dict, only: str | None, ap: argparse.ArgumentParser) 
     and retires and every other proposal declined; otherwise the plan's top-level seats and retire."""
     proposals = plan_data.get("proposals")
     if only is None:
-        return list(plan_data.get("seats") or []), list(plan_data.get("retire") or []), []
+        return list(plan_data.get("seats") or []), list(dict.fromkeys(plan_data.get("retire") or [])), []
     if not isinstance(proposals, list) or (not proposals and only.strip() != "none"):
         ap.error("--only needs a plan that carries proposals (a re-evaluation plan from reevaluate.py)")
     keys = [k.strip() for k in only.split(",") if k.strip()]
+    if not keys:
+        ap.error("--only names no proposal: pass proposal keys, or 'none' to apply nothing")
     keys = [] if keys == ["none"] else keys
     known = [p.get("key") for p in proposals]
     unknown = [k for k in keys if k not in known]
@@ -622,9 +688,10 @@ def main() -> int:
     ap.add_argument("--record", help="the owner's words approving this change; recorded as a decision")
     ap.add_argument("--question", help="the question the owner answered; the decision row's Question cell")
     ap.add_argument("--owner-acts", default="publishing, sending, spending, signing")
-    ap.add_argument("--push-rule", default="the owner pushes; a seat never pushes unless DECISIONS.md says otherwise.")
+    ap.add_argument("--push-rule", default=PUSH_RULE)
     ap.add_argument("--force", action="store_true",
-                    help="overwrite existing files, and seat a role a seated seat already holds")
+                    help="overwrite existing files (never a retired brief, the tracker or owner questions), "
+                         "and seat a role a seated seat already holds")
     ap.add_argument("--list", action="store_true")
     a = ap.parse_args()
 
@@ -668,6 +735,13 @@ def main() -> int:
         ap.error("nothing was changed:\n" + "\n".join(problems))
 
     fresh = not team_doc.is_file()
+    if not fresh:
+        problems += roster_problems(team_doc)
+    both = [t for t in retiring if t in {s.get("team") for s in seats}]
+    if both:
+        problems.append(f"named to seat and to retire in the same run: {names(both, {}, cat)}")
+    if problems:
+        ap.error("nothing was changed:\n" + "\n".join(problems))
     project = a.project or plan_data.get("project") or project_name(root)
     if fresh:
         if not seats:
@@ -692,26 +766,65 @@ def main() -> int:
     for r in new_rows:
         planned[r["skill"]] = {"origin": spec_origin(specs[r["team"]])}
     cur_cov = coverage(root, cur_rows, lock)
+
+    # The retire list first, by the rules retire() applies, so no check below counts a seat as gone
+    # before its retire is known to go ahead: it must be seated (a row of its own), and it may not leave
+    # the CEO or the Bar Raiser held by no seat. A refused retire keeps its seat, which only adds
+    # coverage, so the ALWAYS rule is applied until nothing more is refused.
+    retire_ok = []
+    for t in retiring:
+        if t in seated_teams:
+            retire_ok.append(t)
+        elif cur_cov.get(t):
+            report.append(f"not seated on its own: {seat_name(t, known, cat)} (held by {seat_name(cur_cov[t], known, cat)})")
+        else:
+            report.append(f"not seated: {seat_name(t, known, cat)}")
+    while True:
+        post_cov = coverage(root, [r for r in cur_rows if r["team"] not in retire_ok] + new_rows, planned)
+        lost_by = {t: [x for x in ALWAYS if cur_cov.get(x) == t and x not in post_cov] for t in retire_ok}
+        refused = [t for t in retire_ok if lost_by[t]]
+        if not refused:
+            break
+        for t in refused:
+            retire_ok.remove(t)
+            lost = lost_by[t]
+            if t in ALWAYS:
+                hint = ("; to retire it, seat a merged seat that holds it in the same plan"
+                        if any(t in m["of"] for m in MERGES.values()) else "")
+                report.append(f"not retired: {seat_name(t, known, cat)}: every team keeps one{hint}")
+            else:
+                report.append(f"not retired: {seat_name(t, known, cat)}: it holds {names(lost, known, cat)}, and "
+                              f"every team keeps one; to retire it, seat {names(lost, known, cat)} in the same plan")
+    gone = set(retire_ok)
+
+    def holders(role: str) -> list[str]:
+        """Every seated team holding `role` now: itself, a merged seat holding it, a frontend split."""
+        return [x["team"] for x in cur_rows if x["team"] == role
+                or role in merge_members(x["team"], x["skill"], lock)
+                or (role == "frontend" and covers_frontend(x["team"], x["skill"], lock))]
+
     conflicts, claimed = [], {}
     for r in new_rows:
         for role in [r["team"]] + merge_members(r["team"], r["skill"], planned):
-            holder = cur_cov.get(role)
-            if holder and holder != r["team"] and holder not in retiring:
-                if holder == role:
-                    conflicts.append(f"{r['mark']} {r['seat']} would hold {seat_name(role, known, cat)}, which is "
-                                     "seated on its own; retire it in the same plan, or pass --force")
-                elif role not in merge_members(holder, known[holder]["skill"], lock):
-                    split = [x["team"] for x in cur_rows if covers_frontend(x["team"], x["skill"], lock)]
-                    conflicts.append(f"{seat_name(role, known, cat)} is covered by its split seats "
-                                     f"{names(split, known, cat)}; retire them in the same plan, or pass --force")
-                else:
-                    conflicts.append(f"{seat_name(role, known, cat)} is held by {seat_name(holder, known, cat)}; "
-                                     "unmerge it with a re-evaluation, or pass --force")
+            live = [h for h in holders(role) if h != r["team"] and h not in gone]
+            merged = [h for h in live if h != role and role in merge_members(h, known[h]["skill"], lock)]
+            split = [h for h in live if h != role and h not in merged]
+            if role in live:
+                conflicts.append(f"{r['mark']} {r['seat']} would hold {seat_name(role, known, cat)}, which is "
+                                 "seated on its own; retire it in the same plan, or pass --force")
+            for h in merged:
+                conflicts.append(f"{seat_name(role, known, cat)} is held by {seat_name(h, known, cat)}; "
+                                 "unmerge it with a re-evaluation, or pass --force")
+            overflow = (role == "frontend" and r["team"] == "frontend"
+                        and str(specs.get("frontend", {}).get("why", "")).startswith(FRONTEND_HOLDS))
+            if split and not overflow:  # the Frontend engineer may hold the UI apps no split holds
+                conflicts.append(f"{seat_name(role, known, cat)} is covered by its split seats "
+                                 f"{names(split, known, cat)}; retire them in the same plan, or pass --force")
             if claimed.get(role, r["team"]) != r["team"]:
                 conflicts.append(f"{seat_name(role, known, cat)} would be held by both "
                                  f"{seat_name(claimed[role], known, cat)} and {r['mark']} {r['seat']}; pass --force to allow it")
             claimed.setdefault(role, r["team"])
-    marks = {r["mark"].replace(VS16, ""): r for r in cur_rows if r["team"] not in retiring}
+    marks = {r["mark"].replace(VS16, ""): r for r in cur_rows if r["team"] not in gone}
     mark_clashes = []
     for r in new_rows:
         other = marks.get(r["mark"].replace(VS16, ""))
@@ -720,24 +833,9 @@ def main() -> int:
                                 f"{other['seat']}'s; give the new seat a mark no seated seat uses")
         marks[r["mark"].replace(VS16, "")] = r
     if mark_clashes or (conflicts and not a.force):
-        ap.error("nothing was changed:\n" + "\n".join(mark_clashes + ([] if a.force else conflicts)))
+        refusals = [line for line in report if line.startswith("not retired: ")]  # why a seat is still held
+        ap.error("nothing was changed:\n" + "\n".join(refusals + mark_clashes + ([] if a.force else conflicts)))
 
-    post_rows = [r for r in cur_rows if r["team"] not in retiring] + new_rows
-    post_cov = coverage(root, post_rows, planned)
-    retire_ok = []
-    for t in retiring:
-        lost = [x for x in ALWAYS if cur_cov.get(x) == t and x not in post_cov]
-        if t not in seated_teams and cur_cov.get(t):
-            report.append(f"not seated on its own: {seat_name(t, known, cat)} (held by {seat_name(cur_cov[t], known, cat)})")
-        elif not lost:
-            retire_ok.append(t)
-        elif t in ALWAYS:
-            hint = ("; to retire it, seat a merged seat that holds it in the same plan"
-                    if any(t in m["of"] for m in MERGES.values()) else "")
-            report.append(f"not retired: {seat_name(t, known, cat)}: every team keeps one{hint}")
-        else:
-            report.append(f"not retired: {seat_name(t, known, cat)}: it holds {names(lost, known, cat)}, and every "
-                          f"team keeps one; to retire it, seat {names(lost, known, cat)} in the same plan")
     held_before = {role: holder for role, holder in cur_cov.items() if role != holder}
 
     # ------------------------------------------------ write
@@ -762,13 +860,16 @@ def main() -> int:
     save_lock(root, lock)
     write_briefs(root, project, new_rows + repair, specs, a.force, report)
     retired = retire(root, retire_ok, cat, report) if retire_ok else []
+    write_registers(root, project, "chief-of-staff" in coverage(root), report)
 
     changed = describe_changes(new_rows, retired, specs, held_before, known, cat)
     decision = None
     if not changed and not declined:
         report.append("nothing changed; no decision recorded")
     elif a.record:
-        source = rel(root, a.plan.resolve()) if a.plan else "named by the owner"
+        plan_path = a.plan.resolve() if a.plan else None
+        source = ("named by the owner" if plan_path is None else plan_path.relative_to(root).as_posix()
+                  if root in plan_path.parents else plan_path.name)  # never a path outside the project
         question = a.question or ("Team change" if a.plan else "Team change named by the owner")
         decision = record_decision(root, question, source, changed or "nothing changed",
                                    [p.get("title") or p.get("key") for p in declined], a.record, report)
