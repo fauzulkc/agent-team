@@ -93,7 +93,7 @@ def clone(src: Path, name: str) -> Path:
 
 def run(script: str, *args, scripts: Path = SCRIPTS, check: bool = True) -> subprocess.CompletedProcess:
     res = subprocess.run([sys.executable, str(scripts / script), *map(str, args)], capture_output=True,
-                         text=True, env=ENV)
+                         text=True, encoding="utf-8", env=ENV)
     if check and res.returncode != 0:
         raise AssertionError(f"{script} {' '.join(map(str, args))} exited {res.returncode}\n"
                              f"--- stdout\n{res.stdout}\n--- stderr\n{res.stderr}")
@@ -106,12 +106,12 @@ def scaffold(root: Path, *args, check: bool = True) -> subprocess.CompletedProce
 
 def gen_check(root: Path) -> subprocess.CompletedProcess:
     return subprocess.run([sys.executable, str(root / "scripts" / "gen-team-agents.py"), "--check"],
-                          capture_output=True, text=True, env=ENV, cwd=root)
+                          capture_output=True, text=True, encoding="utf-8", env=ENV, cwd=root)
 
 
 def gen_write(root: Path) -> subprocess.CompletedProcess:
     return subprocess.run([sys.executable, str(root / "scripts" / "gen-team-agents.py")],
-                          capture_output=True, text=True, env=ENV, cwd=root, check=True)
+                          capture_output=True, text=True, encoding="utf-8", env=ENV, cwd=root, check=True)
 
 
 def seat_up(root: Path, option: str, record: str | None = None) -> tuple[dict, str]:
@@ -1545,7 +1545,7 @@ class WalkthroughMeasureTests(unittest.TestCase):
         env = dict(os.environ, GIT_AUTHOR_NAME="CI", GIT_AUTHOR_EMAIL="ci@example.invalid",
                    GIT_COMMITTER_NAME="CI", GIT_COMMITTER_EMAIL="ci@example.invalid")
         res = subprocess.run([sys.executable, str(REPO / "tools" / "measure_tally.py"), "--check"],
-                             env=env, capture_output=True, text=True)
+                             env=env, capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
         self.assertIn("every measured figure holds", res.stdout)
 

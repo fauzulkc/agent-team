@@ -32,6 +32,8 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 SKIP_DIRS = {".git", "node_modules", "vendor", "dist", "build", "out", ".next", ".venv", "venv",
              "__pycache__", "target", ".cache", "coverage", ".turbo", ".claude", "scratchpad", "Pods"}
@@ -381,7 +383,7 @@ class PathMatcher:
 
 def git(root: Path, *args: str) -> str:
     try:
-        return subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True, timeout=20).stdout
+        return subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True, encoding="utf-8", timeout=20).stdout
     except (OSError, subprocess.TimeoutExpired):
         return ""
 

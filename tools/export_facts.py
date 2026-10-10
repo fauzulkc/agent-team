@@ -37,6 +37,8 @@ for p in (SCRIPTS, ROOT / "tools"):
 
 import gen_seats_md  # noqa: E402  (job(): a rulebook's description up to "Use when")
 import teamlib  # noqa: E402
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 # The published home of the repo. plugin.json's `repository` and `homepage` win when it carries them.
 REPOSITORY = "https://github.com/fauzulkc/agent-team"
@@ -120,6 +122,8 @@ def facts() -> dict:
             "update": [f"claude plugin marketplace update {marketplace['name']}",
                        f"claude plugin update {name}@{marketplace['name']}"],
         },
+        "install_notes": ["The one_line form needs a Claude Code version whose plugin install takes --marketplace; older versions use the two plugin steps.",
+                          "On Windows, python3 must open a real Python from Git Bash: turn off the Microsoft Store aliases for python.exe and python3.exe."],
         "skills": skills,
         "seats": seats,
         "merged_seats": merged,

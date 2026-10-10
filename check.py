@@ -50,6 +50,8 @@ for line in CAT.read_text(encoding="utf-8").splitlines():
 # seat names (merges, derived roles) are matched too, so "Product & Design" is never read as "Product".
 sys.path.insert(0, str(ROOT / "skills" / "team-setup" / "scripts"))
 from teamlib import DERIVED_ROLES, MERGES  # noqa: E402
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 SEAT_MARK = {seat: mark for mark, seat, _ in rows}
 _composed = {m["seat"] for m in MERGES.values()} | {d["seat"] for d in DERIVED_ROLES.values()}

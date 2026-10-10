@@ -78,6 +78,8 @@ import plan as planner  # noqa: E402
 from scan import scan as run_scan  # noqa: E402
 from teamlib import (ALWAYS, MERGES, catalogue, coverage, load_lock, merge_members, project_name,  # noqa: E402
                      roster)
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 PREFIX_RE = re.compile(r"^([a-z][a-z0-9-]*)(?:\(([^)]*)\))?:\s")
 ISO_DATE = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
@@ -89,7 +91,7 @@ OPTIONS = ("lean", "recommended", "full")
 def git_subjects(root: Path, days: int) -> list[tuple[str, str]]:
     try:
         out = subprocess.run(["git", "-C", str(root), "log", f"--since={days} days ago", "--format=%as\t%s"],
-                             capture_output=True, text=True, timeout=30).stdout
+                             capture_output=True, text=True, encoding="utf-8", timeout=30).stdout
     except (OSError, subprocess.TimeoutExpired):
         return []
     return [tuple(l.split("\t", 1)) for l in out.splitlines() if "\t" in l]
@@ -257,7 +259,7 @@ def seated_dates(root: Path, rows: list[dict], lock: dict[str, dict]) -> dict[st
             try:
                 log = subprocess.run(["git", "-C", str(root), "log", "--diff-filter=A", "--format=%cs", "--",
                                       f".claude/skills/{r['skill']}/SKILL.md"],
-                                     capture_output=True, text=True, timeout=20).stdout.split()
+                                     capture_output=True, text=True, encoding="utf-8", timeout=20).stdout.split()
             except (OSError, subprocess.TimeoutExpired):
                 log = []
             date = log[0] if log else None

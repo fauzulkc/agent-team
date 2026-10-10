@@ -54,6 +54,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import re  # noqa: E402
 
 from teamlib import ALWAYS, CHECK_SEATS, DERIVED_ROLES, MERGES, catalogue  # noqa: E402
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 # marks for frontend split seats: none is used by a catalogue, merge or derived seat (split_marks checks)
 SPLIT_MARKS = ["💻", "🪟", "📟", "🧩", "🔲", "🪄"]

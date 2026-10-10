@@ -29,6 +29,8 @@ import argparse
 import re
 import sys
 from pathlib import Path
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parent.parent
 TEAM_DOC = ROOT / "docs" / "TEAM.md"
@@ -304,7 +306,7 @@ def validate(rows: list[dict[str, str]]) -> list[str]:
         if found is None:
             problems.append(f"{row['seat']}: skill {row['skill']} found in no skills folder (project or global)")
         elif unauthored(row):
-            problems.append(f"{row['seat']}: rulebook {found.relative_to(ROOT) if ROOT in found.parents else found} "
+            problems.append(f"{row['seat']}: rulebook {(found.relative_to(ROOT) if ROOT in found.parents else found).as_posix()} "
                             "still carries AUTHORING NEEDED, so it has no worker: rewrite it for its role, then "
                             "delete the banner line")
     return problems
@@ -332,11 +334,11 @@ def main() -> int:
     if args.check:
         stale = [p for p, body in files.items() if not p.is_file() or p.read_text(encoding="utf-8") != body]
         for p in stale:
-            problems.append(f"stale or missing: {p.relative_to(ROOT)}")
+            problems.append(f"stale or missing: {p.relative_to(ROOT).as_posix()}")
         for p in orphans:
-            problems.append(f"orphaned (no roster row): {p.relative_to(ROOT)}")
+            problems.append(f"orphaned (no roster row): {p.relative_to(ROOT).as_posix()}")
         for p in unauthored_on_disk:
-            problems.append(f"worker for a rulebook that awaits authoring, to be removed: {p.relative_to(ROOT)}")
+            problems.append(f"worker for a rulebook that awaits authoring, to be removed: {p.relative_to(ROOT).as_posix()}")
         for problem in problems:
             print(f"gen-team-agents: {problem}", file=sys.stderr)
         if not problems:

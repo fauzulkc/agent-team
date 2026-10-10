@@ -27,6 +27,8 @@ import re
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parent.parent
 PLUGIN = Path(".claude-plugin") / "plugin.json"

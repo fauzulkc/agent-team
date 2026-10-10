@@ -56,7 +56,7 @@ class Round2(unittest.TestCase):
     # ------------------------------------------------------------------ helpers
     def run_script(self, *args, ok: bool | None = True, script: str = "scaffold.py") -> subprocess.CompletedProcess:
         res = subprocess.run([sys.executable, str(SCRIPTS / script), *map(str, args)], capture_output=True,
-                             text=True, env=self.env)
+                             text=True, encoding="utf-8", env=self.env)
         if ok is True:
             self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
         elif ok is False:
@@ -185,7 +185,7 @@ class Round2(unittest.TestCase):
         worker = self.root / ".claude" / "agents" / "user-worker.md"
         self.assertTrue(worker.is_file())
         subprocess.run([sys.executable, str(self.root / "scripts" / "gen-team-agents.py")], cwd=self.root,
-                       env=self.env, capture_output=True, text=True, check=True)
+                       env=self.env, capture_output=True, text=True, encoding="utf-8", check=True)
         self.assertTrue(worker.is_file(), "a worker whose row does not parse is kept until the row is fixed")
 
     # ------------------------------------------------------------------ the project's own folder
@@ -267,7 +267,7 @@ class Round2(unittest.TestCase):
 
         def win(*args):
             return subprocess.run([sys.executable, str(runner), str(SCRIPTS / "scaffold.py"), "--root",
-                                   str(self.root), *map(str, args)], capture_output=True, text=True, env=self.env)
+                                   str(self.root), *map(str, args)], capture_output=True, text=True, encoding="utf-8", env=self.env)
         self.assertIn("composed", win("--plan", plan).stdout)
         out = win("--sync").stdout
         self.assertNotIn("updated: .claude/skills/seat-product-design", out)

@@ -58,7 +58,13 @@ claude plugin install agent-team@agent-team
 ```
 
 or from inside a Claude Code session: `/plugin marketplace add fauzulkc/agent-team`, then
-`/plugin install agent-team@agent-team`. Open a new session afterwards so the two skills load.
+`/plugin install agent-team@agent-team`. Open a new session afterwards so the two skills load. Recent
+Claude Code versions also take one line, `claude plugin install agent-team --marketplace fauzulkc/agent-team`;
+an older version without that option uses the two steps above.
+
+**On Windows**, the scripts run as `python3` from Claude Code's Git Bash, so `python3` must open a real
+Python: turn off the Microsoft Store aliases for `python.exe` and `python3.exe` (Settings, Apps,
+Advanced app settings, App execution aliases) and make sure a `python3` command is on your PATH.
 
 **Without the plugin system**, clone the repo and link the skills:
 

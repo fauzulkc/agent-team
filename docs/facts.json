@@ -27,6 +27,10 @@
       "claude plugin update agent-team@agent-team"
     ]
   },
+  "install_notes": [
+    "The one_line form needs a Claude Code version whose plugin install takes --marketplace; older versions use the two plugin steps.",
+    "On Windows, python3 must open a real Python from Git Bash: turn off the Microsoft Store aliases for python.exe and python3.exe."
+  ],
   "skills": [
     {
       "name": "team-setup",

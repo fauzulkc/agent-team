@@ -30,7 +30,7 @@ def isolated_env(home: Path, ceiling: Path) -> dict[str, str]:
 
 
 def git(root: Path, *args: str, env: dict[str, str] | None = None) -> str:
-    res = subprocess.run(["git", *GIT_IDENTITY, "-C", str(root), *args], capture_output=True, text=True,
+    res = subprocess.run(["git", *GIT_IDENTITY, "-C", str(root), *args], capture_output=True, text=True, encoding="utf-8",
                          env=env, check=True)
     return res.stdout
 

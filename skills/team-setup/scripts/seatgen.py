@@ -30,6 +30,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from teamlib import SEATS_SRC, catalogue  # noqa: E402
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 AUTHORING_MARK = "AUTHORING NEEDED"
 SECTION_RE = re.compile(r"^## (\d) · (.+)$", re.M)

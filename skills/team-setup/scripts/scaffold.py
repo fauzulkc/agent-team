@@ -81,6 +81,8 @@ from seatgen import AUTHORING_MARK, compose_derive, compose_merge  # noqa: E402
 from teamlib import (ALWAYS, MERGES, ROSTER_RE, SEATS_SRC, SKILL, catalogue, coverage, covers_frontend,  # noqa: E402
                      load_lock, merge_members, project_name, roster, roster_cells, roster_problems, roster_row,
                      save_lock)
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 TEMPLATES = SKILL / "templates"
 PUSH_RULE = "a seat asks the owner before each push and pushes on the owner's yes."
@@ -143,7 +145,7 @@ def write_doc(path: Path, text: str, newline: str) -> None:
 def tree_hash(d: Path) -> str:
     h = hashlib.sha256()
     for f in sorted(p for p in d.rglob("*") if p.is_file()):
-        h.update(str(f.relative_to(d)).encode()); h.update(f.read_bytes())
+        h.update(f.relative_to(d).as_posix().encode()); h.update(f.read_bytes())  # the same hash on every system
     return h.hexdigest()
 
 
@@ -638,9 +640,9 @@ def finish(root: Path, project: str, force: bool, report: list[str]) -> int:
     if "docs/TEAM.md" not in cm_text:
         cm.write_text(cm_text.rstrip() + "\n" + CLAUDE_POINTER, encoding="utf-8")
         report.append("CLAUDE.md: team pointer added")
-    res = subprocess.run([sys.executable, str(gen_dst)], cwd=root, capture_output=True, text=True)
+    res = subprocess.run([sys.executable, str(gen_dst)], cwd=root, capture_output=True, text=True, encoding="utf-8")
     report.append((res.stdout + res.stderr).strip())
-    pending = [str(p.parent.relative_to(root)) for p in (root / ".claude" / "skills").glob("seat-*/SKILL.md")
+    pending = [p.parent.relative_to(root).as_posix() for p in (root / ".claude" / "skills").glob("seat-*/SKILL.md")
                if AUTHORING_MARK in p.read_text(encoding="utf-8")]
     for p in pending:
         report.append(f"NEEDS AUTHORING: {p}/SKILL.md (rewrite for its role per references/seat-contract.md)")

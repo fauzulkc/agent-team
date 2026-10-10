@@ -60,7 +60,7 @@ def new_dir(name: str) -> Path:
 
 
 def run(script: str, *args) -> str:
-    res = subprocess.run([sys.executable, str(SCRIPTS / script), *map(str, args)], capture_output=True, text=True,
+    res = subprocess.run([sys.executable, str(SCRIPTS / script), *map(str, args)], capture_output=True, text=True, encoding="utf-8",
                          env=ENV)
     if res.returncode != 0:
         raise AssertionError(f"{script} {args} exited {res.returncode}\n{res.stdout}\n{res.stderr}")

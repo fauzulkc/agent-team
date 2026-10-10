@@ -33,6 +33,8 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 ROOT = Path(__file__).resolve().parent.parent
 EXAMPLE = ROOT / "examples" / "tally"
@@ -53,7 +55,7 @@ def generated() -> dict[str, str]:
         out = Path(tmp)
         res = subprocess.run([sys.executable, str(SCAFFOLD), "--root", str(out), "--project", "Tally", "--seats", SEATS,
                               "--owner-acts", OWNER_ACTS, "--question", QUESTION, "--record", WORDS],
-                             capture_output=True, text=True)
+                             capture_output=True, text=True, encoding="utf-8")
         if res.returncode:
             raise SystemExit(f"scaffold failed:\n{res.stderr or res.stdout}")
         today = datetime.date.today().isoformat()

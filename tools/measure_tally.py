@@ -33,6 +33,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS = ROOT / "skills" / "team-setup" / "scripts"
 sys.path.insert(0, str(ROOT / "tests"))
 from repo_fixtures import git, isolated_env, put, put_json  # noqa: E402
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 CODE_FILES, PEOPLE, COMMITS = 661, 4, 8
 ACTIVE = ("ceo", "chief-of-staff", "product", "engineering", "frontend", "testing", "platform", "research",
@@ -46,7 +48,7 @@ WALKTHROUGH = {
 
 
 def run(env: dict, *args: str, cwd: Path) -> str:
-    res = subprocess.run([sys.executable, *args], cwd=cwd, env=env, capture_output=True, text=True)
+    res = subprocess.run([sys.executable, *args], cwd=cwd, env=env, capture_output=True, text=True, encoding="utf-8")
     if res.returncode:
         raise SystemExit(f"failed: {' '.join(args)}\n{res.stderr or res.stdout}")
     return res.stdout

@@ -39,6 +39,8 @@ import plan  # noqa: E402
 import repo_fixtures  # noqa: E402
 import scan as scanner  # noqa: E402
 import teamlib  # noqa: E402
+if hasattr(sys.stdout, "reconfigure"):  # Windows consoles default to cp1252; seat marks need UTF-8
+    sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
 
 
 KEEP = "\x00"  # joins a mark to its seat name so a wrapped line never splits them; a space in the output
