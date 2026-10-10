@@ -1,8 +1,20 @@
 {
   "name": "agent-team",
-  "description": "An AI team for any project: two skills and 29 seat rulebooks. team-setup scans the repo and offers lean, recommended and full teams from 29 seat rulebooks (CEO, Chief of Staff, Product, Engineering, Frontend, Mobile, Testing, Platform, Security, Design, Sales, Data, ML, Docs and more), merging roles into one session for a small project and creating new seats where no role fits, each seat with its own worker team and model tiers. team-reevaluate measures how the team works and proposes adding, retiring, merging or splitting seats, remembering what the owner declined.",
+  "description": "An AI team for any project: two skills and 29 seat rulebooks. team-setup scans the repo and offers lean, recommended and full teams (CEO, Chief of Staff, Product, Engineering, Frontend, Mobile, Testing, Platform, Security, Design, Sales, Data, ML, Docs and more), merging roles into one session for a small project and creating new seats where no role fits, each seat with its own worker team and model tiers. team-reevaluate measures how the team works and proposes adding, retiring, merging or splitting seats, remembering what the owner declined.",
   "version": "1.3.0",
-  "author": { "name": "Fauzul Chowdhury" },
+  "author": {
+    "name": "Fauzul Chowdhury",
+    "url": "https://github.com/fauzulkc"
+  },
+  "homepage": "https://fauzul.com/agent-team",
+  "repository": "https://github.com/fauzulkc/agent-team",
   "license": "MIT",
-  "keywords": ["team", "agents", "seats", "orchestration", "startup", "dynamic-seats"]
+  "keywords": [
+    "team",
+    "agents",
+    "seats",
+    "orchestration",
+    "startup",
+    "dynamic-seats"
+  ]
 }

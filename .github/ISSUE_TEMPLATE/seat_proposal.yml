@@ -1,0 +1,99 @@
+name: Seat proposal
+description: Propose a new seat for the catalogue, a merge group or a derived role.
+title: "seat: "
+labels: ["seat-proposal", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A seat is a role real projects need that no existing seat covers. Before writing one, check
+        [the seats](https://github.com/fauzulkc/agent-team/blob/main/docs/seats.md): the 29 catalogue
+        seats, the merged seats and the new roles setup can already create. A proposal is agreed here
+        first; the rulebook is written after, to
+        [the seat contract](https://github.com/fauzulkc/agent-team/blob/main/skills/team-setup/references/seat-contract.md).
+        [GOVERNANCE.md](https://github.com/fauzulkc/agent-team/blob/main/GOVERNANCE.md) says how
+        seats are accepted.
+  - type: input
+    id: role
+    attributes:
+      label: The role
+      description: The seat's name and, in one line, what it owns.
+      placeholder: "Accessibility: owns the accessibility standard every screen is held to, and audits against it"
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      description: Directors own a register and rule inside it; a manager runs a daily operation under directors; an implementation seat builds under a director's scope; a check challenges other seats' work and owns no product register.
+      options:
+        - director
+        - manager
+        - implementation
+        - check
+        - owner-side
+        - not sure
+    validations:
+      required: true
+  - type: input
+    id: reports-to
+    attributes:
+      label: Reports to
+      description: The seat it answers to, by name.
+      placeholder: CEO
+    validations:
+      required: false
+  - type: textarea
+    id: why-new
+    attributes:
+      label: Why no existing or merged seat covers it
+      description: Name the nearest catalogue seats, merged seats and derived roles, and the work this role does that none of them holds. If it could be a merge of existing seats, or a derived role from an existing rulebook, say why a seat of its own is better.
+    validations:
+      required: true
+  - type: textarea
+    id: signal
+    attributes:
+      label: The signal in a repository that should raise it
+      description: What the scan should look for, such as a dependency, a folder, a config file or a CI step, and where a false match could come from. If no repository can show the need, say when an owner should seat it by hand.
+      placeholder: |
+        A dependency on an accessibility testing library, or an accessibility step in CI.
+        False match: the same library pulled in only as another tool's dependency.
+    validations:
+      required: true
+  - type: textarea
+    id: hard-rules
+    attributes:
+      label: A draft of its four hard rules
+      description: The four rules this seat holds every time, each in bold with its one-line reason. They seed the rulebook's rules section.
+      placeholder: |
+        1. **Rule.** Reason.
+        2. **Rule.** Reason.
+        3. **Rule.** Reason.
+        4. **Rule.** Reason.
+    validations:
+      required: true
+  - type: textarea
+    id: handoffs
+    attributes:
+      label: Hand-offs
+      description: Which seats it takes work from and hands work to, and what passes between them.
+    validations:
+      required: false
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: Pages on how the best operator of this role works at a fast, early-stage company, if you have them.
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: The proposal is project-neutral; it identifies no real project, its people or its customers.
+          required: true
+        - label: I have read the seat contract.
+          required: true
+        - label: I'd like to write the rulebook myself, once the proposal is accepted.
+          required: false

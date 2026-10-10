@@ -1,0 +1,11 @@
+# The workflows' actions are pinned to major versions (actions/checkout@v4); Dependabot proposes the next
+# major when one ships. The scripts use the Python standard library only, so there is nothing else to watch.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels: [dependencies, ci]
+    commit-message:
+      prefix: ci

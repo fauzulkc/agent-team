@@ -14,7 +14,10 @@ team-reevaluate when it exists): name, description, no model names.
 Then the generated docs, which must match what their generators write now (a few seconds: both build
 small throwaway projects): docs/seats.md (tools/gen_seats_md.py, from the catalogue, the rulebooks and
 the planner run on the test fixtures) and the generated files of examples/tally/
-(tools/build_tally_example.py, from a fresh scaffold run). A stale one fails with the command that fixes it.
+(tools/build_tally_example.py, from a fresh scaffold run), and docs/facts.json (tools/export_facts.py, the
+fact sheet a website reads). A stale one fails with the command that fixes it.
+Last, the version is one fact (tools/bump_version.py): .claude-plugin/plugin.json, marketplace.json and the
+newest released CHANGELOG.md heading carry the same version, and '## Unreleased' opens the changelog.
 The behaviour of the scripts is tested separately: `python3 -m unittest discover -s tests -v`.
 """
 import os
@@ -27,9 +30,11 @@ ROOT = Path(__file__).resolve().parent
 CAT = ROOT / "skills" / "team-setup" / "references" / "seats.md"
 # Register codes and the like that only make sense inside one project. Project-identifying words
 # (names, places, vendors) go in a PRIVATE, uncommitted file listed one per line: the path in
-# $AGENT_TEAM_LEAK_WORDS, or .private/leak-words.txt (gitignored). Never commit that list.
+# $AGENT_TEAM_LEAK_WORDS, or .private/leak-words.txt (gitignored). Never commit that list. In CI the
+# workflow writes it from the AGENT_TEAM_LEAK_WORDS secret; a path named there that is missing fails.
 GENERIC_LEAK = r"DEC-[0-9]|DD-[0-9]|MD-[0-9]|TD-[0-9]|\bT-[0-9]|\bG-[0-9]|\bE-[0-9]|\bR-[0-9]"
-_words_file = Path(os.environ.get("AGENT_TEAM_LEAK_WORDS", ROOT / ".private" / "leak-words.txt"))
+_words_env = os.environ.get("AGENT_TEAM_LEAK_WORDS", "")
+_words_file = Path(_words_env) if _words_env else ROOT / ".private" / "leak-words.txt"
 _private = [w.strip() for w in _words_file.read_text(encoding="utf-8").splitlines()
             if w.strip() and not w.startswith("#")] if _words_file.is_file() else []
 LEAK = re.compile("|".join([GENERIC_LEAK] + [r"\b" + re.escape(w) + r"\b" for w in _private]), re.I)
@@ -155,7 +160,8 @@ for mark, seat, skill in rows:
         p.append("names a model")
     leaks = sorted({m.group(0) for m in LEAK.finditer(s)})
     if leaks:
-        p.append(f"project words: {', '.join(leaks[:6])}")
+        generic = sorted({x for x in leaks if re.fullmatch(GENERIC_LEAK, x, re.I)})
+        p.append(f"project words: {', '.join(generic[:6])}{' and private-list words' if len(generic) < len(leaks) else ''}")
     n = s.count("\n")
     if not LINES[0] <= n <= LINES[1]:
         p.append(f"{n} lines, outside {LINES[0]}-{LINES[1]}")
@@ -166,12 +172,18 @@ for mark, seat, skill in rows:
 if _private:
     PRIVATE = re.compile("|".join(r"\b" + re.escape(w) + r"\b" for w in _private), re.I)
     for f in sorted(ROOT.rglob("*")):
-        if not f.is_file() or ".git" in f.parts or ".private" in f.parts or f.suffix not in {".md", ".py", ".json", ".yml", ".yaml", ".sh", ".txt", ".lock"}:
+        if not f.is_file() or ".git" in f.parts or ".private" in f.parts:
             continue
-        for n, line in enumerate(f.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
-            m = PRIVATE.search(line)
-            if m:
-                print(f"leak: {f.relative_to(ROOT)}:{n}: {m.group(0)}"); bad += 1
+        try:  # every text file, whatever its name (CITATION.cff, CODEOWNERS, LICENSE ...); binaries are skipped
+            text = f.read_bytes().decode("utf-8")
+        except UnicodeDecodeError:
+            continue
+        for n, line in enumerate(text.splitlines(), 1):
+            if PRIVATE.search(line):  # never print the word itself: CI logs are public
+                print(f"leak: {f.relative_to(ROOT)}:{n}: a word from the private list"); bad += 1
+elif _words_env:  # named on purpose (CI writes it from a secret) but unusable: the sweep would silently not run
+    why = "which lists no words" if _words_file.is_file() else "which is not a file"
+    print(f"leak words: AGENT_TEAM_LEAK_WORDS names {_words_env}, {why}"); bad += 1
 else:
     print("note: no private leak-word list found; only generic checks ran")
 
@@ -222,4 +234,26 @@ try:
         print("examples/tally: generated files current")
 except (SystemExit, Exception) as e:  # noqa: BLE001
     print(f"examples/tally: tools/build_tally_example.py failed: {type(e).__name__}: {e}"); bad += 1
+# The fact sheet a website reads (docs/facts.json, from tools/export_facts.py), and the version: plugin.json,
+# marketplace.json and the newest released CHANGELOG heading agree, under a '## Unreleased' heading.
+try:
+    import export_facts  # noqa: E402
+    if export_facts.stale():
+        print("docs/facts.json: stale against the catalogue, the skills, teamlib, the tiers or plugin.json; "
+              "run python3 tools/export_facts.py")
+        bad += 1
+    else:
+        print("docs/facts.json: current")
+except Exception as e:  # noqa: BLE001
+    print(f"docs/facts.json: tools/export_facts.py failed: {type(e).__name__}: {e}"); bad += 1
+try:
+    import bump_version  # noqa: E402
+    version_problems = bump_version.problems(ROOT)
+    for problem in version_problems:
+        print(f"version: {problem}")
+    bad += bool(version_problems)
+    if not version_problems:
+        print(f"version: {bump_version.read(ROOT)['plugin']['version']} everywhere it is written")
+except Exception as e:  # noqa: BLE001
+    print(f"version: tools/bump_version.py failed: {type(e).__name__}: {e}"); bad += 1
 sys.exit(1 if bad else 0)

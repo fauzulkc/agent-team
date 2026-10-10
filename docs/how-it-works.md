@@ -315,7 +315,9 @@ a conversation.
 
 - **New model:** edit `TIERS` in `scripts/gen-team-agents.py` and `docs/TEAM.md` §2, run the
   generator, open a new session, and confirm with a one-line spawn that quotes its model id.
-- **Better rulebooks:** update the plugin, then say *"sync the team's rulebooks"* in the project. It
+- **Better rulebooks:** update the plugin (`claude plugin marketplace update agent-team`, then
+  `claude plugin update agent-team@agent-team`, then restart Claude Code; with the manual install,
+  `git pull` in the clone), then say *"sync the team's rulebooks"* in the project. It
   refreshes every catalogue copy and recomposes every merged seat from its members' new rulebooks;
   any rulebook the project edited itself is kept and reported for a hand merge, and derived
   rulebooks, and rulebooks the project had before setup, are the project's own and never synced.

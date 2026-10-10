@@ -1,0 +1,52 @@
+name: Feature request
+description: Ask for a new flag, behaviour or improvement to a skill, a script or the docs.
+title: "feature: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A new seat has its own form, **Seat proposal**. To talk an idea through before asking for it,
+        start in [Discussions](https://github.com/fauzulkc/agent-team/discussions), under Ideas.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - team-setup (scan, plan, seating the team)
+        - team-reevaluate (measuring and resizing the team)
+        - A seat rulebook
+        - The shared protocol (docs/TEAM.md template)
+        - Generated workers and model tiers
+        - Docs or examples
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What you were trying to do, and what got in the way. A real situation helps more than a general wish.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you'd like
+      description: The change you have in mind, and what it would let you do.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: Workarounds or other approaches you considered, and why they fall short.
+    validations:
+      required: false
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd like to build this myself, once it is agreed.
+          required: false

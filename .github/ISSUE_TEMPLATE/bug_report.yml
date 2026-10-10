@@ -1,0 +1,86 @@
+name: Bug report
+description: A skill or script did something its docs say it won't, failed, or wrote a file wrong.
+title: "bug: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. A security problem (a write outside your project, a file overwritten or
+        deleted, a rulebook that lets a seat act publicly without you) goes through the
+        [security policy](https://github.com/fauzulkc/agent-team/security/policy), not here.
+
+        Please leave out private code, customer data and secrets. An invented project that shows the
+        same thing is ideal.
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      description: Run `claude plugin list` and copy the agent-team entry, including its Version line. For an `install.sh` install, give the commit of your clone (`git rev-parse --short HEAD`).
+      placeholder: agent-team@agent-team 1.3.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How it is installed
+      options:
+        - Plugin, from the fauzulkc/agent-team marketplace
+        - Plugin, from a local clone
+        - install.sh
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: The command or phrase you used
+      description: What you said to Claude Code ("set up the team", "retire Design", "sync the team's rulebooks"), or the script command you ran.
+      placeholder: '"re-evaluate the team"'
+    validations:
+      required: true
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+      description: What the team said or did, which files changed, and any error output. Paste errors as text.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: What should have happened instead, and where the docs say so if they do.
+    validations:
+      required: true
+  - type: textarea
+    id: shape
+    attributes:
+      label: Your project's shape
+      description: |
+        The shape, not the code: languages, roughly how many source files and contributors, which apps (web, mobile, API), whether it is a monorepo, and which team was seated. If the team is seated, the `size` and `signals` blocks of `docs/team/scan.json` describe it well; check them for private names before pasting.
+      placeholder: |
+        TypeScript monorepo, about 400 source files, 2 contributors; apps/web (React) and apps/api (Express).
+        Seated the recommended team: 12 seats.
+    validations:
+      required: true
+  - type: input
+    id: claude-version
+    attributes:
+      label: Claude Code version
+      description: The output of `claude --version`.
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: Operating system and Python version
+      placeholder: macOS 15, Python 3.12
+    validations:
+      required: false
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before you submit
+      options:
+        - label: This report holds no private code, customer data or secrets.
+          required: true

@@ -1,0 +1,64 @@
+name: release
+# A tag vX.Y.Z on main publishes release X.Y.Z: every check runs again on the tagged commit, the tag must
+# name the version plugin.json carries, and the GitHub Release takes its notes from that version's
+# CHANGELOG.md section. Cutting a release is in docs/maintaining.md.
+on:
+  push:
+    tags: ["v*.*.*"]
+permissions:
+  contents: write
+# Two pushes of the same tag never publish at once; a run in progress is left to finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: The tagged commit is on main
+        run: |
+          git fetch --no-tags origin main
+          git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD || { echo "::error::tag $GITHUB_REF_NAME is not on main"; exit 1; }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: The tag names the version plugin.json carries
+        run: |
+          version=$(python tools/bump_version.py --current)
+          if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match .claude-plugin/plugin.json version $version (expected v$version)"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - name: Load the private leak-word list (does nothing when the secret is empty)
+        env:
+          LEAK_WORDS: ${{ secrets.AGENT_TEAM_LEAK_WORDS }}
+        run: |
+          if [ -z "$LEAK_WORDS" ]; then echo "AGENT_TEAM_LEAK_WORDS is empty: check.py runs its generic checks only"; exit 0; fi
+          words="$RUNNER_TEMP/leak-words.txt"
+          printf '%s\n' "$LEAK_WORDS" > "$words"
+          while IFS= read -r word; do
+            word="${word%$'\r'}"
+            if [ -n "$word" ]; then echo "::add-mask::$word"; fi
+          done < "$words"
+          echo "AGENT_TEAM_LEAK_WORDS=$words" >> "$GITHUB_ENV"
+      - name: Every seat rulebook is in shape and project-neutral; generated files and the version are current
+        run: python check.py
+      - name: Scan, plan, scaffold and re-evaluate behave on fixture repos
+        run: python -m unittest discover -s tests -v
+      - name: The walkthrough's figures still match what the scripts give a Tally-shaped project
+        run: python tools/measure_tally.py --check
+      - name: Release notes from the CHANGELOG section for this version
+        run: python tools/bump_version.py --notes "$VERSION" > notes.md && cat notes.md
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            echo "Release $TAG exists (a re-run): updating its title and notes"
+            gh release edit "$TAG" --title "agent-team $VERSION" --notes-file notes.md
+          else
+            gh release create "$TAG" --title "agent-team $VERSION" --notes-file notes.md --verify-tag
+          fi

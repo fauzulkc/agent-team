@@ -12,9 +12,13 @@ description (`python3 tools/measure_tally.py`). The files a seated project carri
 
 ## 1. Install (once per machine)
 
+```bash
+claude plugin marketplace add fauzulkc/agent-team
+claude plugin install agent-team@agent-team
 ```
-/plugin install agent-team --marketplace fauzulkc/agent-team
-```
+
+Then open a new Claude Code session so the two skills load. Installing without the plugin system, and
+updating, are in the [README](../README.md#install).
 
 ## 2. Seat the team (once per project)
 

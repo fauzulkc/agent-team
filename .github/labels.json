@@ -1,0 +1,13 @@
+[
+  {"name": "bug", "color": "d73a4a", "description": "Something does not work as the docs say it does"},
+  {"name": "enhancement", "color": "a2eeef", "description": "A new flag, behaviour or improvement to a skill or script"},
+  {"name": "seat-proposal", "color": "7057ff", "description": "A new seat, merge group or derived role for the catalogue"},
+  {"name": "documentation", "color": "0075ca", "description": "README, docs/, a rulebook's wording or the walkthrough"},
+  {"name": "question", "color": "d876e3", "description": "A question about using or extending the toolkit"},
+  {"name": "good first issue", "color": "7057ff", "description": "Small, well described, a good first contribution"},
+  {"name": "help wanted", "color": "008672", "description": "Accepted and open for anyone to pick up"},
+  {"name": "needs-triage", "color": "fbca04", "description": "New: a maintainer has not sorted it yet"},
+  {"name": "release", "color": "0e8a16", "description": "Cutting or publishing a release"},
+  {"name": "dependencies", "color": "0366d6", "description": "Updates a dependency, such as a pinned GitHub Action"},
+  {"name": "ci", "color": "ededed", "description": "The check and release workflows"}
+]

@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use agent-team in your work, please cite it as below."
+type: software
+title: "agent-team"
+abstract: >-
+  A Claude Code plugin that seats a team of AI roles in any project. It scans
+  the repository, offers lean, recommended and full teams from a catalogue of
+  29 seat rulebooks, merged seats and derived roles, and re-evaluates the team
+  as the work changes, asking the owner only what only the owner can decide.
+authors:
+  - family-names: Chowdhury
+    given-names: Fauzul
+version: 1.3.0
+date-released: 2026-10-10
+repository-code: "https://github.com/fauzulkc/agent-team"
+license: MIT
+keywords:
+  - claude-code
+  - claude-code-plugin
+  - ai-agents
+  - multi-agent
+  - agent-orchestration
+  - skills
+  - developer-tools

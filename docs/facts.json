@@ -1,0 +1,547 @@
+{
+  "name": "agent-team",
+  "version": "1.3.0",
+  "license": "MIT",
+  "repository": "https://github.com/fauzulkc/agent-team",
+  "homepage": "https://fauzul.com/agent-team",
+  "blog": "https://fauzul.com/blog/agent-team",
+  "description": "29 seat rulebooks and two skills, team-setup and team-reevaluate: seat an AI team in any project, sized from the repo, and resize it as the work changes.",
+  "install": {
+    "one_line": [
+      "claude plugin install agent-team --marketplace fauzulkc/agent-team"
+    ],
+    "plugin": [
+      "claude plugin marketplace add fauzulkc/agent-team",
+      "claude plugin install agent-team@agent-team"
+    ],
+    "in_session": [
+      "/plugin marketplace add fauzulkc/agent-team",
+      "/plugin install agent-team@agent-team"
+    ],
+    "manual": [
+      "git clone https://github.com/fauzulkc/agent-team",
+      "./agent-team/install.sh"
+    ],
+    "update": [
+      "claude plugin marketplace update agent-team",
+      "claude plugin update agent-team@agent-team"
+    ]
+  },
+  "skills": [
+    {
+      "name": "team-setup",
+      "mark": "🧩",
+      "summary": "Seat an AI team in any project: scans the repo, offers three team sizes (lean, recommended, full) from a catalogue of 29 roles (CEO, Chief of Staff, Product, Engineering, Frontend, Mobile, Testing, Platform, Research, Bar Raiser, Design, Sales, Security, Data, ML, Docs and more), merges roles into one session for a small project, splits or creates seats for a large one, then writes docs/TEAM.md, a decision register, a brief and a rulebook per seat, and each seat's workers."
+    },
+    {
+      "name": "team-reevaluate",
+      "mark": "🔁",
+      "summary": "Change a seated team: re-evaluate it against how it actually works and what the repo needs now (each seat's commits, worker runs, inbox and blocked lines over a window; the repo against the setup baseline), propose seats to add, retire, merge, unmerge or split with the evidence for each and apply what the owner approves, or carry out a change the owner names. Records the owner's words as a decision, remembers what was declined, and tells every seat it touches."
+    }
+  ],
+  "seats": [
+    {
+      "team": "ceo",
+      "mark": "🧭",
+      "seat": "CEO",
+      "skill": "seat-ceo",
+      "kind": "owner-side",
+      "reports_to": "the owner",
+      "register": "docs/DECISIONS.md (the decision register, the queue, milestones)",
+      "what": "The CEO seat: the business decision taker who owns the decision register, the queue and the refusals.",
+      "when": "always"
+    },
+    {
+      "team": "chief-of-staff",
+      "mark": "🛎️",
+      "seat": "Chief of Staff",
+      "skill": "seat-chief-of-staff",
+      "kind": "owner-side",
+      "reports_to": "the owner",
+      "register": "docs/team/tracker.md, docs/team/owner-questions.md",
+      "what": "The owner's chief of staff: the session the owner talks to, which advises, informs the CEO with evidence, relays the CEO's answer back, keeps the tracker and the owner-questions list, receives every seat's stop line and routes each unblock.",
+      "when": "always when five or more other seats run (seven in the lean option)"
+    },
+    {
+      "team": "product",
+      "mark": "🎯",
+      "seat": "Product",
+      "skill": "seat-product",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/GOALS.md (goals, non-goals, scope)",
+      "what": "The Product director: keeps goals, scope and non-goals in sync with what the product does for its buyer, toward product-market fit.",
+      "when": "there is a product with users"
+    },
+    {
+      "team": "engineering",
+      "mark": "⚙️",
+      "seat": "Engineering",
+      "skill": "seat-engineering",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "engineering goals; what lands in code",
+      "what": "The Engineering director: sets engineering standards, dispatches workers on the critical path, reviews what returns, and rules whether work may land or a gate may be called green.",
+      "when": "always for a code project"
+    },
+    {
+      "team": "frontend",
+      "mark": "🖥️",
+      "seat": "Frontend engineer",
+      "skill": "seat-frontend",
+      "kind": "implementation",
+      "reports_to": "Engineering",
+      "register": "the UI code paths",
+      "what": "Frontend engineer: the implementation seat that builds the UI under Engineering's scope, Design's form, Motion's rulings and Sales's words.",
+      "when": "there is a web or app UI"
+    },
+    {
+      "team": "testing",
+      "mark": "🧪",
+      "seat": "Testing",
+      "skill": "seat-testing",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/TEST-STANDARD.md (what counts as green)",
+      "what": "The Testing director: owns whether a green line means exactly what it says, and the tests themselves.",
+      "when": "there is a test suite worth guarding"
+    },
+    {
+      "team": "platform",
+      "mark": "🛰️",
+      "seat": "Platform",
+      "skill": "seat-platform",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/PLATFORM.md (environments, deploys, cost)",
+      "what": "Platform: owns environments, deploy and rollback mechanics, secrets by name, monitoring, logs, the error budget, cost and vendors, backups of what git does not carry, and the tools index.",
+      "when": "something is deployed or costs money to run"
+    },
+    {
+      "team": "research",
+      "mark": "🔬",
+      "seat": "Research",
+      "skill": "seat-research",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/HYPOTHESES.md, docs/LEARNINGS.md",
+      "what": "The Research director: probes claims against the running system, owns the hypothesis record, and corrects the record in both directions.",
+      "when": "claims rest on data, models or measurement"
+    },
+    {
+      "team": "bar-raiser",
+      "mark": "⚖️",
+      "seat": "Bar Raiser",
+      "skill": "seat-bar-raiser",
+      "kind": "check",
+      "reports_to": "CEO",
+      "register": "its findings, in docs/briefs/",
+      "what": "The Bar Raiser: the independent check that holds the standard before work ships, by re-measuring claims, gates and \"done\" against the running system and premortem-ing a plan before dispatch.",
+      "when": "always — the independent check"
+    },
+    {
+      "team": "scope-trimmer",
+      "mark": "✂️",
+      "seat": "Scope Trimmer",
+      "skill": "seat-scope-trimmer",
+      "kind": "check",
+      "reports_to": "CEO",
+      "register": "its trim verdicts, in docs/briefs/",
+      "what": "The Scope Trimmer: a check seat that cuts everything not on the shortest measured path to a paying customer, and proposes each cut for the CEO to rule.",
+      "when": "ten or more other seats run: the queue outgrows the team"
+    },
+    {
+      "team": "design",
+      "mark": "📐",
+      "seat": "Design",
+      "skill": "seat-design",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/DESIGN.md (design rulings and patterns)",
+      "what": "Design: the seat that owns form the way the voice rules own words, through numbered design rulings and citable patterns.",
+      "when": "anything a person looks at"
+    },
+    {
+      "team": "motion",
+      "mark": "🎬",
+      "seat": "Motion & Production",
+      "skill": "seat-motion",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/MOTION.md, the render pipeline",
+      "what": "Motion & Production: governs how anything moves (numbered motion rulings) and makes the moving outward assets (product loop, demo and launch videos, explainers, social cuts, rendered stills, sound) and their render pipeline.",
+      "when": "video, animation or UI motion matters"
+    },
+    {
+      "team": "sales",
+      "mark": "💼",
+      "seat": "Sales & Marketing",
+      "skill": "seat-sales",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/PRICING.md, docs/POSITIONING.md, the outward copy source",
+      "what": "Sales & Marketing: the seat that owns every outward word, the order true things are said in, positioning, the first buyers and the pricing case.",
+      "when": "it will be sold, or words go outward"
+    },
+    {
+      "team": "seo",
+      "mark": "📣",
+      "seat": "SEO & Publicity",
+      "skill": "seat-seo",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/REACH.md (funnel by source, angles, discoverability)",
+      "what": "The SEO & Publicity director: owns measured reach that turns into sign-ups: the funnel by source, the angle ledger, discoverability and bold bets.",
+      "when": "people must find it"
+    },
+    {
+      "team": "social",
+      "mark": "💬",
+      "seat": "Social Media Manager",
+      "skill": "seat-social",
+      "kind": "manager",
+      "reports_to": "SEO & Publicity (timing), Sales (words)",
+      "register": "the posting-day packages and post log",
+      "what": "The Social Media Manager: runs the social channels day to day under two directors (words: Sales; slot, cadence, angle ledger: SEO & Publicity). Owns the posting-day package, the morning live-figure check, comment replies from an approved bank, the exact post minute, and the +48 h and +7 d reads.",
+      "when": "there are social channels to run"
+    },
+    {
+      "team": "competition",
+      "mark": "♟️",
+      "seat": "Competition & Market",
+      "skill": "seat-competition",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/research/market.md (competitors and alternatives)",
+      "what": "The Competition & Market director: keeps the competitor and alternatives record, sizes the market bottom-up, gathers ICP evidence, scans for new data sources and checks every comparative claim.",
+      "when": "there are buyers with alternatives"
+    },
+    {
+      "team": "customer-success",
+      "mark": "🤝",
+      "seat": "Customer Success",
+      "skill": "seat-customer-success",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/DEMAND.md (what people ask for)",
+      "what": "The Customer Success director: the customer's champion inside the team, owning the journey after the first click (join, wait, invite, first session, follow-up, return), the demand ledger, member health and the time from join to first answer.",
+      "when": "there are users or testers"
+    },
+    {
+      "team": "funding",
+      "mark": "🏦",
+      "seat": "Funding, Revenue & Investment",
+      "skill": "seat-funding",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/FUNDING.md",
+      "what": "Funding, Revenue & Investment: keeps the register of where money can come from (grants, programmes, prizes, credits, investors), the deadline calendar, the use-of-funds plan and the runway arithmetic.",
+      "when": "money must be raised or runway matters"
+    },
+    {
+      "team": "payments",
+      "mark": "💳",
+      "seat": "Payments & Company Legal",
+      "skill": "seat-payments",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/PAYMENTS.md",
+      "what": "Payments & Company Legal: owns the payments register (which channel takes which price line, from which region, on what fees, limits and approval times), the compliance of receiving money in the founder's country, tax by buyer type, the legal pages a platform requires, and entity advice.",
+      "when": "it will take money"
+    },
+    {
+      "team": "compliance",
+      "mark": "🗂️",
+      "seat": "Compliance & Audit",
+      "skill": "seat-compliance",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "docs/AUDIT.md, licence and data registers",
+      "what": "The Compliance & Audit director: owns the internal record of what the product does not answer and why, the licence register, the credits licences require, the source-claim check and the personal-data rows.",
+      "when": "third-party data, licences or personal data"
+    },
+    {
+      "team": "user",
+      "mark": "👤",
+      "seat": "User",
+      "skill": "seat-user",
+      "kind": "check",
+      "reports_to": "CEO",
+      "register": "its walk findings, in docs/research/",
+      "what": "The User: the buyer, not the builder. Drives the product from outside through the project's personas, using only what a customer can reach, replays a real buyer's last decision, and reports what broke as a customer would meet it.",
+      "when": "there is something a person can use"
+    },
+    {
+      "team": "mobile",
+      "mark": "📱",
+      "seat": "Mobile engineer",
+      "skill": "seat-mobile",
+      "kind": "implementation",
+      "reports_to": "Engineering",
+      "register": "the mobile app code",
+      "what": "Mobile engineer: the implementation seat that builds the native or cross-platform app (iOS, Android, React Native, Flutter) under Engineering's scope, Design's form and Sales's words, with every store release a one-way door.",
+      "when": "there is an iOS, Android or cross-platform app"
+    },
+    {
+      "team": "ml",
+      "mark": "🧠",
+      "seat": "ML engineer",
+      "skill": "seat-ml",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "models, training and evaluation code; the eval register",
+      "what": "The ML director: owns models, training and evaluation code, the frozen held-out set, the baseline every model must beat, and the eval record; treats prompts and LLM calls as models.",
+      "when": "models are trained, evaluated or prompted"
+    },
+    {
+      "team": "data",
+      "mark": "🗄️",
+      "seat": "Data engineer",
+      "skill": "seat-data",
+      "kind": "implementation",
+      "reports_to": "Engineering",
+      "register": "pipelines, schemas, the warehouse",
+      "what": "The Data engineer: builds and runs pipelines, schemas, warehouse or lake and orchestration that turn raw sources into served numbers, with idempotent jobs, data contracts, freshness and row-count checks, snapshots of anything a source will delete, and lineage.",
+      "when": "data pipelines or a warehouse exist"
+    },
+    {
+      "team": "security",
+      "mark": "🔐",
+      "seat": "Security",
+      "skill": "seat-security",
+      "kind": "check",
+      "reports_to": "CEO",
+      "register": "docs/SECURITY.md (threat model, findings)",
+      "what": "Security: the independent check on what an attacker could reach: a light threat model per surface, authentication, authorization and session review before ship, secret and dependency triage by reachability, least privilege for keys, and logs without personal data.",
+      "when": "there is auth, payments or personal data"
+    },
+    {
+      "team": "docs",
+      "mark": "📚",
+      "seat": "Docs writer",
+      "skill": "seat-docs",
+      "kind": "implementation",
+      "reports_to": "Product",
+      "register": "the docs site, guides, API reference, changelog",
+      "what": "Docs writer: the implementation seat that writes and keeps true the user docs, API reference, guides, README and changelog, versioned with the code.",
+      "when": "there is a docs site, a public API or a library"
+    },
+    {
+      "team": "community",
+      "mark": "🌱",
+      "seat": "Community & DevRel",
+      "skill": "seat-community",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "CONTRIBUTING, issues and discussions, release notes",
+      "what": "The Community & DevRel director: the outside contributor's champion, owning triage of outside issues, discussions and pull requests, CONTRIBUTING, the code of conduct, good first issues, release announcements, recognition, the public roadmap and adoption measured by real signals.",
+      "when": "it is open source with outside contributors"
+    },
+    {
+      "team": "game-design",
+      "mark": "🎮",
+      "seat": "Game designer",
+      "skill": "seat-game-design",
+      "kind": "director",
+      "reports_to": "CEO",
+      "register": "the game design doc (loop, mechanics, economy, game rulings)",
+      "what": "Game designer: owns the game design document as a register of numbered game rulings (core loop, mechanics, progression, economy), finds the fun in a rough prototype before content, and tunes difficulty and balance from data and playtests.",
+      "when": "it is a game"
+    },
+    {
+      "team": "i18n",
+      "mark": "🌐",
+      "seat": "Localization",
+      "skill": "seat-i18n",
+      "kind": "implementation",
+      "reports_to": "Product",
+      "register": "locale files and the string catalogue",
+      "what": "Localization: the implementation seat that makes every user-facing string, number, date and currency work in more than one language and script, carrying Sales's source words into each locale without changing what they say.",
+      "when": "the product ships in more than one language"
+    }
+  ],
+  "merged_seats": [
+    {
+      "team": "growth",
+      "mark": "📈",
+      "seat": "Growth",
+      "kind": "director",
+      "holds": [
+        "sales",
+        "seo",
+        "social"
+      ],
+      "why": "one seat owns words, reach and the channels while the audience is small"
+    },
+    {
+      "team": "product-design",
+      "mark": "🎨",
+      "seat": "Product & Design",
+      "kind": "director",
+      "holds": [
+        "product",
+        "design"
+      ],
+      "why": "one seat decides what to build and how it looks while the surface is small"
+    },
+    {
+      "team": "engineering-platform",
+      "mark": "🔧",
+      "seat": "Engineering & Platform",
+      "kind": "director",
+      "holds": [
+        "engineering",
+        "platform"
+      ],
+      "why": "one seat builds and ships while there is one deploy target"
+    },
+    {
+      "team": "quality",
+      "mark": "🛡️",
+      "seat": "Quality",
+      "kind": "check",
+      "holds": [
+        "testing",
+        "bar-raiser"
+      ],
+      "why": "one independent check owns the test standard and re-measures finished work"
+    },
+    {
+      "team": "money",
+      "mark": "💰",
+      "seat": "Money",
+      "kind": "director",
+      "holds": [
+        "funding",
+        "payments"
+      ],
+      "why": "one seat tracks where money comes from and how it is received"
+    },
+    {
+      "team": "legal-compliance",
+      "mark": "📜",
+      "seat": "Legal & Compliance",
+      "kind": "director",
+      "holds": [
+        "payments",
+        "compliance"
+      ],
+      "why": "one seat holds the legal pages, licences and personal data"
+    },
+    {
+      "team": "data-ml",
+      "mark": "🧮",
+      "seat": "Data & ML",
+      "kind": "director",
+      "holds": [
+        "data",
+        "ml"
+      ],
+      "why": "one seat owns the pipelines and the models built on them while both are young"
+    },
+    {
+      "team": "customer",
+      "mark": "🫱",
+      "seat": "Customer",
+      "kind": "director",
+      "holds": [
+        "customer-success",
+        "community"
+      ],
+      "why": "one seat champions users and contributors while there are few of either"
+    }
+  ],
+  "derived_roles": [
+    {
+      "signal": "hardware",
+      "team": "hardware",
+      "mark": "🔌",
+      "seat": "Hardware & firmware engineer",
+      "kind": "implementation",
+      "base": "seat-mobile",
+      "reports_to": "Engineering",
+      "scope": "firmware and board design: a shipped device can't be patched like a web page"
+    },
+    {
+      "signal": "blockchain",
+      "team": "contracts",
+      "mark": "⛓️",
+      "seat": "Smart-contract engineer",
+      "kind": "implementation",
+      "base": "seat-security",
+      "reports_to": "Engineering",
+      "scope": "on-chain code: every deployment is a one-way door, audits before mainnet"
+    },
+    {
+      "signal": "desktop",
+      "team": "desktop",
+      "mark": "🖱️",
+      "seat": "Desktop engineer",
+      "kind": "implementation",
+      "base": "seat-mobile",
+      "reports_to": "Engineering",
+      "scope": "the desktop app: signed installers and auto-update are one-way doors"
+    },
+    {
+      "signal": "extension",
+      "team": "extension",
+      "mark": "🧷",
+      "seat": "Browser-extension engineer",
+      "kind": "implementation",
+      "base": "seat-frontend",
+      "reports_to": "Engineering",
+      "scope": "the browser extension: permissions and store review decide what ships"
+    }
+  ],
+  "tiers": [
+    {
+      "tier": "quick",
+      "model": "claude-haiku-5-5",
+      "effort": "low",
+      "agent": "team-quick"
+    },
+    {
+      "tier": "scout",
+      "model": "claude-haiku-5-5",
+      "effort": "low",
+      "agent": "team-scout"
+    },
+    {
+      "tier": "check",
+      "model": "claude-haiku-5-5",
+      "effort": "medium",
+      "agent": "team-check"
+    },
+    {
+      "tier": "execution",
+      "model": "sonnet",
+      "effort": "low",
+      "agent": "<team>-worker"
+    },
+    {
+      "tier": "build",
+      "model": "sonnet",
+      "effort": "high",
+      "agent": "team-build"
+    },
+    {
+      "tier": "research",
+      "model": "opus",
+      "effort": "high",
+      "agent": "team-research"
+    },
+    {
+      "tier": "deep",
+      "model": "opus",
+      "effort": "max",
+      "agent": "team-deep"
+    }
+  ],
+  "counts": {
+    "catalogue_seats": 29,
+    "merged_seats": 8,
+    "derived_roles": 4,
+    "skills": 2,
+    "tiers": 7
+  }
+}

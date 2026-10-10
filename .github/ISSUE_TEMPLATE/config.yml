@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/fauzulkc/agent-team/discussions
+    about: Ask how something works, talk an idea through, or show a team you've seated.
+  - name: Report a security vulnerability
+    url: https://github.com/fauzulkc/agent-team/security/policy
+    about: Report it privately, never in a public issue. The security policy says how.
