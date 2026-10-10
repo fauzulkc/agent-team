@@ -16,7 +16,7 @@ jobs:
         python-version: ["3.9", "3.12"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: { python-version: "${{ matrix.python-version }}" }
       - name: Load the private leak-word list (does nothing when the secret is empty, as on fork pull requests)
         # The word list is private: it lives only in this secret and in each maintainer's .private/, never in the repo.
